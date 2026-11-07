@@ -6,8 +6,8 @@ const { KeyVault } = require('../dist/security/vault');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const action = (extra = {}) => ({protocol:1,id:'operation1',tab:1,origin:'https://example.test',version:3,op:'READ',target:'element1',value:'',...extra});
-const state = (extra = {}) => ({tab:1,origin:'https://example.test',version:3,elements:new Map([['element1',{visible:true,enabled:true,sensitive:false,actions:new Set(['READ','CLICK','FILL'])}]]),...extra});
+const action = (extra = {}) => ({protocol:2,document:'doc_00000000000001',id:'operation1',tab:1,origin:'https://example.test',version:3,op:'READ',target:'element1',value:'',...extra});
+const state = (extra = {}) => ({document:'doc_00000000000001',tab:1,origin:'https://example.test',version:3,elements:new Map([['element1',{visible:true,enabled:true,sensitive:false,actions:new Set(['READ','CLICK','FILL'])}]]),...extra});
 function guard(permissions=['read','write','transmit','delete','pay'], clock) {
   const g=new ToastGuard(clock);g.grant({tab:1,origin:'https://example.test',permissions:new Set(permissions)});return g;
 }
@@ -79,4 +79,12 @@ test('key deletion waits for pending encryption and cannot resurrect a deleted k
 });
 test('repeated invalid model requests exhaust the attempt budget and revoke scope',()=>{
  const g=guard();for(let i=0;i<1024;i++)assert.equal(g.claim({op:'eval'},state()).reason,'schema');assert.equal(g.claim(action(),state()).reason,'attempt-budget');
+});
+test('approval cannot cross document reloads even if origin/version/element IDs repeat',()=>{
+ const g=guard(),a=action({op:'CLICK'}),token=g.approve(a,state());
+ assert.equal(g.claim(a,state({document:'doc_00000000000002'}),token).reason,'document');
+ assert.equal(g.claim({...a,document:'doc_00000000000002'},state({document:'doc_00000000000002'}),token).reason,'approval');
+});
+test('old protocol without document binding is rejected',()=>{
+ const a=action({protocol:1});delete a.document;assert.equal(guard().claim(a,state()).reason,'schema');
 });

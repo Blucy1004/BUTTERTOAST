@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { exactKeys, record } from './ipc';
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 export type Permission = 'read' | 'write' | 'transmit' | 'delete' | 'pay';
-type Op = 'CLICK' | 'FILL' | 'SELECT' | 'SCROLL' | 'NAVIGATE' | 'WAIT' | 'READ' | 'EXTRACT' | 'VERIFY' | 'HANDOFF';
-export type Action = { protocol: 1; id: string; tab: number; origin: string; version: number; op: Op; target: string; value: string };
+export type Op = 'CLICK' | 'FILL' | 'SELECT' | 'SCROLL' | 'NAVIGATE' | 'WAIT' | 'READ' | 'EXTRACT' | 'VERIFY' | 'HANDOFF';
+export type Action = { protocol: 2; document: string; id: string; tab: number; origin: string; version: number; op: Op; target: string; value: string };
 export type ElementState = { visible: boolean; enabled: boolean; sensitive: boolean; actions: ReadonlySet<Op> };
-export type PageState = { tab: number; origin: string; version: number; elements: ReadonlyMap<string, ElementState> };
+export type PageState = { document: string; tab: number; origin: string; version: number; elements: ReadonlyMap<string, ElementState> };
 export type Scope = { tab: number; origin: string; permissions: ReadonlySet<Permission> };
 const ops = ['CLICK', 'FILL', 'SELECT', 'SCROLL', 'NAVIGATE', 'WAIT', 'READ', 'EXTRACT', 'VERIFY', 'HANDOFF'];
 const targeted = new Set(['CLICK', 'FILL', 'SELECT', 'READ', 'EXTRACT', 'VERIFY']);
@@ -15,8 +15,8 @@ function validOrigin(value: string): boolean {
   try { const url = new URL(value); return url.protocol === 'https:' && url.origin === value; } catch { return false; }
 }
 export function parseAction(value: unknown): Action | null {
-  if (!record(value) || !exactKeys(value, ['protocol', 'id', 'tab', 'origin', 'version', 'op', 'target', 'value'])) return null;
-  if (value.protocol !== 1 || typeof value.id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(value.id)
+  if (!record(value) || !exactKeys(value, ['protocol', 'document', 'id', 'tab', 'origin', 'version', 'op', 'target', 'value'])) return null;
+  if (value.protocol !== 2 || typeof value.document !== 'string' || !/^[a-zA-Z0-9_-]{16,80}$/.test(value.document) || typeof value.id !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(value.id)
     || !Number.isSafeInteger(value.tab) || (value.tab as number) < 1 || !Number.isSafeInteger(value.version) || (value.version as number) < 0
     || typeof value.origin !== 'string' || !validOrigin(value.origin) || !ops.includes(value.op as string)
     || typeof value.target !== 'string' || value.target.length > 100 || typeof value.value !== 'string' || value.value.length > 4096) return null;
@@ -28,7 +28,7 @@ export function parseAction(value: unknown): Action | null {
   }
   if (!['FILL', 'SELECT', 'WAIT', 'SCROLL', 'NAVIGATE', 'VERIFY'].includes(value.op as string) && value.value !== '') return null;
   // Copy/freeze: a caller cannot mutate an already validated command during an await.
-  return Object.freeze({ protocol: 1, id: value.id, tab: value.tab as number, origin: value.origin,
+  return Object.freeze({ protocol: 2, document: value.document, id: value.id, tab: value.tab as number, origin: value.origin,
     version: value.version as number, op: value.op as Op, target: value.target, value: value.value });
 }
 export type Verdict = { ok: true; action: Action; signal: AbortSignal; lease: string } | { ok: false; reason: string };
@@ -40,7 +40,7 @@ export class ToastGuard {
   private approvals = new Map<string, { action: string; expires: number }>();
   private inFlight: string | null = null;
   private attempts = 0;
-  constructor(private clock: () => number = Date.now) {}
+  constructor(private clock: () => number = () => performance.now()) {}
   grant(scope: Scope): void {
     this.stop();
     if (!Number.isSafeInteger(scope.tab) || scope.tab < 1 || !validOrigin(scope.origin)) throw new Error('Invalid scope');
@@ -48,9 +48,14 @@ export class ToastGuard {
     this.controller = new AbortController(); this.consumed.clear(); this.attempts = 0;
   }
   stop(): void { this.controller.abort(); this.scope = null; this.approvals.clear(); }
+  canRead(state: Pick<PageState, 'tab' | 'origin'>): boolean {
+    return !!this.scope && !this.controller.signal.aborted && this.scope.tab === state.tab
+      && this.scope.origin === state.origin && this.scope.permissions.has('read');
+  }
   private check(action: Action, state: PageState): string | null {
     if (!this.scope || this.controller.signal.aborted) return 'stopped';
     if (action.tab !== this.scope.tab || action.tab !== state.tab || action.origin !== this.scope.origin || action.origin !== state.origin) return 'scope';
+    if (action.document !== state.document) return 'document';
     if (action.version !== state.version) return 'stale';
     if (this.consumed.has(action.id)) return 'replay';
     if (this.consumed.size >= 512) return 'budget';

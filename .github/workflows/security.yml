@@ -33,6 +33,7 @@ jobs:
         run: '"C:\Program Files\Git\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append'
       - run: npm test
       - run: npm run test:electron
+      - run: npm run test:toastir
       - run: npm run audit:deps
       - run: npm run scan:secrets
       - run: npm run sbom

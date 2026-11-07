@@ -12,7 +12,8 @@
     "test:electron": "npm run build && node scripts/test-electron.cjs",
     "scan:secrets": "node scripts/scan-secrets.cjs",
     "sbom": "node scripts/sbom.cjs",
-    "package:win": "npm run build && npm run sbom && node scripts/package-windows.mjs"
+    "package:win": "npm run build && npm run sbom && node scripts/package-windows.mjs",
+    "test:toastir": "npm run build && node scripts/test-toastir.cjs"
   },
   "devDependencies": {
     "@electron/asar": "4.3.1",

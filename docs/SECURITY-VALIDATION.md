@@ -1,5 +1,7 @@
 # 보안 검증 기록 — 2026-11-07
 
+이 문서는 초기 셸 검증 기록이다. 이후 Guard v2 및 ToastIR/탭 경계 변경과 추가 결과는 [추가 검증 기록](TOASTIR-SECURITY-VALIDATION.md)에 있다.
+
 범위: 현재 작업 트리의 개발용 ButterToast, Linux x64, Node 24.22.1, Electron 45.2.3. 실제 공격 대상으로 로컬 HTTP/HTTPS 서버와 별도로 만든 악성 렌더러만 사용했다. 다른 서비스나 사용자 계정을 공격하지 않았다. Windows 실행이나 출시 버전 검증을 의미하지 않는다.
 
 ## 결과

@@ -19,6 +19,7 @@ Electron 바이너리 설치에는 GitHub 릴리스 다운로드가 필요합니
 npm test
 npm run audit:deps
 npm run test:electron
+npm run test:toastir
 npm run scan:secrets
 npm run sbom
 ```
@@ -34,3 +35,5 @@ npm run sbom
 ## Windows 공격 실험용 빌드
 
 `npm run package:win`은 Windows x64 포터블 실행 폴더를 만듭니다. [실행 방법과 한계](docs/WINDOWS-TEST-BUILD.md)를 참조하세요. 서명되지 않은 테스트 빌드이며 Windows 직접 실행은 아직 검증되지 않았습니다.
+
+ToastIR 요소 교체, 승인 재사용, 작업 간 데이터 경계 실험 결과는 [추가 검증 기록](docs/TOASTIR-SECURITY-VALIDATION.md)에 있습니다.
