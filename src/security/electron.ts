@@ -4,7 +4,7 @@ export const WEB_PREFERENCES: WebPreferences = Object.freeze({
   sandbox: true, contextIsolation: true, nodeIntegration: false,
   nodeIntegrationInSubFrames: false, nodeIntegrationInWorker: false,
   webSecurity: true, allowRunningInsecureContent: false, webviewTag: false,
-  navigateOnDragDrop: false, safeDialogs: true, spellcheck: false
+  backgroundThrottling: true, navigateOnDragDrop: false, safeDialogs: true, spellcheck: false
 });
 export function assertSafeLaunch(): void {
   for (const flag of ['no-sandbox', 'disable-web-security', 'ignore-certificate-errors', 'disable-site-isolation-trials', 'disable-site-isolation-for-policy', 'remote-debugging-port', 'remote-debugging-pipe', 'inspect', 'inspect-brk']) {

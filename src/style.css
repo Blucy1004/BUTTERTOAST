@@ -1,17 +1,19 @@
 /* Temporary verification UI. The project owner determines the final design. */
-:root { --surface: #fff; --chrome: #f3f3f3; --hover: #ddd; --text: #222; --border: #bbb; --error: #8c231d; --radius: 4px; --spacing: 8px; --font: 14px system-ui, sans-serif; }
+:root { --surface: #fff; --chrome: #f3f3f3; --hover: #ddd; --text: #222; --border: #bbb; --error: #8c231d; --radius: 4px; --spacing: 8px; --small-font: 12px; --toolbar-icon: 20px; --font: 14px system-ui, sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; font: var(--font); background: var(--chrome); color: var(--text); height: 116px; overflow: hidden; }
 button { border: 0; background: transparent; border-radius: var(--radius); cursor: pointer; font: inherit; color: inherit; padding: var(--spacing); }
 button:hover { background: var(--hover); }
 button:disabled { opacity: .35; cursor: default; }
-.tabs { display: inline-flex; max-width: calc(100% - 45px); height: 42px; vertical-align: middle; overflow-x: auto; align-items: end; }
+.tabstrip { display: flex; align-items: center; height: 42px; }
+.tabs { display: inline-flex; flex: 1; min-width: 0; height: 42px; vertical-align: middle; overflow-x: auto; align-items: end; }
 .tab { display: inline-flex; align-items: center; max-width: 200px; }
 .tab.active { background: var(--surface); }
 .tab button:first-child { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .toolbar { display: flex; gap: 4px; align-items: center; padding: 4px var(--spacing); background: var(--surface); }
-.toolbar button { font-size: 20px; padding: 3px var(--spacing); }
-form { flex: 1; }
+.toolbar button { font-size: var(--toolbar-icon); padding: 3px var(--spacing); }
+.toolbar .text-action { font-size: var(--small-font); white-space: nowrap; }
+form { flex: 1; min-width: 60px; }
 input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: var(--spacing); font: inherit; }
 #security { font-size: 11px; white-space: nowrap; }
-#message { padding: 3px 16px; height: 24px; font-size: 12px; color: var(--error); }
+#message { padding: 3px 16px; height: 24px; font-size: var(--small-font); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--error); }

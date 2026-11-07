@@ -1,8 +1,12 @@
-import { app, BrowserWindow, WebContentsView, ipcMain, session, protocol } from 'electron';
+import { app, BrowserWindow, WebContents, ipcMain, session, protocol } from 'electron';
 import path from 'node:path';
 import { parseCommand, RateGate } from './security/ipc';
-import { assertSafeLaunch, hardenSession, hardenWebContents, WEB_PREFERENCES } from './security/electron';
+import { assertSafeLaunch, hardenSession, WEB_PREFERENCES } from './security/electron';
 import { installUiProtocol, UI_URL } from './security/ui-protocol';
+import { osCipher } from './security/os-cipher';
+import { BrowserTabs } from './browser/tabs';
+import { TabSessionStore } from './browser/session-store';
+import { installPrivacy } from './browser/privacy';
 import { resolveAddress } from './policy';
 
 assertSafeLaunch();
@@ -10,66 +14,39 @@ app.enableSandbox();
 app.commandLine.appendSwitch('site-per-process');
 protocol.registerSchemesAsPrivileged([{ scheme: 'toast-ui', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 const commands = new RateGate();
-const HEADER_HEIGHT = 116;
-type Tab = { id: number; view: WebContentsView; title: string; error: string };
 let window: BrowserWindow;
-let tabs: Tab[] = [];
-let active = 0;
-let nextId = 1;
-
-function current(): Tab | undefined { return tabs.find(t => t.id === active); }
+let tabs: BrowserTabs;
+let store: TabSessionStore;
+let privacy: ReturnType<typeof installPrivacy>;
+let initialized = false;
 function emitState(): void {
-  if (!window || window.isDestroyed()) return;
-  const tab = current();
-  window.webContents.send('browser:state', {
-    tabs: tabs.map(t => ({ id: t.id, title: t.title || '새 탭' })), active,
-    url: tab?.view.webContents.getURL() || '',
-    canBack: tab?.view.webContents.navigationHistory.canGoBack() ?? false,
-    canForward: tab?.view.webContents.navigationHistory.canGoForward() ?? false,
-    loading: tab?.view.webContents.isLoading() ?? false,
-    error: tab?.error || ''
+  if (!window || window.isDestroyed() || !tabs) return;
+  const state = tabs.state();
+  window.webContents.send('browser:state', { ...state, initialized, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+}
+function focusAddress(): void {
+  window.webContents.focus(); window.webContents.send('browser:focus-address');
+}
+/** Native input events work even while an untrusted page owns keyboard focus. */
+function keyboard(wc: WebContents): void {
+  wc.on('before-input-event', (event, input) => {
+    if (!initialized || input.type !== 'keyDown' || input.alt) return;
+    const key = input.key.toLowerCase(), modifier = process.platform === 'darwin' ? input.meta : input.control;
+    let action: (() => void) | undefined;
+    if (modifier) {
+      if (key === 'l' && !input.shift) action = focusAddress;
+      if (key === 't') action = input.shift ? () => tabs.reopen() : () => { tabs.newTab(); focusAddress(); };
+      if (key === 'w' && !input.shift) action = () => tabs.close();
+      if (key === 'tab') action = () => tabs.cycle(input.shift ? -1 : 1);
+      if (/^[1-9]$/.test(key) && !input.shift) action = () => tabs.selectNumber(Number(key));
+      if (input.shift && ['pageup', 'pagedown'].includes(key)) action = () => tabs.move(tabs.state().active, key === 'pageup' ? -1 : 1);
+      if (key === 'r' && !input.shift) action = () => tabs.history('reload');
+    } else if (!input.shift && !input.meta && !input.control) {
+      if (key === 'f5') action = () => tabs.history('reload');
+      if (key === 'escape') action = () => tabs.history('stop');
+    }
+    if (action) { event.preventDefault(); if (commands.allow()) action(); }
   });
-}
-function layout(): void {
-  if (!window || window.isDestroyed()) return;
-  const [width, height] = window.getContentSize();
-  for (const t of tabs) t.view.setBounds({ x: 0, y: HEADER_HEIGHT, width, height: Math.max(0, height - HEADER_HEIGHT) });
-}
-function select(id: number): void {
-  const tab = tabs.find(t => t.id === id);
-  if (!tab) return;
-  for (const t of tabs) t.view.setVisible(t === tab);
-  active = id; layout(); emitState();
-}
-function newTab(): void {
-  if (tabs.length >= 30) return;
-  const view = new WebContentsView({ webPreferences: {
-    ...WEB_PREFERENCES, partition: 'persist:human'
-  }});
-  const tab: Tab = { id: nextId++, view, title: '새 탭', error: '' };
-  tabs.push(tab);
-  window.contentView.addChildView(view);
-  hardenWebContents(view.webContents);
-  view.webContents.on('page-title-updated', (_event, title) => { tab.title = title.slice(0, 120); emitState(); });
-  view.webContents.on('render-process-gone', () => { tab.error = '탭 프로세스가 종료되었습니다. 새로고침하거나 주소를 다시 입력하세요.'; emitState(); });
-  view.webContents.on('did-start-loading', () => { tab.error = ''; emitState(); });
-  view.webContents.on('did-stop-loading', emitState);
-  view.webContents.on('did-navigate', emitState);
-  view.webContents.on('did-navigate-in-page', emitState);
-  view.webContents.on('did-fail-load', (_event, code, _description, _url, mainFrame) => {
-    if (mainFrame && code !== -3) { tab.error = `페이지를 불러오지 못했습니다 (${code}). 주소와 연결 상태를 확인하세요.`; emitState(); }
-  });
-  select(tab.id);
-}
-function closeTab(id: number): void {
-  const index = tabs.findIndex(t => t.id === id);
-  if (index < 0) return;
-  const [tab] = tabs.splice(index, 1);
-  window.contentView.removeChildView(tab.view);
-  tab.view.webContents.close();
-  if (!tabs.length) newTab();
-  else if (id === active) select(tabs[Math.min(index, tabs.length - 1)].id);
-  else emitState();
 }
 function trusted(event: Electron.IpcMainEvent): boolean {
   return !!window && !window.isDestroyed() && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && event.senderFrame?.url === UI_URL;
@@ -78,30 +55,35 @@ ipcMain.on('browser:command', (event, input: unknown) => {
   if (!trusted(event) || !commands.allow()) return;
   const cmd = parseCommand(input);
   if (!cmd) return;
-  const tab = current();
+  if (cmd.type === 'ready') { emitState(); return; }
+  if (!initialized) return;
   switch (cmd.type) {
-    case 'ready': emitState(); break;
-    case 'new': newTab(); break;
-    case 'select': if (Number.isSafeInteger(cmd.id)) select(cmd.id as number); break;
-    case 'close': if (Number.isSafeInteger(cmd.id)) closeTab(cmd.id as number); break;
+    case 'new': tabs.newTab(); focusAddress(); break;
+    case 'select': tabs.select(cmd.id); break;
+    case 'close': tabs.close(cmd.id); break;
+    case 'move': tabs.move(cmd.id, cmd.delta); break;
+    case 'reopen': tabs.reopen(); break;
+    case 'restart': tabs.restart(); break;
+    case 'suspend': tabs.suspend(); break;
     case 'navigate': {
-      if (typeof cmd.address !== 'string' || !tab) break;
       const url = resolveAddress(cmd.address);
-      if (url) void tab.view.webContents.loadURL(url).catch(() => {});
-      else { tab.error = '지원하지 않는 주소입니다. HTTP 또는 HTTPS 주소를 입력하세요.'; emitState(); }
+      if (url) tabs.navigate(url);
+      else tabs.setError('지원하지 않는 주소입니다. HTTP 또는 HTTPS 주소를 입력하세요.');
       break;
     }
-    case 'back': if (tab?.view.webContents.navigationHistory.canGoBack()) tab.view.webContents.navigationHistory.goBack(); break;
-    case 'forward': if (tab?.view.webContents.navigationHistory.canGoForward()) tab.view.webContents.navigationHistory.goForward(); break;
-    case 'reload': tab?.view.webContents.reload(); break;
+    case 'privacy-toggle': {
+      const url = tabs.state().url;
+      if (/^https?:/.test(url)) privacy.setException(url, privacy.enabled(url));
+      emitState(); break;
+    }
+    case 'back': case 'forward': case 'reload': case 'stop': tabs.history(cmd.type); break;
   }
 });
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const browsing = session.fromPartition('persist:human');
-  hardenSession(browsing);
+  hardenSession(browsing); privacy = installPrivacy(browsing);
   const uiSession = session.fromPartition('toast-ui');
-  hardenSession(uiSession);
-  installUiProtocol(uiSession, __dirname);
+  hardenSession(uiSession); installUiProtocol(uiSession, __dirname);
   window = new BrowserWindow({ width: 1280, height: 850, minWidth: 600, minHeight: 400,
     title: 'ButterToast', backgroundColor: '#fff', webPreferences: {
       ...WEB_PREFERENCES, session: uiSession, preload: path.join(__dirname, 'preload.js')
@@ -110,9 +92,20 @@ app.whenReady().then(() => {
   window.webContents.on('will-frame-navigate', event => event.preventDefault());
   window.webContents.on('will-redirect', event => event.preventDefault());
   window.webContents.on('will-attach-webview', event => event.preventDefault());
-  window.on('resize', layout);
-  window.on('closed', () => { for (const t of tabs) if (!t.view.webContents.isDestroyed()) t.view.webContents.close(); tabs = []; });
+  keyboard(window.webContents);
+  store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
+  tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { void store.save(snapshot); }, input: keyboard });
+  window.on('resize', () => tabs.layout());
+  window.on('closed', () => { initialized = false; tabs.dispose(); });
   void window.loadURL(UI_URL);
-  newTab();
+  const saved = await store.load();
+  if (window.isDestroyed()) return;
+  tabs.initialize(saved); initialized = true; emitState();
+}).catch(() => { console.error('Browser initialization failed'); app.quit(); });
+let flushed = false;
+app.on('before-quit', event => {
+  if (flushed || !store) return;
+  event.preventDefault(); initialized = false;
+  void store.flush().finally(() => { flushed = true; app.quit(); });
 });
 app.on('window-all-closed', () => app.quit());

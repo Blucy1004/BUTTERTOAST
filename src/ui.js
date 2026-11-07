@@ -1,11 +1,19 @@
 'use strict';
 const send = (type, extra = {}) => window.browser.command({ type, ...extra });
 const renderToolbar = window.initToolbar(send);
+let current;
 document.getElementById('new').onclick = () => send('new');
-window.browser.onState(state => { window.renderTabs(state, send); renderToolbar(state); });
-document.addEventListener('keydown', e => {
-  if (!(e.ctrlKey || e.metaKey)) return;
-  if (e.key.toLowerCase() === 'l') { e.preventDefault(); const input = document.getElementById('address'); input.focus(); input.select(); }
-  else if (e.key.toLowerCase() === 't') { e.preventDefault(); send('new'); }
+document.getElementById('reopen').onclick = () => send('reopen');
+for (const [id, delta] of [['move-left', -1], ['move-right', 1]]) {
+  document.getElementById(id).onclick = () => current && send('move', { id: current.active, delta });
+}
+window.browser.onState(state => {
+  current = state; window.renderTabs(state, send); renderToolbar(state);
+  document.getElementById('new').disabled = !state.initialized || state.tabs.length >= 30;
+  document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= 30;
+  const index = state.tabs.findIndex(tab => tab.id === state.active);
+  document.getElementById('move-left').disabled = index <= 0;
+  document.getElementById('move-right').disabled = index < 0 || index >= state.tabs.length - 1;
 });
+window.browser.onFocusAddress(() => { const input = document.getElementById('address'); input.focus(); input.select(); });
 send('ready');
