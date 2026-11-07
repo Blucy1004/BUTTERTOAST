@@ -21,3 +21,7 @@ Electron은 Chromium과 Node 기반 애플리케이션 계층, 명시적 프로�
 보안 정책과 증거의 현재 기준 문서는 `SECURITY.md` 및 `docs/SECURITY-VALIDATION.md`다. UI는 전용 프로토콜 및 별도 메모리 세션으로 제공하고 웹 콘텐츠 세션과 분리했다. UI 변경으로 메인 프로세스의 권한 결정을 옮기면 안 된다.
 
 탭 생명주기는 `BrowserTabs`, URL 저장은 `TabSessionStore`, 네트워크 개인정보 정책은 `privacy-policy`와 `installPrivacy`로 분리했다. 메인은 실제 UI 입력을 검증해 이 모듈들을 호출한다. 추적 차단은 사람/AI 웹 세션에만 설치하며 UI 세션의 외부 통신 거부 핸들러를 덮어쓰지 않는다. 복원 데이터에는 AI 권한·문서·DOM·쿠키·POST 본문이 없다. 활성 탭 응답 확인은 World 1002의 고정 코드만 사용하며 ToastIR의 World 1001과 분리한다.
+
+## 계정
+
+`AuthService`는 인증 상태/PKCE/만료/갱신을, `AuthApi`는 고정 Supabase 요청을 소유한다. `AccountWindow`는 별도 샌드박스 계정 창과 그 창만 허용하는 IPC를 연결한다. 계정 UI는 `account.html/js/css`, 공통 시각 속성은 `tokens.css`로 분리한다. 브라우저에는 로그인 여부만 전달하고, 이메일은 계정 창에만 전달한다. 토큰과 verifier는 메인 RAM에만 두며 UI의 외부 통신 금지 정책을 변경하지 않는다. 이메일 확인은 127.0.0.1의 일시적 PKCE 수신기를 사용한다. 이 로그인으로 웹/AI 세션이나 Guard 권한을 합치지 않는다. 구현 및 live 미검증 범위는 [Supabase 기록](SUPABASE-SETUP.md)을 참조한다.

@@ -22,6 +22,7 @@ npm run test:electron
 npm run test:toastir
 npm run test:browser
 npm run test:extended
+npm run test:account
 npm run scan:secrets
 npm run sbom
 ```
@@ -31,6 +32,8 @@ npm run sbom
 주소·검색어 입력, 탭 생성·선택·닫기·순서 이동·최근 닫은 탭 복원, 뒤로·앞으로·새로고침의 초기 구현이 있습니다. 주소에 명시한 HTTP는 허용하며, 별도 인증서 검증 우회는 없습니다. HTTPS 표시는 주소의 프로토콜만 뜻하며 양자내성이나 인증서 상세 상태를 나타내지 않습니다. 사이트 권한, 팝업, 다운로드는 현재 일괄 차단됩니다. AI 제품 연동, 북마크, 방문 기록, 설정, 설치 프로그램과 업데이트는 아직 구현되지 않았습니다. 자세한 현황은 [아키텍처](docs/ARCHITECTURE.md)와 [보안](SECURITY.md)을 참조하세요.
 
 멈춘 탭 재시작, 수동 메모리 해제, OS 암호화를 사용할 수 있을 때 URL 기반 지연 복원, 제한된 추적 요청 차단 및 개인정보 헤더도 구현했습니다. [사용법·시험 결과·한계](docs/CHROMIUM-IMPROVEMENTS.md)를 참조하세요. 메모리 해제와 재시작 시 입력 내용은 사라집니다.
+
+Supabase 이메일 회원가입·로그인·로그아웃과 임시 계정 창을 추가했습니다. 토큰은 메인 프로세스 메모리에만 보관하고 앱 종료 후 다시 로그인합니다. [연결 설정·사용법·검증 범위](docs/SUPABASE-SETUP.md)를 참조하세요. 실제 프로젝트의 메일 발송과 로그인은 별도 확인이 남아 있습니다.
 
 ## 보안 개발 결과
 

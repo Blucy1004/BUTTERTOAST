@@ -1,0 +1,106 @@
+// Local protocol fixtures only; production windows, IPC and UI are exercised without sandbox overrides.
+const { app, BrowserWindow, WebContentsView, webContents, session } = require('electron');
+const assert = require('node:assert/strict'), fs = require('node:fs'), os = require('node:os'), path = require('node:path');
+const { createHash } = require('node:crypto');
+const http = require('node:http');
+app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'bt-account-')));
+process.env.BUTTERTOAST_SUPABASE_URL = 'https://abcdefghijklmnopqrst.supabase.co';
+process.env.BUTTERTOAST_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_local_test_fixture_1234';
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function until(fn, label) { for(let i=0;i<250;i++){if(await fn())return;await wait(20)}throw Error(label) }
+const deadline = setTimeout(()=>{console.error('FAIL account timeout');app.exit(1)},60000);
+const calls = []; let groups=0, server;
+const pass = name => {groups++;console.log('PASS',name)};
+const email = 'owner@example.test';
+const access = 'fixture_access_token_RAM_only', refresh = 'fixture_refresh_token_RAM_only';
+const payload = () => ({access_token:access,refresh_token:refresh,token_type:'bearer',expires_in:3600,user:{id:'11111111-1111-4111-8111-111111111111',email,email_confirmed_at:'2026-11-07T00:00:00Z'}});
+require('../dist/main');
+app.whenReady().then(async()=>{
+  const main = BrowserWindow.getAllWindows()[0], ui = main.webContents;
+  await until(async()=>ui.getURL()==='toast-ui://app/index.html'&&!ui.isLoading()&&await ui.executeJavaScript('!document.getElementById("account-open").disabled'),'main ready');
+  const human = webContents.getAllWebContents().find(w=>w.id!==ui.id);
+  const network = session.fromPartition('toast-auth-network'); let challenge, slowResolve;
+  network.protocol.handle('https',async request=>{
+    const url = new URL(request.url), body = request.method==='POST' ? await request.json().catch(()=>null) : null;
+    calls.push({url:request.url,body,headers:Object.fromEntries(request.headers)});
+    if(url.pathname==='/auth/v1/signup') { challenge=body.code_challenge;return Response.json({id:payload().user.id,email}); }
+    if(url.pathname==='/auth/v1/logout') return new Response(null,{status:204});
+    if(url.searchParams.get('grant_type')==='pkce') {
+      if(body.auth_code!=='fixture-valid-code'||createHash('sha256').update(body.code_verifier).digest('base64url')!==challenge)return Response.json({error_code:'bad_code_verifier',message:'fixture-secret-error'},{status:400});
+      return Response.json(payload());
+    }
+    if(body.email==='slow@example.test') return await new Promise(resolve=>{slowResolve=()=>resolve(Response.json({...payload(),user:{...payload().user,email:'slow@example.test'}}))});
+    if(body.password!=='fixture-password')return Response.json({error_code:'invalid_credentials',message:access},{status:400});
+    return Response.json(payload());
+  });
+  await ui.executeJavaScript('document.getElementById("account-open").click()');
+  await until(()=>BrowserWindow.getAllWindows().length===2,'account window');
+  let account = BrowserWindow.getAllWindows().find(w=>w.id!==main.id), aw=account.webContents;
+  await until(async()=>!aw.isLoading()&&await aw.executeJavaScript('!!window.account && !document.getElementById("submit").disabled'),'account ready');
+  await aw.executeJavaScript('window.observed=[];window.account.onState(s=>observed.push(s))');
+  assert.deepEqual(await aw.executeJavaScript('[typeof require,typeof process,typeof browser]'),['undefined','undefined','undefined']);
+  for(const key of ['sandbox','contextIsolation','webSecurity'])assert.equal(aw.getLastWebPreferences()[key],true);
+  assert.notEqual(network,aw.session);assert.notEqual(network,human.session);
+  const response=await aw.session.fetch('toast-ui://app/account.html');assert.match(response.headers.get('content-security-policy'),/connect-src 'none'/);
+  assert.equal(await aw.executeJavaScript(`fetch('${process.env.BUTTERTOAST_SUPABASE_URL}/auth/v1/token').then(()=>true,()=>false)`),false);
+  pass('account window remains sandboxed; renderer network denied; network/human/UI sessions separated');
+  server=http.createServer((_req,res)=>res.end('<!doctype html><title>Untrusted fixture</title>local page'));await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  await human.loadURL(`http://127.0.0.1:${server.address().port}`);
+  assert.deepEqual(await human.executeJavaScript('[typeof account,typeof browser,typeof require]'),['undefined','undefined','undefined']);
+  assert.equal(await human.executeJavaScript(`fetch('toast-ui://app/account.html').then(()=>true,()=>false)`),false);
+  const {WEB_PREFERENCES}=require('../dist/security/electron');
+  const forged=new BrowserWindow({show:false,webPreferences:{...WEB_PREFERENCES,session:aw.session,preload:path.join(__dirname,'fixtures/forged-account-preload.cjs')}});
+  await forged.loadURL('toast-ui://app/account.html');await wait(80);assert.equal(calls.length,0);forged.destroy();
+  // A main browser UI has its own valid bridge, but cannot use account commands through it.
+  await ui.executeJavaScript(`browser.command({type:'login',email:'attacker@example.test',password:'fixture-password'})`);
+  await wait(40);assert.equal(calls.length,0);
+  pass('web tabs, forged same-URL renderer and browser UI cannot invoke account IPC');
+  await aw.executeJavaScript(`document.getElementById('mode-signup').click();document.getElementById('email').value='${email}';document.getElementById('password').value='1234567';document.getElementById('password-confirm').value='1234567';account.command({type:'signup',email:'${email}',password:'1234567'})`);
+  await wait(60);assert.equal(calls.length,0);
+  await aw.executeJavaScript(`document.getElementById('password').value='fixture-password';document.getElementById('password-confirm').value='different-password';document.getElementById('submit').click()`);
+  await wait(40);assert.equal(calls.length,0);
+  await aw.executeJavaScript(`document.getElementById('password-confirm').value='fixture-password';document.getElementById('password-confirm').dispatchEvent(new Event('input'));document.getElementById('submit').click()`);
+  await until(async()=>await aw.executeJavaScript(`observed.some(s=>s.status==='pending-email')`),'pending email');
+  assert.equal(calls.length,1);assert.equal(calls[0].headers.apikey,process.env.BUTTERTOAST_SUPABASE_PUBLISHABLE_KEY);
+  assert.equal(new URL(calls[0].url).searchParams.get('redirect_to'),'http://127.0.0.1:52149/auth/callback');
+  assert.deepEqual(await aw.executeJavaScript(`[document.getElementById('password').value,document.getElementById('password-confirm').value]`),['','']);
+  pass('actual signup form enforces minimum/confirmation, clears passwords, sends only PKCE challenge');
+  const callback=code=>new Promise((resolve,reject)=>http.get(`http://127.0.0.1:52149/auth/callback?code=${code}`,res=>{let text='';res.on('data',x=>text+=x);res.on('end',()=>resolve({status:res.statusCode,text}))}).on('error',reject));
+  assert.equal((await callback('attacker-injected-code')).status,400);assert.equal(await aw.executeJavaScript(`observed.at(-1).status`),'pending-email');
+  assert.equal((await callback('fixture-valid-code')).status,200);
+  await until(async()=>await aw.executeJavaScript(`observed.at(-1).status==='signed-in'`),'confirmed sign in');
+  await until(async()=>await ui.executeJavaScript(`document.getElementById('account-open').textContent==='계정'`),'main account label');
+  assert.equal(await aw.executeJavaScript(`document.getElementById('signed-in-email').textContent`),email);
+  const renderer=await aw.executeJavaScript(`JSON.stringify({states:observed,storage:{...localStorage},session:{...sessionStorage},html:document.body.innerHTML})`);
+  for(const value of [access,refresh,'code_verifier','fixture-password'])assert.equal(renderer.includes(value),false);
+  const cookies=await network.cookies.get({});assert.equal(cookies.length,0);
+  pass('injected code rejected; valid PKCE signs in; no access/refresh tokens in renderer state/storage/DOM');
+  fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/account-signed-in.png',(await aw.capturePage()).toPNG());
+  await aw.executeJavaScript(`document.getElementById('logout').click()`);await until(()=>calls.some(c=>new URL(c.url).pathname==='/auth/v1/logout'),'server logout');
+  await until(async()=>await aw.executeJavaScript(`observed.at(-1).status==='signed-out'`),'local logout');
+  const logout=calls.find(c=>new URL(c.url).pathname==='/auth/v1/logout');assert.equal(new URL(logout.url).searchParams.get('scope'),'local');assert.equal(logout.headers.authorization,`Bearer ${access}`);
+  pass('logout clears local account immediately and requests only local server session revocation');
+  await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('password').value='wrong-password';document.getElementById('submit').click()`);
+  await until(async()=>await aw.executeJavaScript(`observed.at(-1).message.includes('비밀번호를 확인')`),'generic login error');
+  assert.equal((await aw.executeJavaScript('document.body.textContent')).includes(access),false);
+  await wait(3050);
+  await aw.executeJavaScript(`document.getElementById('password').value='fixture-password';document.getElementById('submit').click()`);
+  await until(async()=>await aw.executeJavaScript(`observed.at(-1).status==='signed-in'`),'password login');
+  pass('password login succeeds and server error body is never displayed');
+  // Closing/reopening a UI window preserves only main-owned account state.
+  account.close();await until(()=>BrowserWindow.getAllWindows().length===1,'old account closed');await ui.executeJavaScript(`document.getElementById('account-open').click()`);
+  await until(()=>BrowserWindow.getAllWindows().length===2,'account reopen');account=BrowserWindow.getAllWindows().find(w=>w.id!==main.id);aw=account.webContents;
+  await until(async()=>!aw.isLoading()&&await aw.executeJavaScript(`!document.getElementById('signed-in').hidden`),'reopened signed in state');
+  await aw.executeJavaScript(`document.getElementById('logout').click()`);await until(async()=>await aw.executeJavaScript(`!document.getElementById('auth-form').hidden`),'logout after reopen');
+  await aw.executeJavaScript(`document.getElementById('mode-signup').click()`);
+  fs.writeFileSync('artifacts/account-signup.png',(await aw.capturePage()).toPNG());
+  pass('account component can close/reopen without persisting credentials');
+  await wait(3050);
+  await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('email').value='slow@example.test';document.getElementById('password').value='fixture-password';document.getElementById('submit').click()`);
+  await until(()=>!!slowResolve,'delayed request');
+  await aw.executeJavaScript(`document.getElementById('logout').click()`);slowResolve();await wait(100);
+  assert.equal(await aw.executeJavaScript(`document.getElementById('signed-in').hidden`),true);
+  assert.equal(await ui.executeJavaScript(`document.getElementById('account-open').textContent`),'로그인');
+  pass('cancel/logout invalidates delayed password response in the production app');
+  clearTimeout(deadline);server.closeAllConnections();server.close();main.destroy();console.log(`Account security groups: ${groups} passed`);app.exit(0);
+}).catch(error=>{console.error('FAIL',error);clearTimeout(deadline);server?.closeAllConnections();server?.close();app.exit(1)});

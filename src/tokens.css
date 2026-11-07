@@ -1,0 +1,2 @@
+/* Temporary design tokens; final design belongs to the project owner. */
+:root { --surface: #fff; --chrome: #f3f3f3; --hover: #ddd; --text: #222; --border: #bbb; --error: #8c231d; --radius: 4px; --spacing: 8px; --small-font: 12px; --toolbar-icon: 20px; --heading-font: 22px; --field-height: 40px; --font: 14px system-ui, sans-serif; }

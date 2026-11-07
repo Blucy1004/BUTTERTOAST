@@ -8,6 +8,7 @@ import { BrowserTabs } from './browser/tabs';
 import { TabSessionStore } from './browser/session-store';
 import { installPrivacy } from './browser/privacy';
 import { resolveAddress } from './policy';
+import { AccountWindow } from './auth/window';
 
 assertSafeLaunch();
 app.enableSandbox();
@@ -19,10 +20,11 @@ let tabs: BrowserTabs;
 let store: TabSessionStore;
 let privacy: ReturnType<typeof installPrivacy>;
 let initialized = false;
+let account: AccountWindow;
 function emitState(): void {
   if (!window || window.isDestroyed() || !tabs) return;
   const state = tabs.state();
-  window.webContents.send('browser:state', { ...state, initialized, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+  window.webContents.send('browser:state', { ...state, initialized, accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
 function focusAddress(): void {
   window.webContents.focus(); window.webContents.send('browser:focus-address');
@@ -58,6 +60,7 @@ ipcMain.on('browser:command', (event, input: unknown) => {
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'account-open': account.open(); break;
     case 'new': tabs.newTab(); focusAddress(); break;
     case 'select': tabs.select(cmd.id); break;
     case 'close': tabs.close(cmd.id); break;
@@ -93,10 +96,11 @@ app.whenReady().then(async () => {
   window.webContents.on('will-redirect', event => event.preventDefault());
   window.webContents.on('will-attach-webview', event => event.preventDefault());
   keyboard(window.webContents);
+  account = new AccountWindow(window, emitState);
   store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
   tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { void store.save(snapshot); }, input: keyboard });
   window.on('resize', () => tabs.layout());
-  window.on('closed', () => { initialized = false; tabs.dispose(); });
+  window.on('closed', () => { initialized = false; account.dispose(); tabs.dispose(); });
   void window.loadURL(UI_URL);
   const saved = await store.load();
   if (window.isDestroyed()) return;

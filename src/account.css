@@ -1,0 +1,19 @@
+/* Replaceable verification UI, not the final product design. */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--text); font: var(--font); }
+main { padding: calc(var(--spacing) * 3); max-width: 500px; margin: auto; }
+h1 { font-size: var(--heading-font); margin: 0 0 calc(var(--spacing) * 2); }
+p { line-height: 1.6; overflow-wrap: anywhere; }
+.hint { font-size: var(--small-font); }
+button, input { font: inherit; color: inherit; border: 1px solid var(--border); border-radius: var(--radius); }
+button { padding: var(--spacing) calc(var(--spacing) * 2); background: var(--chrome); cursor: pointer; }
+button:hover { background: var(--hover); }
+button[aria-pressed="true"] { border-color: var(--text); font-weight: bold; }
+button:disabled { opacity: .5; cursor: default; }
+#auth-modes { display: flex; gap: var(--spacing); margin-bottom: calc(var(--spacing) * 2); }
+label { display: block; margin: var(--spacing) 0; }
+input:not([type="checkbox"]) { width: 100%; min-height: var(--field-height); padding: var(--spacing); background: var(--surface); }
+.inline { display: flex; align-items: center; gap: var(--spacing); margin: calc(var(--spacing) * 2) 0; }
+#submit { width: 100%; }
+#account-message { min-height: 3em; }
+[hidden] { display: none !important; }

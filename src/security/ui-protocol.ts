@@ -5,6 +5,7 @@ export const UI_URL = 'toast-ui://app/index.html';
 export const UI_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; connect-src 'none'";
 const files = new Map([
   ['/index.html', 'text/html'], ['/style.css', 'text/css'], ['/ui.js', 'text/javascript'],
+  ['/account.html', 'text/html'], ['/account.js', 'text/javascript'], ['/account.css', 'text/css'], ['/tokens.css', 'text/css'],
   ['/tabs.js', 'text/javascript'], ['/toolbar.js', 'text/javascript']
 ]);
 export function assetForRequest(url: string, method: string): { name: string; type: string } | null {
