@@ -1,5 +1,6 @@
 import { app, WebContents, Session, WebPreferences } from 'electron';
 import { isWebUrl } from '../policy';
+import { assertSafeSwitches } from './launch-policy';
 export const WEB_PREFERENCES: WebPreferences = Object.freeze({
   sandbox: true, contextIsolation: true, nodeIntegration: false,
   nodeIntegrationInSubFrames: false, nodeIntegrationInWorker: false,
@@ -7,10 +8,12 @@ export const WEB_PREFERENCES: WebPreferences = Object.freeze({
   backgroundThrottling: true, navigateOnDragDrop: false, safeDialogs: true, spellcheck: false
 });
 export function assertSafeLaunch(): void {
-  for (const flag of ['no-sandbox', 'disable-web-security', 'ignore-certificate-errors', 'disable-site-isolation-trials', 'disable-site-isolation-for-policy', 'remote-debugging-port', 'remote-debugging-pipe', 'inspect', 'inspect-brk']) {
-    if (app.commandLine.hasSwitch(flag)) throw new Error('Unsafe Chromium launch configuration');
-  }
-  if (app.commandLine.hasSwitch('disable-features')) throw new Error('Disabling Chromium features is unsupported');
+  // Development Electron injects this switch by default. Our UI uses a custom
+  // protocol and needs no file privileges; remove the implicit default before startup.
+  const fileFlag = 'allow-file-access-from-files';
+  if (process.argv.some(arg => arg === `--${fileFlag}` || arg.startsWith(`--${fileFlag}=`))) throw new Error('Unsafe Chromium launch configuration');
+  app.commandLine.removeSwitch(fileFlag);
+  assertSafeSwitches(name => app.commandLine.hasSwitch(name));
 }
 export function hardenSession(ses: Session): void {
   ses.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));

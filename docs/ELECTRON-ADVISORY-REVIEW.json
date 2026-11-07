@@ -1,0 +1,1340 @@
+{
+  "checkedAt": "2026-11-07T11:57:16.259Z",
+  "electron": "45.2.3",
+  "sourcePages": 7,
+  "summary": {
+    "outside-published-range": 68,
+    "affected": 1,
+    "manual-review": 1
+  },
+  "advisories": [
+    {
+      "id": "GHSA-jr5w-w6x2-84p9",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9",
+      "cve": [
+        "CVE-2026-115570"
+      ],
+      "affected": [
+        ">= 45.0.0-alpha.1, < 45.0.0-beta.6",
+        ">= 44.0.0-alpha.1, < 44.9.1",
+        ">= 43.0.0-alpha.1, < 43.8.1",
+        "< 42.11.16"
+      ],
+      "patched": [
+        "45.0.0-beta.6",
+        "44.9.1",
+        "43.8.1",
+        "42.11.16"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-x562-297c-g43g",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-x562-297c-g43g",
+      "cve": [
+        "CVE-2026-113798"
+      ],
+      "affected": [
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.13",
+        ">= 44.0.0-alpha.1, < 44.5.0",
+        ">= 43.0.0-alpha.1, < 43.7.6",
+        "< 42.11.9"
+      ],
+      "patched": [
+        "45.0.0-alpha.13",
+        "44.5.0",
+        "43.7.6",
+        "42.11.9"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-3qxv-5xgr-q7w9",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-3qxv-5xgr-q7w9",
+      "cve": [
+        "CVE-2026-114122"
+      ],
+      "affected": [
+        "< 42.11.6",
+        ">= 43.0.0-alpha.1, < 43.7.3",
+        ">= 44.0.0-alpha.1, < 44.4.3",
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.9"
+      ],
+      "patched": [
+        "42.11.6",
+        "43.7.3",
+        "44.4.3",
+        "45.0.0-alpha.9"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-h3v5-h239-pg29",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-h3v5-h239-pg29",
+      "cve": [
+        "CVE-2026-114124"
+      ],
+      "affected": [
+        "< 42.11.6",
+        ">= 43.0.0-alpha.1, < 43.7.3",
+        ">= 44.0.0-alpha.1, < 44.4.3",
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.9"
+      ],
+      "patched": [
+        "42.11.6",
+        "43.7.3",
+        "44.4.3",
+        "45.0.0-alpha.9"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-997q-gvvc-jwmx",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-997q-gvvc-jwmx",
+      "cve": [
+        "CVE-2026-114121"
+      ],
+      "affected": [
+        "< 42.11.3",
+        ">= 43.0.0-alpha.1, < 43.7.0",
+        ">= 44.0.0-alpha.1, < 44.3.0",
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.5"
+      ],
+      "patched": [
+        "42.11.3",
+        "43.7.0",
+        "44.3.0",
+        "45.0.0-alpha.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-fw47-9c62-h3vw",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-fw47-9c62-h3vw",
+      "cve": [
+        "CVE-2026-113800"
+      ],
+      "affected": [
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.5",
+        ">= 44.0.0-alpha.1, < 44.3.0",
+        ">= 43.0.0-alpha.1, < 43.7.0",
+        "< 42.11.3"
+      ],
+      "patched": [
+        "45.0.0-alpha.5",
+        "44.3.0",
+        "43.7.0",
+        "42.11.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-gr2m-v5gq-v685",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-gr2m-v5gq-v685",
+      "cve": [
+        "CVE-2026-102674"
+      ],
+      "affected": [
+        "< 41.10.6",
+        ">= 42.0.0-alpha.1, < 42.9.2",
+        ">= 43.0.0-alpha.1, < 43.4.1",
+        ">= 44.0.0-alpha.1, < 44.0.0-beta.5"
+      ],
+      "patched": [
+        "41.10.6",
+        "42.9.2",
+        "43.4.1",
+        "44.0.0-beta.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-9qh4-3jw8-366w",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9qh4-3jw8-366w",
+      "cve": [
+        "CVE-2026-102676"
+      ],
+      "affected": [
+        "< 41.10.6",
+        ">= 42.0.0-alpha.1, < 42.9.2",
+        ">= 43.0.0-alpha.1, < 43.4.1",
+        ">= 44.0.0-alpha.1, < 44.0.0-beta.5"
+      ],
+      "patched": [
+        "41.10.6",
+        "42.9.2",
+        "43.4.1",
+        "44.0.0-beta.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-j84w-jfhq-vhvj",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-j84w-jfhq-vhvj",
+      "cve": [
+        "CVE-2026-102675"
+      ],
+      "affected": [
+        "< 41.10.6",
+        ">= 42.0.0-alpha.1, < 42.9.2",
+        ">= 43.0.0-alpha.1, < 43.4.1",
+        ">= 44.0.0-alpha.1, < 44.0.0-beta.5"
+      ],
+      "patched": [
+        "41.10.6",
+        "42.9.2",
+        "43.4.1",
+        "44.0.0-beta.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-r4w5-6pfg-jxp5",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-r4w5-6pfg-jxp5",
+      "cve": [
+        "CVE-2026-70606"
+      ],
+      "affected": [
+        ">= 43.0.0-alpha.1, < 43.0.0",
+        ">= 42.0.0-alpha.1, < 42.5.1",
+        ">= 41.0.0-alpha.1, < 41.9.1",
+        ">= 40.0.0-alpha.1, < 40.10.6"
+      ],
+      "patched": [
+        "43.0.0",
+        "42.5.1",
+        "41.9.1",
+        "40.10.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-hq2x-r82h-9wj4",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-hq2x-r82h-9wj4",
+      "cve": [
+        "CVE-2026-102673"
+      ],
+      "affected": [
+        "< 41.10.4",
+        ">= 42.0.0-alpha.1, < 42.5.2",
+        ">= 43.0.0-alpha.1, < 43.0.0"
+      ],
+      "patched": [
+        "41.10.4",
+        "42.5.2",
+        "43.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-qmv3-fv6v-rmhq",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-qmv3-fv6v-rmhq",
+      "cve": [
+        "CVE-2026-102677"
+      ],
+      "affected": [
+        ">= 42.3.3, < 42.10.0",
+        ">= 43.0.0-beta.1, < 43.4.2",
+        ">= 44.0.0-alpha.1, < 44.0.0-beta.6"
+      ],
+      "patched": [
+        "42.10.0",
+        "43.4.2",
+        "44.0.0-beta.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-q6m5-f73j-m9mc",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-q6m5-f73j-m9mc",
+      "cve": [
+        "CVE-2026-54257"
+      ],
+      "affected": [
+        "42.3.1,42.3.2"
+      ],
+      "patched": [
+        "42.3.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-9f4c-93c8-jc8g",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9f4c-93c8-jc8g",
+      "cve": [
+        "CVE-2026-70608"
+      ],
+      "affected": [
+        ">= 42.0.0-alpha.1, < 42.0.1",
+        ">= 40.0.0-alpha.1, < 41.10.3",
+        "< 39.8.10"
+      ],
+      "patched": [
+        "42.0.1",
+        "41.10.3",
+        "39.8.10"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-v3j7-r9gq-3gjw",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-v3j7-r9gq-3gjw",
+      "cve": [
+        "CVE-2026-70604"
+      ],
+      "affected": [
+        ">= 42.0.0-alpha.1, < 42.0.0",
+        ">= 41.0.0-alpha.1, < 41.4.0",
+        ">= 40.0.0-alpha.1, < 40.9.3",
+        "< 39.8.10"
+      ],
+      "patched": [
+        "42.0.0",
+        "41.4.0",
+        "40.9.3",
+        "39.8.10"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-98mx-cjp9-gchm",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-98mx-cjp9-gchm",
+      "cve": [
+        "CVE-2026-113797"
+      ],
+      "affected": [
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.4",
+        ">= 44.0.0-alpha.1, < 44.1.1",
+        ">= 43.0.0-alpha.1, < 43.5.1",
+        "< 42.11.1"
+      ],
+      "patched": [
+        "45.0.0-alpha.4",
+        "44.1.1",
+        "43.5.1",
+        "42.11.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-x8rc-wpg4-grpf",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-x8rc-wpg4-grpf",
+      "cve": [
+        "CVE-2026-70600"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-jm7p-cc5g-qwxx",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-jm7p-cc5g-qwxx",
+      "cve": [
+        "CVE-2026-70597"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-m55f-7gqj-fr98",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-m55f-7gqj-fr98",
+      "cve": [
+        "CVE-2026-70602"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-f2r8-jv7c-xqmp",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-f2r8-jv7c-xqmp",
+      "cve": [
+        "CVE-2026-70611"
+      ],
+      "affected": [
+        "< 39.8.9",
+        ">= 40.0.0-alpha.1, < 40.9.2",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.9",
+        "40.9.2",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-pfmc-3mgc-p6fp",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-pfmc-3mgc-p6fp",
+      "cve": [
+        "CVE-2026-70598"
+      ],
+      "affected": [
+        "< 39.8.10",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.10",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-p2rr-rvmm-c5fp",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-p2rr-rvmm-c5fp",
+      "cve": [
+        "CVE-2026-70612"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-ff2p-hmqr-hxm4",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-ff2p-hmqr-hxm4",
+      "cve": [
+        "CVE-2026-70610"
+      ],
+      "affected": [
+        "< 39.8.9",
+        ">= 40.0.0-alpha.1, < 40.9.2",
+        ">= 41.0.0-alpha.1, < 41.2.2",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.4"
+      ],
+      "patched": [
+        "39.8.9",
+        "40.9.2",
+        "41.2.2",
+        "42.0.0-beta.4"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-v93f-fgjr-hjrj",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-v93f-fgjr-hjrj",
+      "cve": [
+        "CVE-2026-70607"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-v64r-4m7r-3mvq",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-v64r-4m7r-3mvq",
+      "cve": [
+        "CVE-2026-70605"
+      ],
+      "affected": [
+        "< 39.8.8",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.1",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.3"
+      ],
+      "patched": [
+        "39.8.8",
+        "40.9.0",
+        "41.2.1",
+        "42.0.0-beta.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-h7rp-cf8h-j98x",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-h7rp-cf8h-j98x",
+      "cve": [
+        "CVE-2026-70601"
+      ],
+      "affected": [
+        "< 39.8.9",
+        ">= 40.0.0-alpha.1, < 40.9.2",
+        ">= 41.0.0-alpha.1, < 41.2.2",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.5"
+      ],
+      "patched": [
+        "39.8.9",
+        "40.9.2",
+        "41.2.2",
+        "42.0.0-beta.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-vv43-5jgx-7qv8",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-vv43-5jgx-7qv8",
+      "cve": [
+        "CVE-2026-102672"
+      ],
+      "affected": [
+        "< 39.8.10",
+        ">= 40.0.0-alpha.1",
+        ">= 41.0.0-alpha.1, < 41.10.5",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.2"
+      ],
+      "patched": [
+        "39.8.10",
+        "41.10.5",
+        "42.0.0-beta.2"
+      ],
+      "rangeReview": "affected",
+      "applicability": "not-applicable-to-current-target-and-features",
+      "rationale": "Published range includes 45.2.3 because one branch has no upper bound. Do not override that range: advisory requires macOS Squirrel.Mac/ShipIt auto-updates; ButterToast targets Windows and does not implement Squirrel.Mac updates."
+    },
+    {
+      "id": "GHSA-9pf5-hg6p-4pwp",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9pf5-hg6p-4pwp",
+      "cve": [
+        "CVE-2026-70599"
+      ],
+      "affected": [
+        "< 39.8.7",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.0",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.1"
+      ],
+      "patched": [
+        "39.8.7",
+        "40.9.0",
+        "41.2.0",
+        "42.0.0-beta.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-4f78-qhmw-8j8m",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-4f78-qhmw-8j8m",
+      "cve": [
+        "CVE-2026-70609"
+      ],
+      "affected": [
+        "< 39.8.7",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        ">= 41.0.0-alpha.1, < 41.2.0",
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.1"
+      ],
+      "patched": [
+        "39.8.7",
+        "40.9.0",
+        "41.2.0",
+        "42.0.0-beta.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-5c9j-mhmv-5xgx",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-5c9j-mhmv-5xgx",
+      "cve": [
+        "CVE-2026-70603"
+      ],
+      "affected": [
+        ">= 42.0.0-alpha.1, < 42.0.0-beta.1",
+        ">= 41.0.0-alpha.1, < 41.1.1",
+        ">= 40.0.0-alpha.1, < 40.9.0",
+        "< 39.8.6"
+      ],
+      "patched": [
+        "42.0.0-beta.1",
+        "41.1.1",
+        "40.9.0",
+        "39.8.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-8x5q-pvf5-64mp",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-8x5q-pvf5-64mp",
+      "cve": [
+        "CVE-2026-34764"
+      ],
+      "affected": [
+        ">= 33.0.0-alpha.1, < 39.8.5",
+        ">= 40.0.0-alpha.1, < 40.8.5",
+        ">= 41.0.0-alpha.1, < 41.1.0",
+        ">= 42.0.0-alpha.1, < 42.0.0-alpha.5"
+      ],
+      "patched": [
+        "39.8.5",
+        "40.8.5",
+        "41.1.0",
+        "42.0.0-alpha.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-f3pv-wv63-48x8",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-f3pv-wv63-48x8",
+      "cve": [
+        "CVE-2026-34765"
+      ],
+      "affected": [
+        "< 39.8.5",
+        ">= 40.0.0-alpha.1, < 40.8.5",
+        ">= 41.0.0-alpha.1, < 41.1.0",
+        ">= 42.0.0-alpha.1, < 42.0.0-alpha.5"
+      ],
+      "patched": [
+        "39.8.5",
+        "40.8.5",
+        "41.1.0",
+        "42.0.0-alpha.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-4p4r-m79c-wq3v",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-4p4r-m79c-wq3v",
+      "cve": [
+        "CVE-2026-34767"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.3",
+        ">= 40.0.0-alpha.1, < 40.8.3",
+        ">= 41.0.0-alpha.1, < 41.0.3"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.3",
+        "40.8.3",
+        "41.0.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-9899-m83m-qhpj",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9899-m83m-qhpj",
+      "cve": [
+        "CVE-2026-34766"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.0",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.0",
+        "40.7.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-jfqx-fxh3-c62j",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-jfqx-fxh3-c62j",
+      "cve": [
+        "CVE-2026-34768"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-9wfr-w7mm-pc7f",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9wfr-w7mm-pc7f",
+      "cve": [
+        "CVE-2026-34769"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.0",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.0",
+        "40.7.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-jjp3-mq3x-295m",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-jjp3-mq3x-295m",
+      "cve": [
+        "CVE-2026-34770"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-8337-3p73-46f4",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-8337-3p73-46f4",
+      "cve": [
+        "CVE-2026-34771"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.0",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.0",
+        "40.7.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-9w97-2464-8783",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-9w97-2464-8783",
+      "cve": [
+        "CVE-2026-34772"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.0",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.7"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.0",
+        "40.7.0",
+        "41.0.0-beta.7"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-532v-xpq5-8h95",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-532v-xpq5-8h95",
+      "cve": [
+        "CVE-2026-34774"
+      ],
+      "affected": [
+        "< 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "39.8.1",
+        "40.7.0",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-mwmh-mq4g-g6gr",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-mwmh-mq4g-g6gr",
+      "cve": [
+        "CVE-2026-34773"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.1",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.1",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-3c8v-cfp5-9885",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-3c8v-cfp5-9885",
+      "cve": [
+        "CVE-2026-34776"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.1",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.1",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-r5p7-gp4j-qhrx",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-r5p7-gp4j-qhrx",
+      "cve": [
+        "CVE-2026-34777"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.1",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.1",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-xwr5-m59h-vwqr",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-xwr5-m59h-vwqr",
+      "cve": [
+        "CVE-2026-34775"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.4",
+        ">= 40.0.0-alpha.1, < 40.8.4",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.4",
+        "40.8.4",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-xj5x-m3f3-5x3h",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-xj5x-m3f3-5x3h",
+      "cve": [
+        "CVE-2026-34778"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.1",
+        ">= 41.0.0-alpha.1, < 41.0.0"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.1",
+        "41.0.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-5rqw-r77c-jp79",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-5rqw-r77c-jp79",
+      "cve": [
+        "CVE-2026-34779"
+      ],
+      "affected": [
+        "< 38.8.6",
+        ">= 39.0.0-alpha.1, < 39.8.1",
+        ">= 40.0.0-alpha.1, < 40.8.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "38.8.6",
+        "39.8.1",
+        "40.8.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-jfqg-hf23-qpw2",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-jfqg-hf23-qpw2",
+      "cve": [
+        "CVE-2026-34780"
+      ],
+      "affected": [
+        ">= 39.0.0-alpha.1, < 39.8.0",
+        ">= 40.0.0-alpha.1, < 40.7.0",
+        ">= 41.0.0-alpha.1, < 41.0.0-beta.8"
+      ],
+      "patched": [
+        "39.8.0",
+        "40.7.0",
+        "41.0.0-beta.8"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-f37v-82c4-4x64",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-f37v-82c4-4x64",
+      "cve": [
+        "CVE-2026-34781"
+      ],
+      "affected": [
+        "< 39.8.5",
+        ">= 40.0.0-alpha.1, < 40.8.5",
+        ">= 41.0.0-alpha.1, < 41.1.0",
+        ">= 42.0.0-alpha.1, < 42.0.0-alpha.5"
+      ],
+      "patched": [
+        "39.8.5",
+        "40.8.5",
+        "41.1.0",
+        "42.0.0-alpha.5"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-vmqv-hx8q-j7mg",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-vmqv-hx8q-j7mg",
+      "cve": [
+        "CVE-2025-55305"
+      ],
+      "affected": [
+        "< 35.7.5 || >= 36.0.0-alpha.1 < 36.8.1 || >= 37.0.0-alpha.1 < 37.3.1 || >= 38.0.0-alpha.1 < 38.0.0-beta.6"
+      ],
+      "patched": [
+        "35.7.5, 36.8.1, 37.3.1, 38.0.0-beta.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-2p8c-gr87-2676",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-2p8c-gr87-2676",
+      "cve": [
+        "CVE-2026-113796"
+      ],
+      "affected": [
+        ">= 45.0.0-alpha.1, < 45.0.0-alpha.6",
+        ">= 44.0.0-alpha.1, < 44.3.0",
+        ">= 43.0.0-alpha.1, < 43.7.0",
+        "< 42.11.3"
+      ],
+      "patched": [
+        "45.0.0-alpha.6",
+        "44.3.0",
+        "43.7.0",
+        "42.11.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-22mq-c535-7vv9",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-22mq-c535-7vv9",
+      "cve": [],
+      "affected": [
+        ">= 36.0.0-alpha.1, < 36.0.0-alpha.5",
+        ">= 35.0.0-alpha.1, < 35.1.0"
+      ],
+      "patched": [
+        "36.0.0-alpha.5",
+        "35.1.0"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-xw5q-g62x-2qjc",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-xw5q-g62x-2qjc",
+      "cve": [
+        "CVE-2024-46992"
+      ],
+      "affected": [
+        ">= 30.0.0-alpha.1 < 30.0.5 || >= 31.0.0-alpha.1 < 31.0.0-beta.1"
+      ],
+      "patched": [
+        "30.0.5,31.0.0-beta.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-6r2x-8pq8-9489",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-6r2x-8pq8-9489",
+      "cve": [
+        "CVE-2024-46993"
+      ],
+      "affected": [
+        "< 28.3.2 || >= 29.0.0-alpha.1 < 29.3.3 || >= 30.0.0-alpha.1 < 30.0.3"
+      ],
+      "patched": [
+        "28.3.2, 29.3.3, 30.0.3"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-2hfc-r8fq-92h7",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-2hfc-r8fq-92h7",
+      "cve": [],
+      "affected": [
+        "4f76fff97879ee8f9b2d0dcfd43e686ff8757c69"
+      ],
+      "patched": [
+        "c86e4cb9ce7546324970ceb6e85ad7001df4318c"
+      ],
+      "rangeReview": "manual-review",
+      "applicability": "upstream-repository-workflow-only",
+      "rationale": "Commit-hash advisory for electron/electron issue-opened.yml, not the npm runtime. ButterToast has no such workflow and does not interpolate issue bodies into scripts."
+    },
+    {
+      "id": "GHSA-7m48-wc93-9g85",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85",
+      "cve": [
+        "CVE-2023-44402"
+      ],
+      "affected": [
+        "< 22.3.24 || >= 23.0.0-alpha.1 < 23.3.14 || >= 24.0.0-alpha.1 < 24.8.3 || >= 25.0.0-alpha.1 < 25.8.1 || >= 26.0.0-alpha.1 < 26.2.1 || >= 27.0.0-alpha.1 < 27.0.0-alpha.7"
+      ],
+      "patched": [
+        "22.3.24, 24.8.3, 25.8.1, 26.2.1, 27.0.0-alpha.7"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-7x97-j373-85x5",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-7x97-j373-85x5",
+      "cve": [
+        "CVE-2023-39956"
+      ],
+      "affected": [
+        "< 22.3.19 || >= 23.0.0-alpha.1 < 23.3.13 || >= 24.0.0-alpha.1 < 24.7.1 || >= 25.0.0-alpha.1 < 25.5.0 || >= 26.0.0-alpha.1 < 26.0.0-beta.13"
+      ],
+      "patched": [
+        "26.0.0-beta.13, 25.5.0, 24.7.1, 23.3.13, 22.3.19"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-p7v2-p9m8-qqg7",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-p7v2-p9m8-qqg7",
+      "cve": [
+        "CVE-2023-29198"
+      ],
+      "affected": [
+        "< 22.3.6 || >= 23.0.0-alpha.1 < 23.2.3 || >= 24.0.0-alpha.1 < 24.0.1 || >= 25.0.0-alpha.1 < 25.0.0-alpha.2"
+      ],
+      "patched": [
+        "22.3.6, 23.2.3, 24.0.1, 25.0.0-alpha.2"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-gxh7-wv9q-fwfr",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-gxh7-wv9q-fwfr",
+      "cve": [
+        "CVE-2023-23623"
+      ],
+      "affected": [
+        ">= 22.0.0-beta.1 < 22.0.1, >= 23.0.0-alpha.1 < 23.0.0-alpha.2"
+      ],
+      "patched": [
+        "22.0.1, 23.0.0-alpha.2"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-p2jh-44qj-pf2v",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-p2jh-44qj-pf2v",
+      "cve": [
+        "CVE-2022-36077"
+      ],
+      "affected": [
+        "< 18.3.7, >= 19.0.0-beta.1 < 19.0.11, >= 20.0.0-beta.1 < 20.0.1"
+      ],
+      "patched": [
+        "18.3.7, 19.0.11, 20.0.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-77xc-hjv8-ww97",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-77xc-hjv8-ww97",
+      "cve": [
+        "CVE-2022-29257"
+      ],
+      "affected": [
+        "< 15.5.0 || >= 16.0.0-beta.1 < 16.2.0 || >= 17.0.0-beta.1 < 17.2.0 || >= 18.0.0-beta.1 < 18.0.0-beta.6"
+      ],
+      "patched": [
+        "15.5.0, 16.2.0, 17.2.0, 18.0.0-beta.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-mq8j-3h7h-p8g7",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-mq8j-3h7h-p8g7",
+      "cve": [
+        "CVE-2022-29247"
+      ],
+      "affected": [
+        "< 15.5.5 || >= 16.0.0-beta.1 < 16.2.6 || >= 17.0.0-beta.1 < 17.2.0 || >= 18.0.0-beta.1 < 18.0.0-beta.6"
+      ],
+      "patched": [
+        "15.5.5, 16.2.6, 17.2.0, 18.0.0-beta.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-3p22-ghq8-v749",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-3p22-ghq8-v749",
+      "cve": [
+        "CVE-2022-21718"
+      ],
+      "affected": [
+        "< 13.6.6 || >=14.0.0-beta.1 < 14.2.4 || >=15.0.0-beta.1 <15.3.5 || >=16.0.0-beta.1 <16.0.6 || >=17.0.0-alpha.1 <17.0.0-alpha.6"
+      ],
+      "patched": [
+        "13.6.6, 14.2.4, 15.3.5, 16.0.6, 17.0.0-alpha.6"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-mpjm-v997-c4h4",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-mpjm-v997-c4h4",
+      "cve": [
+        "CVE-2021-39184"
+      ],
+      "affected": [
+        ">=10.1.0 <11.0.0-beta.1 || >=11.0.0-beta.1 < 11.5.0 || >=12.0.0-beta.1 < 12.1.0 || >=13.0.0-beta.1 <13.3.0 || >=14.0.0-beta.1 <14.0.0 || >=15.0.0-alpha.1 <15.0.0-alpha.10"
+      ],
+      "patched": [
+        "11.5.0, 12.1.0, 13.3.0, 14.0.0, 15.0.0-alpha.10"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-hvf8-h2qh-37m9",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-hvf8-h2qh-37m9",
+      "cve": [
+        "CVE-2020-26272"
+      ],
+      "affected": [
+        ">=9.0.0-beta.0 < 9.4.0 || >= 10.0.0-beta.0 < 10.2.0 || >= 11.0.0-beta.0 < 11.1.0 || >= 12.0.0-beta.0 < 12.0.0-beta.9 || <= 8"
+      ],
+      "patched": [
+        "9.4.0, 10.2.0, 11.1.0, 12.0.0-beta.9"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-56pc-6jqp-xqj8",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-56pc-6jqp-xqj8",
+      "cve": [
+        "CVE-2020-15215"
+      ],
+      "affected": [
+        ">=11.0.0-beta.0 <=11.0.0-beta.5 || >=10.0.0-beta.0 <=10.1.1 || >=9.0.0-beta.0 <=9.3.0 || >=8.0.0-beta.0 <=8.5.1 <= 8"
+      ],
+      "patched": [
+        "11.0.0-beta.6, 10.1.2, 9.3.1, 8.5.2"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-2q4g-w47c-4674",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-2q4g-w47c-4674",
+      "cve": [
+        "CVE-2020-15174"
+      ],
+      "affected": [
+        ">=10.0.0-beta.0 <=10.0.0 || >=9.0.0-beta.0 <=9.2.1 || >=8.0.0-beta.0 <=8.5.0 <= 8"
+      ],
+      "patched": [
+        "11.0.0-beta.1, 10.0.1, 9.3.0, 8.5.1"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-6vrv-94jv-crrg",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-6vrv-94jv-crrg",
+      "cve": [
+        "CVE-2020-15096"
+      ],
+      "affected": [
+        ">=9.0.0-beta.0 <=9.0.0-beta.20 || >=8.0.0-beta.0 <=8.2.3 || >= 7.0.0-beta < =7.2.3 || >= 6.0.0-beta.0 <= 6.1.10 || <= 6"
+      ],
+      "patched": [
+        "9.0.0-beta.21, 8.2.4, 7.2.4, 6.1.11"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-f9mq-jph6-9mhm",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-f9mq-jph6-9mhm",
+      "cve": [
+        "CVE-2020-4075"
+      ],
+      "affected": [
+        ">=9.0.0-beta.0 <=9.0.0-beta.20 || >=8.0.0-beta.0 <=8.2.3 || >= 7.0.0-beta < =7.2.3 || <7"
+      ],
+      "patched": [
+        "7.2.4,8.2.4,9.0.0-beta.21"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-m93v-9qjc-3g79",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-m93v-9qjc-3g79",
+      "cve": [
+        "CVE-2020-4076"
+      ],
+      "affected": [
+        ">=9.0.0-beta.0 <=9.0.0-beta.20 || >=8.0.0-beta.0 <=8.2.3 || >= 7.0.0-beta < =7.2.3 || <7"
+      ],
+      "patched": [
+        "7.2.4,8.2.4,9.0.0-beta.21"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    },
+    {
+      "id": "GHSA-h9jc-284h-533g",
+      "url": "https://github.com/electron/electron/security/advisories/GHSA-h9jc-284h-533g",
+      "cve": [
+        "CVE-2020-4077"
+      ],
+      "affected": [
+        ">=9.0.0-beta.0 <=9.0.0-beta.20 || >=8.0.0-beta.0 <=8.2.3 || >= 7.0.0-beta < =7.2.3 || <7"
+      ],
+      "patched": [
+        "7.2.4,8.2.4,9.0.0-beta.21"
+      ],
+      "rangeReview": "outside-published-range",
+      "applicability": "outside-published-version-range"
+    }
+  ],
+  "limitations": "Vendor version-range and documented feature review only. Not exploit execution or a complete Chromium/Node/CVE inventory. Snapshot of seven public listing pages."
+}

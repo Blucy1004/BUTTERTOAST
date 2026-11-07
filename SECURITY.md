@@ -1,6 +1,6 @@
 # ButterToast 보안 상태
 
-이 문서는 구현과 검증 범위를 구분한다. 현재는 개발 중인 브라우저 셸이며 출시 보안 심사 완료 상태가 아니다. 재현 결과는 [보안 검증 보고서](docs/SECURITY-VALIDATION.md)를 참조한다.
+이 문서는 구현과 검증 범위를 구분한다. 현재는 개발 중인 브라우저 셸이며 출시 보안 심사 완료 상태가 아니다. 최신 범위와 결과는 [확대 보안 검사](docs/EXPANDED-SECURITY-REVIEW.md), 이전 재현은 [초기 기록](docs/SECURITY-VALIDATION.md)을 참조한다.
 
 ## 실행 중인 브라우저에 적용된 정책
 
@@ -10,7 +10,7 @@
 - 웹 탐색은 HTTP(S)만 허용하며 자격 증명이 포함된 URL을 거부한다. 직접 입력한 HTTP는 지원한다. 페이지 주도 HTTPS→HTTP 탐색과 HTTPS 탐색 중 다운그레이드 리디렉션은 차단한다. TLS 인증서 검증을 우회하지 않는다.
 - 사이트·장치·화면 공유 권한, 팝업, 다운로드는 현재 모두 거부한다. 권한별 승인 UI와 안전한 다운로드 허용 흐름은 아직 없다.
 - 렌더러 충돌·응답 지연을 UI에 표시하고 해당 탭을 재시작할 수 있다. 수동 메모리 해제는 WebContents를 닫고 URL만 유지한다. 재실행용 URL은 OS 보호 저장소가 있을 때만 암호화하며 평문 대체를 하지 않는다. 복원은 사용자가 선택한 탭만 GET으로 로드한다.
-- 위험한 실행 플래그와 원격 디버깅 플래그를 거부한다. Windows 테스트 패키징은 Node 실행 모드·환경 옵션·검사 인자·file 추가 권한을 fuse로 끄고 ASAR 전용 로딩·무결성 검사와 쿠키 암호화를 켠다. 실제 exe의 fuse와 내장 ASAR 해시를 재검증한다.
+- 위험한 실행 플래그와 원격 디버깅 플래그를 거부한다. 인증서 예외·GPU sandbox·단일 프로세스·실험 기능 등 29개 플래그를 검사하며 개발용 Electron의 암묵적 file 접근 권한도 시작 시 제거한다. Windows 테스트 패키징은 Node 실행 모드·환경 옵션·검사 인자·file 추가 권한을 fuse로 끄고 ASAR 전용 로딩·무결성 검사와 쿠키 암호화를 켠다. 실제 exe의 fuse와 내장 ASAR 해시를 재검증한다.
 
 사람 탭과 AI 작업 세션에 제한적인 타사 추적 호스트 차단, GPC/DNT 헤더와 다른 origin으로의 Referer 최소화를 적용한다. 사이트별 차단 예외는 신뢰된 UI에서만 설정한다. [추가 검증과 한계](docs/CHROMIUM-IMPROVEMENTS.md)를 참조한다.
 
@@ -28,7 +28,7 @@ Guard와 연결된 최소 DOM 수집·실행 경로를 추가했다. `ToastContr
 
 ## 공급망과 검증
 
-lockfile을 저장하며 `npm ci`, 취약점 검사, CycloneDX SBOM 생성과 제한적인 자격 증명 패턴 검사를 제공한다. GitHub Actions는 커밋 SHA에 고정했고 읽기 전용 권한과 checkout 자격 증명 비보존을 사용한다. Linux/Windows 테스트 워크플로 파일을 추가했으나 GitHub 실행 결과는 아직 없다. `npm audit`은 Chromium 취약점 전체나 악성 패키지 부재를 보증하지 않는다. 패턴 스캐너도 완전한 비밀정보 탐지기가 아니다.
+lockfile을 저장하며 `npm ci`, 취약점 검사, CycloneDX SBOM 생성과 제한적인 자격 증명 패턴 검사를 제공한다. GitHub Actions는 커밋 SHA에 고정했고 읽기 전용 권한과 checkout 자격 증명 비보존을 사용한다. Linux/Windows 테스트 워크플로 파일을 추가했으나 GitHub 실행 결과는 아직 없다. `npm audit`은 Chromium 취약점 전체나 악성 패키지 부재를 보증하지 않는다. 패턴 스캐너도 완전한 비밀정보 탐지기가 아니다. 확대 검토에서 Gitleaks 및 Electronegativity도 별도로 실행했으며 npm 패키지 서명 감사는 메타데이터 다운로드 403으로 미완료다. 상세 결과와 수동 판정은 확대 검사 보고서에 있다.
 
 ## 남은 보안 작업
 

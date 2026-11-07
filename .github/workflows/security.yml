@@ -35,6 +35,7 @@ jobs:
       - run: npm run test:electron
       - run: npm run test:toastir
       - run: npm run test:browser
+      - run: npm run test:extended
       - run: npm run audit:deps
       - run: npm run scan:secrets
       - run: npm run sbom

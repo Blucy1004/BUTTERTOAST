@@ -18,6 +18,7 @@
 - Run `npm test` for relevant code changes. `npm run test:electron` exercises real Electron against local malicious fixtures and requires OpenSSL and an operational Chromium sandbox. Never add a sandbox-disabling switch.
 - `npm run test:toastir` exercises the isolated DOM mapping, document-bound approvals and AI-task storage separation in real Electron. Keep Action protocol and operational document versions aligned.
 - Run `npm run test:browser` for tab lifecycle, session restore, responsiveness or privacy changes. This uses local fixtures and an operational Chromium sandbox; see `docs/CHROMIUM-IMPROVEMENTS.md` for limits.
+- Run `npm run test:extended` for security boundary/launch policy changes; `npm run test:security` runs the complete local security suite. See `docs/EXPANDED-SECURITY-REVIEW.md` for advisory, scanner and coverage limits.
 - Use `npm run audit:deps`, `npm run scan:secrets` and `npm run sbom` when dependency or release changes warrant them. Check scanner and audit limitations in SECURITY.md.
 - `npm run package:win` builds an unsigned Windows x64 test folder and verifies its payload, PE architecture, fuses and embedded ASAR hash. Code signing and Windows execution remain separate checks.
 - Keep generated binaries, node_modules, profiles and credentials out of Git.

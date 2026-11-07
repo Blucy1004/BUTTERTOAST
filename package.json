@@ -14,7 +14,9 @@
     "sbom": "node scripts/sbom.cjs",
     "package:win": "npm run build && npm run sbom && node scripts/package-windows.mjs",
     "test:toastir": "npm run build && node scripts/test-toastir.cjs",
-    "test:browser": "npm run build && node scripts/test-browser.cjs"
+    "test:browser": "npm run build && node scripts/test-browser.cjs",
+    "test:extended": "npm run build && node scripts/test-extended.cjs",
+    "test:security": "npm test && node scripts/test-electron.cjs && node scripts/test-toastir.cjs && node scripts/test-browser.cjs && node scripts/test-extended.cjs && npm run audit:deps && npm run scan:secrets"
   },
   "devDependencies": {
     "@electron/asar": "4.3.1",

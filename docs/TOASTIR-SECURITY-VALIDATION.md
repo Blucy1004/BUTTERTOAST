@@ -60,3 +60,7 @@
 아직 실제 모델, 제품의 승인·작업 UI, 전체 AX 구조, iframe/shadow DOM, 바이너리 IR와 모든 행동이 연결된 제품은 아니다. controller의 grant/approval callback은 신뢰된 host API이며 웹 IPC로 공개하면 안 된다. 사이트의 표시 이름도 여전히 비신뢰 데이터다. 폼·숨김 값 필터가 페이지에 표시된 모든 비밀을 알아내지는 못한다.
 
 CLICK의 Node 동일성과 상태 검사는 임의 페이지 event handler의 의미나 서버의 전송/결제 결과까지 증명하지 않는다. 이미 Chromium에 전달한 행동을 소급 취소하지 못한다. 네이티브 Chromium 취약점이나 모든 프롬프트 인젝션 방어를 주장하지 않는다. 같은 사람 프로필의 정상 동일 출처 저장소 공유는 의도된 브라우저 동작이며 유출로 분류하지 않았다.
+
+## 같은 날 확대 검사
+
+이후 [확대 보안 검사](EXPANDED-SECURITY-REVIEW.md)에서 이 suite를 19개 그룹으로 늘려 모두 통과했다. IndexedDB 및 CacheStorage의 사람/AI·AI 작업 간 분리와, 종료한 AI 세션의 쿠키/localStorage/IndexedDB/CacheStorage 정리를 실제 Electron으로 추가 확인했다. 같은 사람 세션에서는 데이터가 공유되는 양성 대조군도 사용했다.
