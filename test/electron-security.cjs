@@ -1,0 +1,97 @@
+// Test-only harness: never imported into the shipped application.
+const { app, BrowserWindow, webContents, session } = require('electron');
+const assert = require('node:assert/strict');
+const http = require('node:http');
+const https = require('node:https');
+const { execFileSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'bt-e2e-'));
+app.setPath('userData', profile);
+let server, tlsServer;
+const timeout = setTimeout(() => { console.error('FAIL: E2E timeout'); app.exit(1); }, 45000);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn) { for(let i=0;i<150;i++){if(await fn())return;await wait(50)}throw Error('Condition did not become true'); }
+const appRoot=path.resolve(process.env.BUTTERTOAST_TEST_APP || path.join(__dirname,'..'));
+require(path.join(appRoot,'dist/main.js'));
+app.whenReady().then(async()=>{
+  const win=BrowserWindow.getAllWindows()[0];
+  await until(()=>win.webContents.getURL()==='toast-ui://app/index.html' && !win.webContents.isLoading());
+  const ui=win.webContents;
+  await until(async()=>await ui.executeJavaScript('!!window.browser'));
+  const content=webContents.getAllWebContents().find(w=>w.id!==ui.id);
+  assert.ok(content);
+  const prefs=content.getLastWebPreferences();assert.equal(prefs.sandbox,true);assert.equal(prefs.nodeIntegration,false);assert.equal(prefs.contextIsolation,true);assert.equal(prefs.webSecurity,true);
+  console.log('PASS sandbox and isolation preferences');
+  const malicious='<title>&lt;img src=x onerror=alert(1)&gt;</title><script>window.open("file:///etc/passwd");window.parent.postMessage({type:"navigate",address:"file:///etc/passwd"},"*")</script><a id="file" href="file:///etc/passwd">file</a><a id="download" href="/evil.exe" download>download</a>';
+  server=http.createServer((req,res)=>{if(req.url==='/evil.exe'){res.writeHead(200,{'Content-Disposition':'attachment; filename="evil.exe"'});res.end('not-an-executable');}else{res.setHeader('Content-Type','text/html');res.end(malicious)}});
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const url=`http://127.0.0.1:${server.address().port}/`;
+  await ui.executeJavaScript(`window.browser.command({type:'navigate',address:${JSON.stringify(url)}})`);
+  await until(()=>content.getURL()===url && !content.isLoading());
+  assert.deepEqual(await content.executeJavaScript('[typeof require,typeof process,typeof browser]'),['undefined','undefined','undefined']);
+  assert.equal(BrowserWindow.getAllWindows().length,1);
+  console.log('PASS hostile page has no Node/bridge; popup denied');
+  await content.executeJavaScript('document.getElementById("file").click()');await wait(150);assert.equal(content.getURL(),url);
+  assert.equal(await ui.executeJavaScript('document.querySelectorAll("#tabs img").length'),0);
+  console.log('PASS local file navigation and title HTML injection blocked');
+  assert.equal(await content.executeJavaScript('navigator.permissions.query({name: "geolocation"}).then(p=>p.state)'), 'denied');
+  assert.equal(await content.executeJavaScript('Notification.requestPermission()'), 'denied');
+  console.log('PASS site permissions denied');
+  // Verify actual cancellation, not just listener registration.
+  let downloadPrevented=false;
+  content.session.once('will-download',event=>{downloadPrevented=event.defaultPrevented});
+  await content.executeJavaScript('document.getElementById("download").click()');
+  await until(()=>downloadPrevented);
+  console.log('PASS malicious attachment download canceled');
+  await content.executeJavaScript(`new Promise(resolve=>{const f=document.createElement('iframe');f.src='http://localhost:${server.address().port}/';f.onload=resolve;document.body.append(f)})`);
+  await until(()=>content.mainFrame.frames.length>0 && content.mainFrame.frames[0].url.startsWith('http://localhost:'));
+  assert.notEqual(content.mainFrame.processId,content.mainFrame.frames[0].processId);
+  console.log('PASS cross-site iframe runs in a different renderer process');
+  const before=await ui.executeJavaScript('document.querySelectorAll(".tab").length');
+  await ui.executeJavaScript('window.browser.command({type:"new",approved:true})');await wait(100);
+  assert.equal(await ui.executeJavaScript('document.querySelectorAll(".tab").length'),before);
+  console.log('PASS malformed privileged IPC rejected');
+  const attacker=new BrowserWindow({show:false,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false,preload:path.join(__dirname,'fixtures/forged-preload.cjs'),session:ui.session}});
+  await attacker.loadURL('toast-ui://app/index.html');await wait(100);
+  assert.equal(await ui.executeJavaScript('document.querySelectorAll(".tab").length'),before);assert.equal(content.getURL(),url);attacker.destroy();
+  console.log('PASS same-URL foreign renderer cannot impersonate shell IPC');
+  for(const blocked of ['toast-ui://app/package.json','toast-ui://app/%2e%2e/package.json','toast-ui://evil/index.html']){
+    await assert.rejects(ui.session.fetch(blocked));
+  }
+  await assert.rejects(ui.session.fetch(url));
+  console.log('PASS UI asset allowlist and outbound network restriction');
+  content.forcefullyCrashRenderer();
+  await until(async()=> (await ui.executeJavaScript('document.getElementById("message").textContent')).includes('탭 프로세스가 종료'));
+  await ui.executeJavaScript(`window.browser.command({type:'navigate',address:${JSON.stringify(url)}})`);
+  await until(()=>content.getURL()===url && !content.isLoading() && !content.isCrashed());
+  assert.deepEqual(await content.executeJavaScript('[typeof require,typeof browser]'),['undefined','undefined']);
+  console.log('PASS renderer crash reported; navigation recovers with isolation intact');
+  const certDir=fs.mkdtempSync(path.join(os.tmpdir(),'bt-tls-'));
+  const cert=path.join(certDir,'cert.pem'), key=path.join(certDir,'key.pem');
+  execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',key,'-out',cert,'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1'],{stdio:'ignore'});
+  let served=0;
+  tlsServer=https.createServer({key:fs.readFileSync(key),cert:fs.readFileSync(cert)},(_req,res)=>{served++;res.end('must not load')});
+  await new Promise(resolve=>tlsServer.listen(0,'127.0.0.1',resolve));
+  await assert.rejects(content.loadURL(`https://127.0.0.1:${tlsServer.address().port}/`),/ERR_CERT_AUTHORITY_INVALID/);
+  assert.equal(served,0);tlsServer.close();fs.rmSync(certDir,{recursive:true,force:true});
+  console.log('PASS invalid TLS certificate rejected before document request');
+  const { KeyVault }=require(path.join(appRoot,'dist/security/vault'));
+  const { osCipher }=require(path.join(appRoot,'dist/security/os-cipher'));
+  const vault=new KeyVault(path.join(profile,'keys'),osCipher);
+  if(process.platform==='win32') assert.equal(await osCipher.available(),true,'Windows DPAPI must be available');
+  if(await osCipher.available()) {
+    await vault.set('openai','local-test-only-key');assert.equal(await vault.get('openai'),'local-test-only-key');
+    assert.equal(fs.readFileSync(path.join(profile,'keys/openai.key')).includes('local-test-only-key'),false);
+    await vault.delete('openai');console.log('PASS actual OS encryption round trip and key deletion');
+  } else {
+    await assert.rejects(vault.set('openai','local-test-only-key'),/unavailable/);
+    console.log('PASS unavailable OS storage rejected (OS encryption round trip NOT RUN)');
+  }
+  // A normal user command still works after attack probes.
+  await ui.executeJavaScript('window.browser.command({type:"new"})');
+  await until(async()=>await ui.executeJavaScript('document.querySelectorAll(".tab").length')===before+1);
+  console.log('PASS legitimate tab creation after rejected attacks');
+  clearTimeout(timeout);server.close();win.destroy();app.exit(0);
+}).catch(error=>{console.error('FAIL:',error);clearTimeout(timeout);server?.close();tlsServer?.close();app.exit(1)});
