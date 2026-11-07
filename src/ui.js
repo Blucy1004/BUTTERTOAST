@@ -2,6 +2,7 @@
 const send = (type, extra = {}) => window.browser.command({ type, ...extra });
 const renderToolbar = window.initToolbar(send);
 let current;
+document.getElementById('ai-toggle').onclick = () => send('ai-toggle');
 document.getElementById('account-open').onclick = () => send('account-open');
 document.getElementById('new').onclick = () => send('new');
 document.getElementById('reopen').onclick = () => send('reopen');
@@ -11,6 +12,7 @@ for (const [id, delta] of [['move-left', -1], ['move-right', 1]]) {
 window.browser.onState(state => {
   document.getElementById('account-open').disabled = !state.initialized;
   document.getElementById('account-open').textContent = state.accountSignedIn ? '계정' : '로그인';
+  document.getElementById('ai-toggle').disabled = !state.initialized;
   current = state; window.renderTabs(state, send); renderToolbar(state);
   document.getElementById('new').disabled = !state.initialized || state.tabs.length >= 30;
   document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= 30;

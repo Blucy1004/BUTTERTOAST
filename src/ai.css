@@ -1,0 +1,28 @@
+/* Temporary, replaceable components. Final design is supplied by the project owner. */
+* { box-sizing: border-box; }
+body { margin: 0; font: var(--font); color: var(--text); background: var(--surface); height: 100vh; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+header, footer { padding: var(--spacing); background: var(--chrome); flex: none; }
+header, .row { display: flex; align-items: center; gap: var(--spacing); }
+header strong { flex: 1; }
+main { overflow: auto; min-height: 0; flex: 1; padding: var(--spacing); }
+button, input, select, textarea { font: inherit; color: inherit; border: 1px solid var(--border); border-radius: var(--radius); padding: var(--spacing); background: var(--surface); }
+button { cursor: pointer; white-space: nowrap; }
+button:hover { background: var(--hover); } button:disabled { opacity: .45; cursor: default; }
+input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; }
+label { display: block; margin: var(--spacing) 0; }
+.check { display: flex; align-items: center; gap: var(--spacing); }
+.row { margin: var(--spacing) 0; flex-wrap: wrap; } .row input { flex: 1; min-width: 120px; }
+summary { cursor: pointer; padding: var(--spacing) 0; }
+details { border-bottom: 1px solid var(--border); padding-bottom: var(--spacing); }
+.hint { font-size: var(--small-font); line-height: 1.5; }
+p { overflow-wrap: anywhere; } pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+#context-preview { max-height: 180px; overflow: auto; border: 1px solid var(--border); padding: var(--spacing); }
+#context-origin { overflow-wrap: anywhere; min-width: 0; }
+.message { border-bottom: 1px solid var(--border); padding: var(--spacing) 0; }
+.message p { white-space: pre-wrap; margin: var(--spacing) 0; line-height: 1.5; }
+#proposal { padding: var(--spacing); border: 1px solid var(--border); }
+#ai-message { font-size: var(--small-font); min-height: 1.5em; }
+textarea { resize: vertical; min-height: 60px; max-height: 160px; }
+[hidden] { display: none !important; }
+
+@media (max-height: 480px) { body { display: block; height: auto; } main { overflow: visible; } }

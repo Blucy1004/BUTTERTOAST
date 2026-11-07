@@ -26,7 +26,19 @@ export function installToastRuntime(documentId: string): void {
       form?.getAttribute('action'), form?.getAttribute('method'), visible, enabled, sensitive]);
     return { role, name, visible, enabled, sensitive, fingerprint, actions: sensitive ? [] : ['READ', 'EXTRACT', 'VERIFY', 'CLICK'] };
   }
-  function capture() {
+  function readVisibleText(): string {
+    const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
+    const excluded = 'script,style,noscript,template,input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private],[hidden],[aria-hidden="true"],[inert]';
+    const parts: string[] = []; let length = 0, visited = 0;
+    while (walker.nextNode() && visited++ < 10000 && length < 12000) {
+      const parent = walker.currentNode.parentElement;
+      if (!parent || parent.closest(excluded) || !parent.checkVisibility({ opacityProperty: true, visibilityProperty: true, contentVisibilityAuto: true })) continue;
+      const text = (walker.currentNode.textContent || '').replace(/\s+/g, ' ').trim();
+      if (text) { const bounded = text.slice(0, 12000 - length); parts.push(bounded); length += bounded.length + 1; }
+    }
+    return parts.join('\n').slice(0, 12000);
+  }
+  function capture(includeText = false) {
     flush();
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('button,a[href],input,textarea,select')).slice(0, 500);
     const fresh = new Map<string, Entry>();
@@ -39,7 +51,7 @@ export function installToastRuntime(documentId: string): void {
     const signature = JSON.stringify(elements);
     if (signature !== previous) { version++; previous = signature; }
     entries = fresh;
-    return { document: documentId, version, origin: location.origin, elements };
+    return { document: documentId, version, origin: location.origin, elements, text: includeText ? readVisibleText() : '' };
   }
   function perform(action: { document: string; version: number; target: string; op: string; value: string }) {
     flush();

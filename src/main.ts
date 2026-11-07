@@ -9,6 +9,7 @@ import { TabSessionStore } from './browser/session-store';
 import { installPrivacy } from './browser/privacy';
 import { resolveAddress } from './policy';
 import { AccountWindow } from './auth/window';
+import { AiPanel } from './ai/panel';
 
 assertSafeLaunch();
 app.enableSandbox();
@@ -21,8 +22,10 @@ let store: TabSessionStore;
 let privacy: ReturnType<typeof installPrivacy>;
 let initialized = false;
 let account: AccountWindow;
+let ai: AiPanel;
 function emitState(): void {
   if (!window || window.isDestroyed() || !tabs) return;
+  ai?.observe();
   const state = tabs.state();
   window.webContents.send('browser:state', { ...state, initialized, accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
@@ -60,6 +63,7 @@ ipcMain.on('browser:command', (event, input: unknown) => {
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'ai-toggle': ai.toggle(); break;
     case 'account-open': account.open(); break;
     case 'new': tabs.newTab(); focusAddress(); break;
     case 'select': tabs.select(cmd.id); break;
@@ -99,8 +103,9 @@ app.whenReady().then(async () => {
   account = new AccountWindow(window, emitState);
   store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
   tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { void store.save(snapshot); }, input: keyboard });
-  window.on('resize', () => tabs.layout());
-  window.on('closed', () => { initialized = false; account.dispose(); tabs.dispose(); });
+  ai = new AiPanel(window, tabs);
+  window.on('resize', () => ai.layout());
+  window.on('closed', () => { initialized = false; account.dispose(); ai.dispose(); tabs.dispose(); });
   void window.loadURL(UI_URL);
   const saved = await store.load();
   if (window.isDestroyed()) return;

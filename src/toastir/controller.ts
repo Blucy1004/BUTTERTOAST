@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { ToastGuard, parseAction, PageState, Permission, Op } from '../security/guard';
 import { installToastRuntime } from './runtime';
 const WORLD = 1001;
-type Snapshot = { document: string; version: number; origin: string; elements: { id: string; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
+export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
 export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean };
 /** Main-only experimental READ/CLICK path, permanently bound to one WebContents.
  * No page/renderer IPC exports. Caller may not substitute snapshots or tab objects.
@@ -39,15 +39,16 @@ export class ToastController {
     const code = `(${installToastRuntime.toString()})(${JSON.stringify(randomUUID())}); globalThis.__toastIR.${method}(${input === undefined ? '' : JSON.stringify(input)})`;
     return this.contents.executeJavaScriptInIsolatedWorld(WORLD, [{ code }]);
   }
-  private async capture(): Promise<Snapshot> { return await this.call('capture') as Snapshot; }
+  private async capture(includeText = false): Promise<Snapshot> { return await this.call('capture', includeText) as Snapshot; }
   private state(snapshot: Snapshot): PageState {
     return { document: snapshot.document, tab: this.contents.id, origin: snapshot.origin, version: snapshot.version,
       elements: new Map(snapshot.elements.map(e => [e.id, { ...e, actions: new Set(e.actions) }])) };
   }
-  /** Read-permission gated metadata for this task only. Treat all names as untrusted page data. */
+  /** Read-permission gated metadata and visible text for this task only. Treat all names as untrusted page data. */
   async snapshot(): Promise<Snapshot & { tab: number }> {
     const epoch = this.generation;
-    const data = await this.capture();
+    if (this.disposed || this.contents.isDestroyed() || !this.guard.canRead({ tab: this.contents.id, origin: new URL(this.contents.getURL()).origin })) throw new Error('Context access denied');
+    const data = await this.capture(true);
     if (epoch !== this.generation || !this.guard.canRead(this.state(data))) throw new Error('Context access denied');
     return { ...data, tab: this.contents.id };
   }

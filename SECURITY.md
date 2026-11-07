@@ -18,11 +18,11 @@
 
 `ToastGuard`는 프로토콜 v2 행동의 명시적 스키마, 단일 탭/HTTPS origin 범위, 문서 고유 ID 및 신뢰된 스냅샷 버전과 대상 상태를 검사한다. 가시성·활성 상태·민감정보 표시를 확인하며 기본적으로 권한을 거부한다. CLICK은 결과를 안전하게 분류할 수 없으므로 write/transmit/delete/pay 권한과 행동별 명시적 승인 모두를 요구한다. FILL/SELECT/NAVIGATE도 해당 권한과 정확한 행동의 일회성 승인이 필요하다. 승인은 단조 시계로 30초 만료, 문서/버전과 인자에 결합되며 32개로 제한한다. 최대 512개 작업 ID 및 실패를 포함한 1024회 시도 제한, 중복 실행 거부, 한 번에 하나의 실행 lease, AbortSignal 중단을 제공한다.
 
-Guard와 연결된 최소 DOM 수집·실행 경로를 추가했다. `ToastController`는 하나의 WebContents에 고정되어 read 범위 없이 스냅샷을 반환하지 않고, 외부 스냅샷을 받지 않는다. isolated world에서 실제 Node를 ID에 연결하며 DOM mutation과 문서 교체, 직전 대상 상태를 검증한다. CLICK/READ/EXTRACT/VERIFY만 실험적으로 지원한다. 모델과 승인 UI에는 아직 노출되지 않았다. 상세 제한은 `TOASTIR.md`와 `docs/TOASTIR-SECURITY-VALIDATION.md`에 있다.
+Guard와 연결된 최소 DOM 수집·실행 경로를 추가했다. `ToastController`는 하나의 WebContents에 고정되어 read 범위 없이 스냅샷을 반환하지 않고, 외부 스냅샷을 받지 않는다. isolated world에서 실제 Node를 ID에 연결하며 DOM mutation과 문서 교체, 직전 대상 상태를 검증한다. CLICK/READ/EXTRACT/VERIFY만 실험적으로 지원한다. 단일 CLICK은 모델 제안과 네이티브 승인 UI에 연결했고, 나머지 실행 범위는 아래 AI 연결 기록을 참조한다. 상세 제한은 `TOASTIR.md`와 `docs/TOASTIR-SECURITY-VALIDATION.md`에 있다.
 
 `createAiTask`는 작업마다 별도 메모리 세션을 생성하며 종료 시 저장소를 비운다. 사람 탭의 정상적인 동일 출처 저장소 공유는 유지한다. 실제 Electron 테스트에서 사람→AI 및 AI 작업 간 쿠키/localStorage 분리를 확인했다. 스냅샷에서 form 값과 숨김 라벨은 제외하지만 페이지에 표시된 모든 비밀을 자동 판별하지는 않는다. 임의 페이지 스크립트의 click 후 부수효과도 증명하지 않는다.
 
-`KeyVault`는 Electron의 비동기 OS 보호 저장소 어댑터를 사용한다. Windows에서는 Electron이 제공하는 DPAPI를 사용하며 Linux `basic_text`와 저장소 불가 상태는 거부한다. 제공사 이름은 고정 목록이고 저장 파일에는 암호문만 쓴다. 임시 파일·원자적 rename과 작업 직렬화로 키 교체/삭제 경합을 방지한다. 복호화 오류에는 비밀 값과 원본 오류를 포함하지 않는다. 키 저장 UI/IPC와 제공사 호출은 아직 없다. Linux에서 실제 OS 암호화 사용 불가 시의 거부 동작만 검증했으며 Windows DPAPI 왕복은 CI에서 검증하도록 구성했다. 동일 OS 사용자나 이미 장악된 메인 프로세스에 대한 키 비밀성은 보장하지 않는다.
+`KeyVault`는 Electron의 비동기 OS 보호 저장소 어댑터를 사용한다. Windows에서는 Electron이 제공하는 DPAPI를 사용하며 Linux `basic_text`와 저장소 불가 상태는 거부한다. 제공사 이름은 고정 목록이고 저장 파일에는 암호문만 쓴다. 임시 파일·원자적 rename과 작업 직렬화로 키 교체/삭제 경합을 방지한다. 복호화 오류에는 비밀 값과 원본 오류를 포함하지 않는다. 키 저장 UI/IPC와 OpenAI·Claude·OpenAI 호환 호출을 추가했으며 범위와 미검증 항목은 아래 AI 연결 기록을 참조한다. Linux에서 실제 OS 암호화 사용 불가 시의 거부 동작만 검증했으며 Windows DPAPI 왕복은 CI에서 검증하도록 구성했다. 동일 OS 사용자나 이미 장악된 메인 프로세스에 대한 키 비밀성은 보장하지 않는다.
 
 `verifyUpdate`는 Node 표준 Ed25519 서명과 SHA-256을 사용해 고정된 게시자 공개키, 정확한 manifest 필드, HTTPS origin, 크기, 만료 및 버전 상승을 검증한다. 변조된 manifest/서명/파일과 rollback을 거부한다. 현재 다운로드·설치·실행은 하지 않는다. 실제 게시자 키, Windows 코드 서명, 서명된 패키지와 자동 업데이트 전달 경로는 아직 없다. 공개키와 업데이트 origin을 다운로드 응답에서 가져오면 안 된다. 실제 설치까지 파일 바뀜을 방지하는 처리 역시 필요하다.
 
@@ -33,8 +33,8 @@ lockfile을 저장하며 `npm ci`, 취약점 검사, CycloneDX SBOM 생성과 �
 ## 남은 보안 작업
 
 - 전체 ToastIR/실행기 및 모델/제품 UI 연결, 접근성·iframe·shadow DOM·추가 행동의 공격 회귀
-- 분리된 AI 세션을 실제 협업 UI에 연결, 신뢰된 승인·제어권 회수 UI와 감사 이력
-- 모델 제공사 통신 및 모델로 보내는 데이터 최소화, 오류·로그 비밀 제거의 실제 경로 검증
+- 단일 승인 클릭을 넘어서는 여러 AI 협업, 세분화된 제어권 인계와 영속 감사 이력
+- 유효한 제공사 키를 사용하는 실제 모델 응답 및 복잡한 웹사이트에서의 데이터 최소화·도구 정확도 검증
 - Windows 실제 실행과 DPAPI, 코드 서명, 안전한 업데이트 설치·복구
 - 양자내성 TLS 협상 결과 확인 및 표시. 지금 UI의 HTTPS 표시는 프로토콜만 뜻한다.
 - 사이트 권한 세분화와 안전한 다운로드 허용, 자원 고갈·장기 실행·충돌 복구 확대 검사
@@ -43,4 +43,8 @@ lockfile을 저장하며 `npm ci`, 취약점 검사, CycloneDX SBOM 생성과 �
 
 ## Supabase 계정
 
-이메일 가입·로그인·로그아웃과 별도 계정 창을 구현했다. 공개 publishable 식별자만 소스에 포함하고 비밀번호/사용자 토큰은 영속 저장하지 않는다. 인증 요청과 토큰은 메인 프로세스의 전용 네트워크 세션에 두고, PKCE 코드·계정 바인딩, 정확한 IPC 발신자, 세션 만료 및 로그아웃 경쟁을 검사한다. `npm run test:account`를 전체 보안 회귀와 CI에 추가했다. 로컬 검증 결과와 실제 서버/메일/Windows 미검증 범위는 [계정 연결 기록](docs/SUPABASE-SETUP.md)을 참조한다.
+이메일 가입·로그인·로그아웃과 별도 계정 창을 구현했다. 공개 publishable 식별자만 소스에 포함하고 비밀번호/사용자 토큰은 영속 저장하지 않는다. 인증 요청과 토큰은 메인 프로세스의 전용 네트워크 세션에 두고, PKCE 코드·계정 바인딩, 정확한 IPC 발신자, 세션 만료 및 로그아웃 경쟁을 검사한다. `npm run test:account`를 전체 보안 회귀와 CI에 추가했다. 로컬·실서버 검증 결과와 실제 PC의 PKCE 콜백 및 Windows 미검증 범위는 [계정 연결 기록](docs/SUPABASE-SETUP.md)을 참조한다.
+
+## AI 연결
+
+교체 가능한 AI 패널, 메인 전용 키/대화 서비스, 고정 또는 사용자 지정 호환 API 어댑터, 명시적 페이지 공유 및 별도 AI 작업 창을 추가했다. 네이티브 승인 전에는 모델의 클릭 제안을 실행하지 않는다. 페이지/탭 전환, 요소 교체, 중단·지연 응답과 키 삭제 경쟁을 검사한다. `npm run test:ai`를 CI와 전체 보안 회귀에 포함했다. [기능 범위와 검증](docs/AI-CONNECTION.md)에서 실제 제공사 키/로컬 모델 미검증을 구분한다.

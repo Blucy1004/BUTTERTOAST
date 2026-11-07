@@ -58,9 +58,12 @@ export class BrowserTabs {
       this.active = this.tabs[saved.active].id; this.changed();
     } else this.newTab();
   }
+  private reservedWidth = 0;
+  reservePanel(width: number): void { this.reservedWidth = Math.max(0, Math.min(480, width)); this.layout(); }
+  activeContents(): WebContents | undefined { return this.current()?.view?.webContents; }
   layout(): void {
     const [width, height] = this.window.getContentSize();
-    for (const tab of this.tabs) tab.view?.setBounds({ x: 0, y: 116, width, height: Math.max(0, height - 116) });
+    for (const tab of this.tabs) tab.view?.setBounds({ x: 0, y: 116, width: Math.max(0, width - this.reservedWidth), height: Math.max(0, height - 116) });
   }
   private attach(tab: Tab): void {
     if (tab.view || this.disposed) return;

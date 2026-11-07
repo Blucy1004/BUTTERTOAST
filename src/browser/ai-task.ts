@@ -14,7 +14,7 @@ export function createAiTask() {
     view, controller,
     async close() {
       controller.dispose();
-      if (!view.webContents.isDestroyed()) view.webContents.close();
+      if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
       await taskSession.clearStorageData(); await taskSession.clearCache();
     }
   };

@@ -20,6 +20,7 @@
 - Run `npm run test:browser` for tab lifecycle, session restore, responsiveness or privacy changes. This uses local fixtures and an operational Chromium sandbox; see `docs/CHROMIUM-IMPROVEMENTS.md` for limits.
 - Run `npm run test:extended` for security boundary/launch policy changes; `npm run test:security` runs the complete local security suite. See `docs/EXPANDED-SECURITY-REVIEW.md` for advisory, scanner and coverage limits.
 - Run `npm run test:account` for account UI, IPC, Supabase transport and session changes. Use local fixtures; never disable sandboxing/TLS or commit user passwords/tokens. See `docs/SUPABASE-SETUP.md` for the public client configuration and live validation limits.
+- Run `npm run test:ai` for AI panel, key/endpoint management, adapters, shared context or approved actions. Never use live keys in fixtures. See `docs/AI-CONNECTION.md` for supported operations and live-model validation limits.
 - Use `npm run audit:deps`, `npm run scan:secrets` and `npm run sbom` when dependency or release changes warrant them. Check scanner and audit limitations in SECURITY.md.
 - `npm run package:win` builds an unsigned Windows x64 test folder and verifies its payload, PE architecture, fuses and embedded ASAR hash. Code signing and Windows execution remain separate checks.
 - Keep generated binaries, node_modules, profiles and credentials out of Git.

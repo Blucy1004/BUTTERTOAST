@@ -1,2 +1,2 @@
 const fs = require('node:fs');
-for (const name of ['index.html', 'ui.js', 'tabs.js', 'toolbar.js', 'style.css', 'tokens.css', 'account.html', 'account.css', 'account.js']) fs.copyFileSync(`src/${name}`, `dist/${name}`);
+for (const name of ['index.html', 'ui.js', 'tabs.js', 'toolbar.js', 'style.css', 'tokens.css', 'account.html', 'account.css', 'account.js', 'ai.html', 'ai.css', 'ai.js', 'ai-settings.js']) fs.copyFileSync(`src/${name}`, `dist/${name}`);
