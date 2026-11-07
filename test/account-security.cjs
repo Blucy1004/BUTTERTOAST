@@ -12,7 +12,7 @@ const deadline = setTimeout(()=>{console.error('FAIL account timeout');app.exit(
 const calls = []; let groups=0, server;
 const pass = name => {groups++;console.log('PASS',name)};
 const email = 'owner@example.test';
-const access = 'fixture_access_token_RAM_only', refresh = 'fixture_refresh_token_RAM_only';
+const access = 'fixture_access_token_RAM_only', refresh = 'fixture_rt12';
 const payload = () => ({access_token:access,refresh_token:refresh,token_type:'bearer',expires_in:3600,user:{id:'11111111-1111-4111-8111-111111111111',email,email_confirmed_at:'2026-11-07T00:00:00Z'}});
 require('../dist/main');
 app.whenReady().then(async()=>{

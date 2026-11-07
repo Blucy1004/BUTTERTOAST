@@ -8,7 +8,7 @@ const { AuthService } = require('../dist/auth/service');
 const { ConfirmationListener } = require('../dist/auth/confirmation');
 const config = parseAuthConfig('https://abcdefghijklmnopqrst.supabase.co', 'sb_publishable_local_test_fixture_1234');
 const email = 'owner@example.test';
-const payload = (extra = {}) => ({ access_token: 'fixture_access_value_only', refresh_token: 'fixture_refresh_value_only', expires_in: 3600, token_type: 'bearer', user: { id: '11111111-1111-4111-8111-111111111111', email, email_confirmed_at: '2026-11-07T00:00:00Z' }, ...extra });
+const payload = (extra = {}) => ({ access_token: 'fixture_access_value_only', refresh_token: 'fixture_rt12', expires_in: 3600, token_type: 'bearer', user: { id: '11111111-1111-4111-8111-111111111111', email, email_confirmed_at: '2026-11-07T00:00:00Z' }, ...extra });
 function harness(handler) {
   let now = Date.now(), callback, closed = 0;
   const states = [], calls = [];
@@ -50,7 +50,7 @@ test('signup binds PKCE proof and email, never exposes tokens in public state', 
     const verifier=h.calls[1][1].code_verifier;
     assert.equal(createHash('sha256').update(verifier).digest('base64url'),request[1].code_challenge);
     assert.equal(h.service.publicState().status,'signed-in');assert.ok(h.closed());
-    const json=JSON.stringify(h.states);for(const value of ['fixture_access','fixture_refresh',verifier,'fixture-password']) assert.equal(json.includes(value),false);
+    const json=JSON.stringify(h.states);for(const value of ['fixture_access',payload().refresh_token,verifier,'fixture-password']) assert.equal(json.includes(value),false);
     await h.service.command({type:'logout'});assert.equal(h.service.publicState().status,'signed-out');
     assert.equal(h.calls.at(-1)[3],'?scope=local');
   } finally {h.service.dispose()}
@@ -118,4 +118,11 @@ test('email wait expires and closes receiver; a disposed service ignores late wo
   try{await h.service.command({type:'signup',email,password:'fixture-password'});t.mock.timers.tick(3600000);assert.equal(h.service.publicState().status,'signed-out');assert.ok(h.closed());assert.equal(await h.confirm('late-confirmation'),false)}finally{h.service.dispose()}
   let resolve;const delayed=harness(()=>new Promise(r=>resolve=r));
   const task=delayed.service.command({type:'login',email,password:'fixture-password'});delayed.service.dispose();resolve(payload());await task;assert.notEqual(delayed.service.publicState().status,'signed-in');
+});
+
+test('opaque 12-character Supabase refresh tokens are accepted; malformed values stay rejected', () => {
+  const token = 'fixture_rt12';
+  assert.equal(token.length, 12);
+  assert.equal(parseAuthSession(payload({refresh_token:token}),email).refresh, token);
+  for (const refresh_token of ['', ' ', '\n', 'fixture\nrt12', 'x'.repeat(4097), null, 123]) assert.throws(() => parseAuthSession(payload({refresh_token}),email));
 });
