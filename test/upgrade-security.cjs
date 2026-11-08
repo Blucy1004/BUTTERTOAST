@@ -32,8 +32,11 @@ app.whenReady().then(async()=>{
  await menu(first,'탭 고정');assert.equal((await shell()).tabs[0].pinned,true);
  await menu(first,'탭 음소거');assert.equal(human.isAudioMuted(),true);
  await menu(first,'탭 복제 (주소만)');
- await until(async()=>(await shell()).tabs.length===2&&!webContents.getAllWebContents().some(w=>w.getURL()==='https://upgrade.test/page'&&w.isLoading()),'duplicate page');
- const duplicate=webContents.getAllWebContents().find(w=>w!==human&&w.getURL()==='https://upgrade.test/page');
+ let duplicate;
+ await until(async()=>{
+   duplicate=webContents.getAllWebContents().find(w=>w!==human&&w.session===human.session&&w.getURL()==='https://upgrade.test/page');
+   return (await shell()).tabs.length===2&&duplicate&&!duplicate.isLoading()&&await duplicate.executeJavaScript('document.readyState==="complete"&&!!document.getElementById("draft")');
+ },'duplicate page commits and finishes loading');
  assert.ok(duplicate);assert.equal(await human.executeJavaScript('document.getElementById("draft").value'),'KEEP_ORIGINAL');assert.equal(await duplicate.executeJavaScript('document.getElementById("draft").value'),'');assert.equal(duplicate.isAudioMuted(),true);
  assert.equal(requests.at(-1).method,'GET');assert.equal((await shell()).tabs[1].pinned,false);
  await send({type:'move',id:(await shell()).active,delta:-1});await wait(50);assert.equal((await shell()).tabs[0].id,first);
