@@ -2,8 +2,9 @@ import { Session } from 'electron';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 export const UI_URL = 'toast-ui://app/index.html';
-export const UI_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; connect-src 'none'";
+export const UI_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; connect-src 'none'";
 const files = new Map([
+  ['/workspace.js', 'text/javascript'], ['/starfield.png', 'image/png'], ['/cursor.html', 'text/html'], ['/cursor.css', 'text/css'],
   ['/manager.html', 'text/html'], ['/manager.css', 'text/css'], ['/manager.js', 'text/javascript'],
   ['/index.html', 'text/html'], ['/style.css', 'text/css'], ['/ui.js', 'text/javascript'],
   ['/ai.html', 'text/html'], ['/ai.js', 'text/javascript'], ['/ai.css', 'text/css'], ['/ai-settings.js', 'text/javascript'],

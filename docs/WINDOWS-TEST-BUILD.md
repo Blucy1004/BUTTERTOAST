@@ -4,7 +4,7 @@
 
 ## 실행 파일
 
-- GitHub 다운로드: [v0.1.0-dev.1 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.1)의 Assets. `Source code` 대신 `ButterToast-0.1.0-Setup-x64.exe` 또는 `ButterToast-0.1.0-Windows-x64.zip`을 선택한다. 비공개 저장소 접근 권한이 있는 계정으로 로그인해야 한다.
+- GitHub 다운로드: [v0.1.0-dev.2 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.2)의 Assets. `Source code` 대신 `ButterToast-0.1.0-Setup-x64.exe` 또는 `ButterToast-0.1.0-Windows-x64.zip`을 선택한다. 비공개 저장소 접근 권한이 있는 계정으로 로그인해야 한다.
 - 설치 프로그램: `artifacts/ButterToast-0.1.0-Setup-x64.exe`
 - 포터블 실행 파일: `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`
 

@@ -1,0 +1,2 @@
+html,body { margin: 0; width: 44px; height: 44px; overflow: hidden; background: transparent; pointer-events: none; }
+i { display: block; width: 12px; height: 12px; margin: 10px; border-radius: 50%; background: #dcecff; border: 2px solid #378bff; box-shadow: 0 0 0 5px #368cff44, -7px -4px 0 2px #368cff35, -13px -8px 0 0 #368cff20; }

@@ -1,16 +1,22 @@
 # ButterToast
 
-Chromium 기반 AI 협업 브라우저의 개발 버전입니다. 핵심 기능과 보안을 우선하며 최종 UI/UX는 프로젝트 오너의 명세로 결정합니다. 현재 화면은 기능 검증용 임시 컴포넌트입니다.
+Chromium 기반 AI 협업 브라우저의 개발 버전입니다. 핵심 기능과 보안을 우선하며 최종 UI/UX는 프로젝트 오너의 명세로 결정합니다. 현재 메인 화면은 오너가 제공한 3패널 디자인을 적용했습니다. 계정·상세 설정 화면은 기능 검증용 컴포넌트입니다.
 
 ## Windows 다운로드
 
-[개발 빌드 v0.1.0-dev.1](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.1)의 Assets에서 받으세요. 비공개 저장소이므로 접근 권한이 있는 GitHub 계정으로 로그인해야 합니다.
+[개발 빌드 v0.1.0-dev.2](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.2)의 Assets에서 받으세요. 비공개 저장소이므로 접근 권한이 있는 GitHub 계정으로 로그인해야 합니다.
 
-- [설치 프로그램 (.exe)](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.1/ButterToast-0.1.0-Setup-x64.exe): 현재 사용자용 설치 프로그램입니다.
-- [포터블 ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.1/ButterToast-0.1.0-Windows-x64.zip): 전체를 압축 해제한 뒤 `ButterToast-win32-x64/ButterToast.exe`를 실행하세요.
-- [SHA-256 체크섬](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.1/SHA256SUMS.txt)
+- [설치 프로그램 (.exe)](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/ButterToast-0.1.0-Setup-x64.exe): 현재 사용자용 설치 프로그램입니다.
+- [포터블 ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/ButterToast-0.1.0-Windows-x64.zip): 전체를 압축 해제한 뒤 `ButterToast-win32-x64/ButterToast.exe`를 실행하세요.
+- [SHA-256 체크섬](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/SHA256SUMS.txt)
 
 GitHub의 `Source code (zip)`은 소스이며 실행 파일이 없습니다. 설치 프로그램과 포터블 ZIP은 일반 Git 파일 제한(100 MiB)을 넘으므로 Releases에 보관합니다. 이 빌드는 코드 서명되지 않은 사전 테스트 버전이며, 실제 Windows 설치·제거 검증은 아직 남아 있습니다.
+
+## 오너 디자인 적용
+
+왼쪽 **Butter**(탭·도구), 중앙 **Browser**(사람용 웹), 오른쪽 **Toast**(독립 AI 작업) 구성입니다. 패널 너비 조절·접기, 원본을 유지하는 탭 드래그 위임, 같은 세션의 상태/작업화면 전환, 실제 실행 이벤트의 가상 커서를 지원합니다. [설계·검증·남은 범위](docs/DESIGN-IMPLEMENTATION.md)를 확인하세요.
+
+![ButterToast 3패널 화면](docs/design/implemented-workspace.png)
 
 ## 개발 실행
 

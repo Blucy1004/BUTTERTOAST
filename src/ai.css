@@ -1,4 +1,4 @@
-/* Temporary, replaceable components. Final design is supplied by the project owner. */
+/* Replaceable AI controls; the Toast workspace below follows the owner design brief. */
 * { box-sizing: border-box; }
 body { margin: 0; font: var(--font); color: var(--text); background: var(--surface); height: 100vh; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
 header, footer { padding: var(--spacing); background: var(--chrome); flex: none; }
@@ -26,3 +26,24 @@ textarea { resize: vertical; min-height: 60px; max-height: 160px; }
 [hidden] { display: none !important; }
 
 @media (max-height: 480px) { body { display: block; height: auto; } main { overflow: visible; } }
+/* Owner's Toast panel: task surface first, connection/chat tools in a separate drawer. */
+body { border: 1px solid var(--border); border-radius: var(--panel-radius); overflow: hidden; background: #050914; }
+header { height: 48px; padding: 0 12px; background: var(--surface); gap: 6px; }
+header strong { font-size: 16px; font-weight: 500; flex: 0; white-space: nowrap; }header>.hint { flex: 1; font-size: 10px; }
+header button { font-size: 11px; padding: 5px; border: 0; }
+.task-toolbar { height: 38px; display: flex; gap: 2px; padding: 4px 8px; background: #0c1429; flex: none; }.task-toolbar button { padding: 4px 6px; font-size: 10px; border: 0; }.task-toolbar button[aria-pressed="true"] { background: #1b3560; }
+#task-stage { min-height: 0; flex: 1; position: relative; background: #050914 url('starfield.png') top center / auto 320%; }
+#task-status { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px; text-align: center; }
+#task-status h1 { font-size: clamp(20px,5.5vw,30px); font-weight: 400; line-height: 1.6; margin: 12px 0; }
+#task-status p { color: var(--muted); font-size: 11px; line-height: 1.7; }.eyebrow { letter-spacing: 2px; }
+#show-page { border: 0; background: transparent; margin: 16px 0 4px; font-size: 15px; }#show-page span { display: inline-grid; place-items: center; background: #0752ac; border-radius: 50%; width: 36px; height: 36px; margin-left: 10px; }
+#controls-drawer { position: absolute; z-index: 2; top: 86px; bottom: 168px; left: 0; right: 0; background: var(--surface); padding: 12px; overflow: auto; }
+footer { height: 168px; min-height: 168px; padding: 5px 10px; border-top: 1px solid var(--border); background: #0b1329; overflow: auto; }
+footer .row { margin: 3px 0; flex-wrap: nowrap; }footer button { font-size: 11px; padding: 4px 9px; }footer textarea { min-height: 36px; height: 38px; max-height: 70px; padding: 7px; resize: none; font-size: 12px; }
+.quick-actions { display: flex; gap: 2px; margin-bottom: 4px; }.quick-actions button { border: 0; color: var(--muted); font-size: 10px; padding: 4px; }
+#ai-message { margin: 0; height: 17px; min-height: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+#proposal { padding: 4px; display: flex; align-items: center; gap: 4px; font-size: 10px; border-color: #9c7541; }#proposal-description { flex: 1; max-height: 28px; margin: 0; overflow: auto; }#proposal .row { flex: none; }
+#usage { font-size: 9px; color: var(--muted); margin: 2px 0; white-space: nowrap; overflow: hidden; }
+#event-log { padding-left: 22px; font-size: 11px; }#event-log li { margin: 8px 0; }#event-log button { font-size: 10px; margin-left: 6px; padding: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media(max-height:480px) { body { display: flex; height: 100vh; }main { overflow:auto; } }

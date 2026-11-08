@@ -1,6 +1,7 @@
 import { BrowserWindow, WebContents, WebContentsView } from 'electron';
 import { WEB_PREFERENCES, hardenWebContents } from '../security/electron';
 import { restorableUrl, SessionSnapshot, TAB_LIMIT } from './session-store';
+import type { Bounds } from './workspace';
 export type TabStatus = 'ready' | 'loading' | 'slow' | 'unresponsive' | 'crashed' | 'suspended';
 type Tab = { id: number; title: string; url: string; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout };
 type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void };
@@ -59,6 +60,10 @@ export class BrowserTabs {
     } else this.newTab();
   }
   private reservedWidth = 0;
+  private viewport?: Bounds;
+  private workspaceVisible = true;
+  setViewport(bounds: Bounds, visible = true): void { this.viewport = bounds; this.workspaceVisible = visible; this.layout(); }
+  contentsFor(id: number): WebContents | undefined { return this.tabs.find(t => t.id === id)?.view?.webContents; }
   reservePanel(width: number): void { this.reservedWidth = Math.max(0, Math.min(480, width)); this.layout(); }
   activeContents(): WebContents | undefined { return this.current()?.view?.webContents; }
   allContents(): WebContents[] { return this.tabs.flatMap(t => t.view && !t.view.webContents.isDestroyed() ? [t.view.webContents] : []); }
@@ -75,11 +80,12 @@ export class BrowserTabs {
   }
   layout(): void {
     const [width, height] = this.window.getContentSize();
-    for (const tab of this.tabs) tab.view?.setBounds({ x: 0, y: 116, width: Math.max(0, width - this.reservedWidth), height: Math.max(0, height - 116) });
+    for (const tab of this.tabs) { tab.view?.setBounds(this.viewport ?? { x: 0, y: 116, width: Math.max(0, width - this.reservedWidth), height: Math.max(0, height - 116) }); tab.view?.setVisible(this.workspaceVisible && tab.id === this.active && !!tab.url); }
   }
   private attach(tab: Tab): void {
     if (tab.view || this.disposed) return;
     const view = new WebContentsView({ webPreferences: { ...WEB_PREFERENCES, partition: 'persist:human' } });
+    view.setBorderRadius(16);
     tab.view = view; const wc = view.webContents;
     const valid = () => !this.disposed && tab.view === view && this.tabs.includes(tab);
     const clearSlow = () => { clearTimeout(tab.slowTimer); tab.slowTimer = undefined; };
@@ -122,7 +128,7 @@ export class BrowserTabs {
     this.active = tab.id; this.attach(tab);
     for (const t of this.tabs) t.view?.setVisible(t === tab);
     if (url) void tab.view!.webContents.loadURL(url).catch(() => {});
-    this.changed(true);
+    this.layout(); this.changed(true);
   }
   select(id: number): void {
     const tab = this.tabs.find(t => t.id === id); if (!tab) return;

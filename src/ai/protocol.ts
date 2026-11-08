@@ -18,6 +18,10 @@ export function parseConnection(provider: unknown, endpoint: unknown, key: unkno
   } catch { return null; }
 }
 export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-context' | 'task-close' | 'approve' | 'reject' | 'continue-task' | 'handoff' | 'save-chat' | 'load-chat' | 'delete-chat' }
+  | { type: 'task-display'; mode: 'status' | 'page' | 'controls' }
+  | { type: 'visual-options'; speed: number; motion: boolean }
+  | { type: 'replay'; id: number } | { type: 'task-return' }
+  | { type: 'share-selection' }
   | { type: 'connect'; provider: Provider; endpoint: string; key: string; remember: boolean }
   | { type: 'restore' | 'forget'; provider: Provider }
   | { type: 'model'; model: string } | { type: 'send'; text: string }
@@ -26,6 +30,11 @@ export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-co
   | {type:'run-task';goal:string;steps:number};
 export function parseAiCommand(value: unknown): AiCommand | null {
   if (!record(value)) return null;
+  if(value.type==='task-return'&&exactKeys(value,['type']))return {type:'task-return'};
+  if(value.type==='share-selection'&&exactKeys(value,['type']))return {type:'share-selection'};
+  if(value.type==='task-display'&&exactKeys(value,['type','mode'])&&['status','page','controls'].includes(value.mode as string))return value as AiCommand;
+  if(value.type==='visual-options'&&exactKeys(value,['type','speed','motion'])&&[1,.5,.1].includes(value.speed as number)&&typeof value.motion==='boolean')return value as AiCommand;
+  if(value.type==='replay'&&exactKeys(value,['type','id'])&&Number.isSafeInteger(value.id)&&(value.id as number)>0)return value as AiCommand;
   if (value.type === 'options' && exactKeys(value,['type','options'])) { const options=parseOptions(value.options); return options ? {type:'options',options} : null; }
   if (['ready', 'hide', 'stop', 'clear', 'remove-context', 'task-close', 'approve', 'reject', 'continue-task', 'handoff', 'save-chat', 'load-chat', 'delete-chat'].includes(value.type as string) && exactKeys(value, ['type'])) return { type: value.type } as AiCommand;
   if(value.type==='run-task'&&exactKeys(value,['type','goal','steps'])&&typeof value.goal==='string'&&value.goal.trim().length>0&&value.goal.length<=12000&&Number.isSafeInteger(value.steps)&&(value.steps as number)>=1&&(value.steps as number)<=10)return {type:'run-task',goal:value.goal.trim(),steps:value.steps as number};

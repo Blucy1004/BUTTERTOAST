@@ -74,6 +74,8 @@ export function installToastRuntime(documentId: string): void {
     if (!entry || !entry.node.isConnected) return { ok: false, reason: 'detached' };
     const data = describe(entry.node);
     if (data.fingerprint !== entry.fingerprint || !data.visible || !data.enabled || data.sensitive) return { ok: false, reason: 'changed-target' };
+    const targetRect = entry.node.getBoundingClientRect();
+    const point = { x: targetRect.x + targetRect.width / 2, y: targetRect.y + targetRect.height / 2, width: innerWidth, height: innerHeight };
     if (['READ', 'EXTRACT', 'VERIFY'].includes(action.op)) {
       return { ok: true, text: data.name, ...(action.op === 'VERIFY' ? { matches: data.name === action.value } : {}) };
     }
@@ -83,13 +85,13 @@ export function installToastRuntime(documentId: string): void {
       if (entry.node.maxLength >= 0 && action.value.length > entry.node.maxLength) return {ok:false,reason:'field-length'};
       entry.node.value = action.value;
       // One event: a page may replace the target in its handler. Do not dispatch another event to a stale node.
-      entry.node.dispatchEvent(new Event('input', {bubbles:true})); return {ok:true};
+      entry.node.dispatchEvent(new Event('input', {bubbles:true})); return {ok:true, point};
     }
     if (action.op === 'SELECT') {
       if (!(entry.node instanceof HTMLSelectElement) || entry.node.multiple) return {ok:false,reason:'option'};
       const matches=Array.from(entry.node.options).filter(o=>(o.value===action.value||o.label===action.value)&&!o.disabled&&!o.hidden);
       if(matches.length!==1)return {ok:false,reason:'ambiguous-option'};
-      entry.node.value=matches[0].value; entry.node.dispatchEvent(new Event('change',{bubbles:true})); return {ok:true};
+      entry.node.value=matches[0].value; entry.node.dispatchEvent(new Event('change',{bubbles:true})); return {ok:true, point};
     }
     if (action.op !== 'CLICK') return { ok:false, reason:'unsupported' };
     const rect = entry.node.getBoundingClientRect();
@@ -97,7 +99,20 @@ export function installToastRuntime(documentId: string): void {
     if (!hit || !(hit === entry.node || entry.node.contains(hit))) return { ok: false, reason: 'covered' };
     // Validation and dispatch share one synchronous JS turn. Page handler effects are untrusted.
     entry.node.click();
-    return { ok: true };
+    return { ok: true, point };
   }
-  Object.defineProperty(world, '__toastIR', { value: Object.freeze({ capture, perform }), configurable: false, writable: false });
+  function selection():string {
+    const selected=getSelection(),node=selected?.anchorNode;
+    const textNode=node?.nodeType===Node.TEXT_NODE?node:node?.childNodes.length===1&&node.firstChild?.nodeType===Node.TEXT_NODE?node.firstChild:null;
+    const parent=textNode?.parentElement;
+    // A single visible text node only. Form selections and ranges crossing private
+    // content must not be copied merely because the user selected nearby text.
+    if(!selected||!node||node!==selected.focusNode||!textNode||!parent
+      || document.activeElement?.matches('input,textarea,[contenteditable]:not([contenteditable="false"])')
+      ||parent.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private],[hidden],[aria-hidden="true"],[inert],script,style')
+      ||!parent.checkVisibility({opacityProperty:true,visibilityProperty:true}))return '';
+    const text=textNode.textContent||'',factor=node===textNode?1:text.length;
+    return text.slice(Math.min(selected.anchorOffset,selected.focusOffset)*factor,Math.max(selected.anchorOffset,selected.focusOffset)*factor).slice(0,4000);
+  }
+  Object.defineProperty(world, '__toastIR', { value: Object.freeze({ capture, perform, selection }), configurable: false, writable: false });
 }

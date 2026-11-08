@@ -15,7 +15,7 @@ window.initToolbar = send => {
     $('privacy-toggle').textContent = state.privacyEnabled ? '추적 차단' : '차단 예외';
     $('privacy-toggle').setAttribute('aria-pressed', String(state.privacyEnabled));
     $('security').textContent = state.url.startsWith('https://') ? 'HTTPS' : state.url.startsWith('http://') ? '주의: HTTP' : '';
-    const storageMessage = state.sessionStatus === 'unavailable' ? '보호 저장소를 사용할 수 없어 종료 후 탭을 복원할 수 없습니다.' : state.sessionStatus === 'failed' ? '탭 목록 저장·복원에 실패했습니다.' : '';
+    const storageMessage = state.sessionStatus === 'unavailable' ? '보호 저장소를 사용할 수 없어 종료 후 탭·패널 너비를 복원할 수 없습니다.' : state.sessionStatus === 'failed' ? '탭 목록 저장·복원에 실패했습니다.' : '';
     $('message').textContent = !state.initialized ? '탭 목록 준비 중…' : state.error || (state.loading ? '불러오는 중…' : storageMessage);
   };
 };

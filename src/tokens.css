@@ -1,2 +1,10 @@
-/* Temporary design tokens; final design belongs to the project owner. */
-:root { --surface: #fff; --chrome: #f3f3f3; --hover: #ddd; --text: #222; --border: #bbb; --error: #8c231d; --radius: 4px; --spacing: 8px; --small-font: 12px; --toolbar-icon: 20px; --heading-font: 22px; --field-height: 40px; --font: 14px system-ui, sans-serif; }
+/* Owner's navy / starfield direction. Shared across independently replaceable UI components. */
+:root {
+  color-scheme: dark;
+  --surface: #080f26; --chrome: #0d1732; --hover: #1b2b50; --text: #eef3ff;
+  --muted: #a4b2ce; --border: #293955; --error: #ffb7aa; --accent: #4a91ff;
+  --radius: 8px; --panel-radius: 18px; --spacing: 8px; --small-font: 12px;
+  --toolbar-icon: 19px; --heading-font: 22px; --field-height: 40px;
+  --font: 14px system-ui, 'Segoe UI', sans-serif; --motion: 160ms;
+}
+@media (prefers-reduced-motion: reduce) { :root { --motion: 0ms; } }

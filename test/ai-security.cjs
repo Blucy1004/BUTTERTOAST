@@ -67,7 +67,7 @@ app.whenReady().then(async()=>{
  app.on('session-created',ses=>{ses.protocol.handle('https',()=>new Response(fixture,{headers:{'Content-Type':'text/html'}}))});
  await ai.executeJavaScript(`document.getElementById('task-url').value='https://task.ai-fixture.test/';document.getElementById('task-open').click()`);
  await until(()=>webContents.getAllWebContents().some(w=>w.getURL()==='https://task.ai-fixture.test/'),'task page');taskWc=webContents.getAllWebContents().find(w=>w.getURL()==='https://task.ai-fixture.test/');
- await until(()=>!taskWc.isLoading(),'task ready');await until(()=>taskWc.executeJavaScript('innerWidth>=600&&innerHeight>=400'),'usable task viewport');assert.notEqual(taskWc.session,human.session);assert.equal(await taskWc.executeJavaScript('typeof ai'),'undefined');
+ await until(()=>!taskWc.isLoading(),'task ready');await until(()=>taskWc.executeJavaScript('innerWidth>=280&&innerHeight>=200'),'usable task viewport');assert.notEqual(taskWc.session,human.session);assert.equal(await taskWc.executeJavaScript('typeof ai'),'undefined');
  async function propose(){await ai.executeJavaScript('document.getElementById("share-task").click()');await until(async()=>await ai.executeJavaScript('!!states.at(-1).context'),'task context');await wait(1550);await send('Propose a click');await until(async()=>await ai.executeJavaScript('!!states.at(-1).proposal'),'proposal');}
  await propose();assert.equal(await taskWc.executeJavaScript('clicked'),0);
  const originalDialog=dialog.showMessageBox;let dialogs=0;

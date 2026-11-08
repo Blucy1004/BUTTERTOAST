@@ -5,7 +5,7 @@ import { record } from '../security/ipc';
 import {defaultOptions,ModelOptions,estimatedCost} from './options';
 export type PageContext = { source: 'human' | 'task' | 'controlled'; origin: string; text: string; elements: { id: string; role: string; name: string; actions?: string[] }[] };
 export interface Attachment { data: PageContext; check(): Promise<boolean>; valid(): boolean; click(target: string): Promise<boolean>; act?(proposal: Proposal): Promise<boolean>; dispose(): void }
-export interface AiHost { capture(source: 'human' | 'task' | 'controlled'): Promise<Attachment>; openTask(url: string): Promise<void>; closeTask(): void; stopTask?(): void; hide(): void; confirmWorkflow?(origin:string):Promise<boolean>; handoff?(source?:PageContext['source']):void; completed?():void;
+export interface AiHost { capture(source: 'human' | 'task' | 'controlled', selectionOnly?:boolean): Promise<Attachment>; openTask(url: string): Promise<void>; closeTask(): void; stopTask?(): void; hide(): void; confirmWorkflow?(origin:string):Promise<boolean>; handoff?(source?:PageContext['source']):void; completed?():void;
   saveChat?(messages:ChatMessage[]):Promise<void>;loadChat?():Promise<ChatMessage[]>;deleteChat?():Promise<void> }
 type Workflow={goal:string;origin:string;step:number;limit:number;status:'running'|'paused'|'completed';model:string};
 export type AiState = { connected: boolean; provider: Provider; endpoint: string; model: string; models: string[]; busy: boolean; message: string;
@@ -57,7 +57,7 @@ export class AiService {
         }catch{if(epoch===this.epoch)this.emit({busy:false,message:'보호 저장소의 대화를 저장·불러오기·삭제하지 못했습니다.'});}break;
       }
       case 'ready': this.changed(); return;
-      case 'hide': this.stop(); this.host.hide(); return;
+      case 'hide': this.workspaceHidden(); this.host.hide(); return;
       case 'stop': this.stop(); return;
       case 'clear': this.stop(); this.history = []; this.conversationRequests = 0; this.emit({ messages: [], workflow:null, message: '새 대화를 시작합니다.' }); return;
       case 'handoff': this.stop(); this.host.handoff?.(); this.emit({message:'AI 제어를 회수했습니다. 작업 페이지를 직접 조작할 수 있습니다.'});return;
@@ -86,9 +86,10 @@ export class AiService {
       case 'model': this.stop(); this.emit({ model: command.model, message: '모델을 변경했습니다. 필요한 페이지는 다시 공유해 주세요.' }); break;
       case 'send': this.state.workflow=null;await this.send(command.text); break;
       case 'share': await this.share(command.source); break;
+      case 'share-selection': await this.share('human',true);break;
       case 'task-open': {
-        this.stop();this.state.workflow=null; const epoch = this.epoch; this.emit({ busy: true, message: '별도 AI 작업 창을 여는 중입니다.' });
-        try { await this.host.openTask(command.url); if (epoch === this.epoch) this.emit({ busy: false, message: 'AI 작업 창을 열었습니다. 공유할 내용을 먼저 확인해 주세요.' }); }
+        this.stop();this.state.workflow=null; const epoch = this.epoch; this.emit({ busy: true, message: '별도 AI 작업 페이지를 여는 중입니다.' });
+        try { await this.host.openTask(command.url); if (epoch === this.epoch) this.emit({ busy: false, message: 'AI 작업 페이지를 열었습니다. 공유할 내용을 먼저 확인해 주세요.' }); }
         catch { if (epoch === this.epoch) this.emit({ busy: false, message: 'AI 작업 페이지를 열지 못했습니다.' }); } break;
       }
       case 'approve': await this.approve(); break;
@@ -116,10 +117,10 @@ export class AiService {
     try { await this.vault.delete(provider); if (epoch === this.epoch) this.emit({ message: '해당 연결의 저장된 키를 삭제했습니다.' }); }
     catch { if (epoch === this.epoch) this.emit({ message: '메모리 연결을 중단했지만 저장된 키 삭제는 확인하지 못했습니다.' }); }
   }
-  private async share(source: 'human' | 'task' | 'controlled'): Promise<void> {
+  private async share(source: 'human' | 'task' | 'controlled', selectionOnly=false): Promise<void> {
     this.stop(); const epoch = this.epoch; this.emit({ busy: true, message: '공유할 페이지 내용을 읽는 중입니다.' });
     try {
-      const attachment = await this.host.capture(source);
+      const attachment = await this.host.capture(source,selectionOnly);
       if (epoch !== this.epoch) { attachment.dispose(); return; }
       this.attachment = attachment; this.emit({ busy: false, context: attachment.data, message: '아래 미리보기를 확인하세요. 다음 전송에만 페이지 내용이 포함됩니다.' });
     } catch { if (epoch === this.epoch) this.emit({ busy: false, message: '현재 페이지를 읽을 수 없습니다. HTTPS 페이지를 연 뒤 다시 시도해 주세요.' }); }
@@ -161,7 +162,7 @@ export class AiService {
   private async approve(): Promise<void> {
     const attachment = this.attachment, proposal = this.state.proposal;
     if (!attachment || !proposal || attachment.data.source === 'human') return;
-    const epoch = this.invalidate(); this.emit({ busy: true, proposal: null, message: '클릭 승인 대기 중입니다.' });
+    const epoch = this.invalidate(); this.emit({ busy: true, proposal: null, message: '동작 승인 대기 중입니다.' });
     try {
       this.executing=true;
       const ok = attachment.act && proposal.action ? await attachment.act(proposal.action) : await attachment.click(proposal.target);
@@ -182,7 +183,7 @@ export class AiService {
       if(epoch!==this.epoch||!await this.host.confirmWorkflow?.(attachment.data.origin)||!await attachment.check())return;
       if(epoch!==this.epoch)return;
       this.state.workflow={goal,limit,step:0,origin:attachment.data.origin,model:this.state.model,status:'running'};
-    }catch{this.emit({message:'AI 작업 창을 먼저 열고 페이지 로딩을 완료하세요.'});}
+    }catch{this.emit({message:'AI 작업 페이지를 먼저 열고 페이지 로딩을 완료하세요.'});}
     finally{attachment?.dispose();if(epoch===this.epoch)this.emit({busy:false});}
     if(epoch===this.epoch&&this.state.workflow)await this.advance();
   }

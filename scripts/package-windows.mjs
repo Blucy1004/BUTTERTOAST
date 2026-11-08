@@ -27,7 +27,7 @@ try {
       if (entry.isDirectory()) await collect(file, relative);
       else {
         assert(entry.isFile(), `Unexpected payload entry ${relative}`);
-        assert(relative === 'package.json' || /^dist\/[a-zA-Z0-9_./-]+\.(js|html|css)$/.test(relative) || /^dist\/guidance\/(SYSTEM|ACTIONS|HANDOFF|RECOVERY)\.md$/.test(relative), `Unexpected payload ${relative}`);
+        assert(relative === 'package.json' || relative === 'dist/starfield.png' || /^dist\/[a-zA-Z0-9_./-]+\.(js|html|css)$/.test(relative) || /^dist\/guidance\/(SYSTEM|ACTIONS|HANDOFF|RECOVERY)\.md$/.test(relative), `Unexpected payload ${relative}`);
         files.set(relative, await fs.readFile(file));
       }
     }
@@ -85,6 +85,9 @@ try {
   await fs.cp(path.join(root, 'docs', 'BROWSER-AI-IMPLEMENTATION.md'), path.join(output, 'LATEST-VALIDATION.md'));
   await fs.cp(path.join(root, 'docs', 'IMPLEMENTATION-STATUS.md'), path.join(output, 'IMPLEMENTATION-STATUS.md'));
   await fs.cp(path.join(root, 'docs', 'WINDOWS-TEST-BUILD.md'), path.join(output, 'READ-ME-FIRST.md'));
+  await fs.cp(path.join(root, 'docs', 'DESIGN-IMPLEMENTATION.md'), path.join(output, 'DESIGN-IMPLEMENTATION.md'));
+  await fs.mkdir(path.join(output, 'design'), {recursive:true});
+  for(const name of ['BRIEF.md','owner-layout.png','implemented-workspace.png']) await fs.cp(path.join(root,'docs','design',name),path.join(output,'design',name));
   await fs.cp(path.join(root, 'artifacts', 'sbom.cdx.json'), path.join(output, 'SBOM.cdx.json'));
   console.log(`Verified Windows x64 test build: ${output}`);
   console.log(`Application payload: ${files.size} files; hardened fuses and embedded ASAR hash verified.`);

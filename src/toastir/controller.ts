@@ -5,7 +5,8 @@ import { installToastRuntime } from './runtime';
 import {encodeIR,diffIR,IRDelta} from './codec';
 const WORLD = 1001;
 export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; parent: string|null; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
-export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean };
+export type ActionPoint = { x: number; y: number; width: number; height: number };
+export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean; point?: ActionPoint };
 /** Main-only experimental READ/CLICK path, permanently bound to one WebContents.
  * No page/renderer IPC exports. Caller may not substitute snapshots or tab objects.
  */
@@ -34,7 +35,7 @@ export class ToastController {
     const origin = new URL(this.contents.getURL()).origin;
     this.stop(); this.guard.grant({ tab: this.contents.id, origin, permissions });
   }
-  private async call(method: 'capture' | 'perform', input?: unknown): Promise<unknown> {
+  private async call(method: 'capture' | 'perform' | 'selection', input?: unknown): Promise<unknown> {
     if (this.disposed || this.contents.isDestroyed()) throw new Error('Task unavailable');
     // Only fixed app code plus JSON data crosses the boundary. The web page cannot access WORLD.
     const code = `(${installToastRuntime.toString()})(${JSON.stringify(randomUUID())}); globalThis.__toastIR.${method}(${input === undefined ? '' : JSON.stringify(input)})`;
@@ -54,6 +55,12 @@ export class ToastController {
     return { ...data, tab: this.contents.id };
   }
   async binarySnapshot():Promise<Buffer> {const {tab,...snapshot}=await this.snapshot();return encodeIR(snapshot);}
+  async selectedText():Promise<string> {
+    const epoch=this.generation;
+    await this.snapshot();const text=await this.call('selection');
+    if(epoch!==this.generation||typeof text!=='string'||text.length>4000)throw new Error('Selection unavailable');
+    return text;
+  }
   async changes(previous:Snapshot):Promise<IRDelta|null> {const next=await this.snapshot();return diffIR(previous,next);}
   /** Callback belongs to trusted UI; model must not supply it or approve based on page text. */
   async requestApproval(input: unknown, confirm: () => Promise<boolean>): Promise<string | null> {

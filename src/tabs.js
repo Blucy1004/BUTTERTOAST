@@ -5,11 +5,13 @@ window.renderTabs = (state, send) => {
   container.replaceChildren();
   for (const tab of state.tabs) {
     const wrap = document.createElement('span'); wrap.className = 'tab' + (tab.id === state.active ? ' active' : '');
+    wrap.draggable = false; wrap.dataset.tabId = String(tab.id);
     const select = document.createElement('button');
-    select.textContent = (tabStatus[tab.status] ? `[${tabStatus[tab.status]}] ` : '') + tab.title;
+    select.textContent = state.layout?.compact ? String(state.tabs.indexOf(tab)+1) : (tabStatus[tab.status] ? `[${tabStatus[tab.status]}] ` : '') + tab.title;
     select.title = select.textContent; select.setAttribute('role', 'tab'); select.setAttribute('aria-selected', String(tab.id === state.active));
     select.onclick = () => send('select', { id: tab.id });
     const close = document.createElement('button'); close.textContent = '×'; close.setAttribute('aria-label', `${tab.title} 닫기`); close.onclick = () => send('close', { id: tab.id });
-    wrap.append(select, close); container.append(wrap);
+    const delegate = document.createElement('button'); delegate.className='send-tab';delegate.textContent='↗';delegate.title='Toast에 보내기';delegate.setAttribute('aria-label',`${tab.title} Toast에 보내기`);delegate.onclick=()=>send('delegate',{id:tab.id});
+    wrap.append(select, delegate, close); container.append(wrap);
   }
 };

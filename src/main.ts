@@ -1,6 +1,6 @@
 import { app, BrowserWindow, WebContents, ipcMain, session, protocol } from 'electron';
 import path from 'node:path';
-import { parseCommand, RateGate } from './security/ipc';
+import { parseCommand, RateGate, record } from './security/ipc';
 import { assertSafeLaunch, hardenSession, WEB_PREFERENCES } from './security/electron';
 import { installUiProtocol, UI_URL } from './security/ui-protocol';
 import { osCipher } from './security/os-cipher';
@@ -17,12 +17,14 @@ import { GoogleTheme } from './browser/theme';
 import { installSitePermissions } from './browser/permissions';
 import {BrowserUpdates} from './browser/updates';
 import { isWebUrl } from './policy';
+import { defaultWorkspace, workspaceGeometry } from './browser/workspace';
 
 assertSafeLaunch();
 app.enableSandbox();
 app.commandLine.appendSwitch('site-per-process');
 protocol.registerSchemesAsPrivileged([{ scheme: 'toast-ui', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 const commands = new RateGate();
+const resizeCommands = new RateGate(8,30);
 let window: BrowserWindow;
 let tabs: BrowserTabs;
 let store: TabSessionStore;
@@ -34,6 +36,16 @@ let library: BrowserLibrary;
 let manager: BrowserManager;
 let downloads: DownloadManager;
 let updates:BrowserUpdates;
+let workspace=defaultWorkspace(), narrowToast=false, arranging=false, workspaceDirty=false;
+let arrangeTimer:NodeJS.Timeout|undefined;
+function layoutWorkspace():ReturnType<typeof workspaceGeometry> {
+  const [width,height]=window.getContentSize(),layout=workspaceGeometry(width,height,workspace,narrowToast);
+  tabs?.setViewport(layout.human,layout.browserVisible&&!arranging);
+  ai?.setPresentation(layout.toast,layout.toastVisible&&!arranging);
+  return layout;
+}
+function saveWorkspace():void {library.configureWorkspace(workspace);emitState();}
+function endArrange():void {clearTimeout(arrangeTimer);arranging=false;if(workspaceDirty){workspaceDirty=false;library?.configureWorkspace(workspace);}emitState();}
 const theme = new GoogleTheme();
 const externalUrl = (args: string[]) => args.find(arg => arg.length <= 4096 && /^https?:\/\//i.test(arg) && isWebUrl(arg));
 let pendingUrl = app.isPackaged ? externalUrl(process.argv.slice(1)) : undefined;
@@ -55,7 +67,7 @@ function emitState(): void {
   if (!window || window.isDestroyed() || !tabs) return;
   ai?.observe();
   const state = tabs.state();
-  window.webContents.send('browser:state', { ...state, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+  window.webContents.send('browser:state', { ...state, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
 function focusAddress(): void {
   window.webContents.focus(); window.webContents.send('browser:focus-address');
@@ -88,16 +100,27 @@ function trusted(event: Electron.IpcMainEvent): boolean {
   return !!window && !window.isDestroyed() && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && event.senderFrame?.url === UI_URL;
 }
 ipcMain.on('browser:command', (event, input: unknown) => {
-  if (!trusted(event) || !commands.allow()) return;
+  if (!trusted(event) || !(record(input)&&input.type==='workspace-resize'?resizeCommands:commands).allow()) return;
   const cmd = parseCommand(input);
   if (!cmd) return;
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'delegate': void ai.delegate(cmd.id);break;
+    case 'workspace-toggle': {
+      if(cmd.side==='left')workspace.leftCollapsed=!workspace.leftCollapsed;
+      else {workspace.rightCollapsed=!workspace.rightCollapsed;if(!workspace.rightCollapsed)narrowToast=true;}
+      saveWorkspace();break;
+    }
+    case 'workspace-resize': {
+      workspace[cmd.side]=cmd.width;workspaceDirty=true;arranging=true;clearTimeout(arrangeTimer);arrangeTimer=setTimeout(endArrange,1200);emitState();break;
+    }
+    case 'workspace-resize-end': endArrange();break;
+    case 'workspace-drag': arranging=cmd.active;clearTimeout(arrangeTimer);if(arranging)arrangeTimer=setTimeout(endArrange,15000);emitState();break;
     case 'ai-next':ai.next();emitState();break;
     case 'manager-open': manager.open(); break;
     case 'bookmark': manager.bookmark(); break;
-    case 'ai-toggle': ai.toggle(); break;
+    case 'ai-toggle': if(workspace.rightCollapsed||!ai.isOpen()||(window.getContentSize()[0]<760&&!narrowToast)){narrowToast=true;ai.open();}else ai.toggle();break;
     case 'account-open': account.open(); break;
     case 'new': tabs.newTab(); focusAddress(); break;
     case 'select': tabs.select(cmd.id); break;
@@ -126,8 +149,8 @@ app.whenReady().then(async () => {
   privacy = installPrivacy(browsing);
   const uiSession = session.fromPartition('toast-ui');
   hardenSession(uiSession); installUiProtocol(uiSession, __dirname);
-  window = new BrowserWindow({ width: 1280, height: 850, minWidth: 600, minHeight: 400,
-    title: 'ButterToast', backgroundColor: '#fff', webPreferences: {
+  window = new BrowserWindow({ width: 1440, height: 900, minWidth: 600, minHeight: 560, autoHideMenuBar:true,
+    title: 'ButterToast', backgroundColor: '#050b1d', webPreferences: {
       ...WEB_PREFERENCES, session: uiSession, preload: path.join(__dirname, 'preload.js')
     }});
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -137,6 +160,7 @@ app.whenReady().then(async () => {
   keyboard(window.webContents);
   library = new BrowserLibrary(path.join(app.getPath('userData'), 'library.enc'), osCipher, () => manager?.emit());
   await library.load();
+  workspace=library.workspace();
   account = new AccountWindow(window, emitState);
   store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
   tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { if (library.settings().restoreTabs) void store.save(snapshot); }, input: keyboard,
@@ -145,8 +169,9 @@ app.whenReady().then(async () => {
   hardenSession(browsing, downloads.accept); installSitePermissions(browsing, window, library, () => tabs.activeContents());
   updates=new BrowserUpdates(window,()=>manager?.emit());
   manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates);
-  ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome));
-  window.on('resize', () => ai.layout());
+  ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();});
+  window.on('resize', () => emitState());
+  window.on('blur',endArrange);
   window.on('closed', () => { initialized = false;updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose(); });
   void window.loadURL(UI_URL);
   const saved = await store.load();
@@ -158,6 +183,7 @@ let flushed = false;
 app.on('before-quit', event => {
   if (flushed || !store) return;
   event.preventDefault(); initialized = false;
+  if(workspaceDirty){workspaceDirty=false;library?.configureWorkspace(workspace);}
   void Promise.all([store.flush(), library?.flush(),ai?.flush()]).finally(() => { flushed = true; app.quit(); });
 });
 app.on('window-all-closed', () => app.quit());

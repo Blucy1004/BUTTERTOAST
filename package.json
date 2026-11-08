@@ -16,12 +16,13 @@
     "test:toastir": "npm run build && node scripts/test-toastir.cjs",
     "test:browser": "npm run build && node scripts/test-browser.cjs",
     "test:extended": "npm run build && node scripts/test-extended.cjs",
-    "test:security": "npm test && node scripts/test-electron.cjs && node scripts/test-toastir.cjs && node scripts/test-browser.cjs && node scripts/test-extended.cjs && node scripts/test-account.cjs && node scripts/test-ai.cjs && node scripts/test-manager.cjs && npm run audit:deps && npm run scan:secrets",
+    "test:security": "npm test && node scripts/test-electron.cjs && node scripts/test-toastir.cjs && node scripts/test-browser.cjs && node scripts/test-extended.cjs && node scripts/test-account.cjs && node scripts/test-ai.cjs && node scripts/test-manager.cjs && node scripts/test-workspace.cjs && npm run audit:deps && npm run scan:secrets",
     "test:account": "npm run build && node scripts/test-account.cjs",
     "test:ai": "npm run build && node scripts/test-ai.cjs",
     "test:manager": "npm run build && node scripts/test-manager.cjs",
     "package:installer": "npm run package:win && node scripts/package-installer.mjs",
-    "benchmark": "npm run build && node scripts/benchmark.cjs"
+    "benchmark": "npm run build && node scripts/benchmark.cjs",
+    "test:workspace": "npm run build && node scripts/test-workspace.cjs"
   },
   "devDependencies": {
     "@electron/asar": "4.3.1",

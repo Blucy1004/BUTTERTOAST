@@ -4,14 +4,15 @@ import { randomUUID } from 'node:crypto';
 import type { OsCipher } from '../security/vault';
 import { exactKeys, record } from '../security/ipc';
 import { restorableUrl } from './session-store';
+import { defaultWorkspace, parseWorkspace, WorkspacePreferences } from './workspace';
 
 export type Settings = { search: 'google' | 'brave' | 'duckduckgo'; theme: 'off' | 'light' | 'dark'; history: boolean; restoreTabs: boolean };
 export type Entry = { id: string; url: string; title: string; time: number };
 export type SitePermission = 'geolocation' | 'notifications' | 'media';
 export type SiteRule = { origin: string; permission: SitePermission; decision: 'allow' | 'deny' };
 export type AuditEntry = { id: string; time: number; origin: string; operation: string; outcome: string };
-export type LibraryData = { version: 1; settings: Settings; bookmarks: Entry[]; history: Entry[]; permissions: SiteRule[]; audit: AuditEntry[] };
-const defaults = (): LibraryData => ({ version: 1, settings: { search: 'google', theme: 'off', history: true, restoreTabs: true }, bookmarks: [], history: [], permissions: [], audit: [] });
+export type LibraryData = { version: 1; workspace: WorkspacePreferences; settings: Settings; bookmarks: Entry[]; history: Entry[]; permissions: SiteRule[]; audit: AuditEntry[] };
+const defaults = (): LibraryData => ({ version: 1, workspace: defaultWorkspace(), settings: { search: 'google', theme: 'off', history: true, restoreTabs: true }, bookmarks: [], history: [], permissions: [], audit: [] });
 export function httpsOrigin(value: unknown): value is string {
   if (typeof value !== 'string' || value.length > 4096) return false;
   try { const u = new URL(value); return u.protocol === 'https:' && !u.username && !u.password && u.origin === value; } catch { return false; }
@@ -23,7 +24,8 @@ export function parseSettings(value: unknown): Settings | null {
 }
 export function sitePermission(value: unknown): value is SitePermission { return ['geolocation', 'notifications', 'media'].includes(value as string); }
 export function parseLibrary(value: unknown): LibraryData | null {
-  if (!record(value) || !exactKeys(value, ['version', 'settings', 'bookmarks', 'history', 'permissions', 'audit']) || value.version !== 1) return null;
+  if (!record(value) || !exactKeys(value, ['version', 'settings', 'bookmarks', 'history', 'permissions', 'audit', ...(Object.hasOwn(value,'workspace') ? ['workspace'] : [])]) || value.version !== 1) return null;
+  const workspace = Object.hasOwn(value, 'workspace') ? parseWorkspace(value.workspace) : defaultWorkspace(); if (!workspace) return null;
   const settings = parseSettings(value.settings); if (!settings) return null;
   const entries = (data: unknown, limit: number): data is Entry[] => Array.isArray(data) && data.length <= limit && data.every(e => record(e) && exactKeys(e, ['id', 'url', 'title', 'time'])
     && typeof e.id === 'string' && /^[\w-]{1,80}$/.test(e.id) && typeof e.title === 'string' && e.title.length <= 200 && !!e.url && restorableUrl(e.url) && Number.isSafeInteger(e.time) && (e.time as number) >= 0);
@@ -32,7 +34,7 @@ export function parseLibrary(value: unknown): LibraryData | null {
     || !Array.isArray(value.audit) || value.audit.length > 1000 || !value.audit.every(e => record(e) && exactKeys(e, ['id', 'time', 'origin', 'operation', 'outcome'])
       && typeof e.id === 'string' && /^[\w-]{1,80}$/.test(e.id) && Number.isSafeInteger(e.time) && (e.time as number) >= 0 && httpsOrigin(e.origin)
       && typeof e.operation === 'string' && /^[A-Z_]{1,32}$/.test(e.operation) && typeof e.outcome === 'string' && /^[a-z-]{1,64}$/.test(e.outcome))) return null;
-  return structuredClone({ ...value, settings }) as LibraryData;
+  return structuredClone({ ...value, settings, workspace }) as LibraryData;
 }
 /** Main-process metadata only. No plaintext fallback, credentials, form values or AI text. */
 export class BrowserLibrary {
@@ -45,6 +47,8 @@ export class BrowserLibrary {
   constructor(private file: string, private cipher: OsCipher, private changed: () => void = () => {}) {}
   snapshot(): LibraryData { return structuredClone(this.data); }
   settings(): Settings { return { ...this.data.settings }; }
+  workspace(): WorkspacePreferences { return { ...this.data.workspace }; }
+  configureWorkspace(value: WorkspacePreferences): void { const parsed = parseWorkspace(value); if (parsed) { this.data.workspace = parsed; this.save(); } }
   async load(): Promise<void> {
     try {
       this.available = await this.cipher.available(); this.status = this.available ? 'available' : 'unavailable';
