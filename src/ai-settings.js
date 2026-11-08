@@ -1,7 +1,7 @@
 'use strict';
 window.initAiSettings = send => {
   const el = id => document.getElementById(id);
-  const endpoints = { openai: 'https://api.openai.com/v1', anthropic: 'https://api.anthropic.com/v1', compatible: 'http://127.0.0.1:1234/v1' };
+  const endpoints = { openai: 'https://api.openai.com/v1', anthropic: 'https://api.anthropic.com/v1', gemini: 'https://generativelanguage.googleapis.com/v1beta', compatible: 'http://127.0.0.1:1234/v1' };
   const clear = () => { el('api-key').value = ''; };
   el('provider').onchange = () => { clear(); el('endpoint').value = endpoints[el('provider').value]; el('endpoint').readOnly = el('provider').value !== 'compatible'; };
   el('endpoint').readOnly = true;

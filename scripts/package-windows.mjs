@@ -27,7 +27,7 @@ try {
       if (entry.isDirectory()) await collect(file, relative);
       else {
         assert(entry.isFile(), `Unexpected payload entry ${relative}`);
-        assert(relative === 'package.json' || /^dist\/[a-zA-Z0-9_./-]+\.(js|html|css)$/.test(relative), `Unexpected payload ${relative}`);
+        assert(relative === 'package.json' || /^dist\/[a-zA-Z0-9_./-]+\.(js|html|css)$/.test(relative) || /^dist\/guidance\/(SYSTEM|ACTIONS|HANDOFF|RECOVERY)\.md$/.test(relative), `Unexpected payload ${relative}`);
         files.set(relative, await fs.readFile(file));
       }
     }
@@ -37,6 +37,7 @@ try {
     dir: stage, out: path.join(root, 'artifacts', 'windows'), name: 'ButterToast',
     executableName: 'ButterToast', platform: 'win32', arch: 'x64',
     electronVersion: pkg.devDependencies.electron, appVersion: pkg.version,
+    download: { cacheRoot: path.join(root, 'artifacts', '.electron-cache') },
     asar: true, prune: false, overwrite: true,
     win32metadata: { ProductName: 'ButterToast Security Test', 'requested-execution-level': 'asInvoker' }
   });
@@ -79,6 +80,8 @@ try {
   };
   await fs.writeFile(path.join(output, 'BUILD-VERIFICATION.json'), JSON.stringify(report, null, 2) + '\n');
   await fs.cp(path.join(root, 'docs', 'SECURITY-VALIDATION.md'), path.join(output, 'SECURITY-VALIDATION.md'));
+  await fs.cp(path.join(root, 'docs', 'BROWSER-AI-IMPLEMENTATION.md'), path.join(output, 'LATEST-VALIDATION.md'));
+  await fs.cp(path.join(root, 'docs', 'IMPLEMENTATION-STATUS.md'), path.join(output, 'IMPLEMENTATION-STATUS.md'));
   await fs.cp(path.join(root, 'docs', 'WINDOWS-TEST-BUILD.md'), path.join(output, 'READ-ME-FIRST.md'));
   await fs.cp(path.join(root, 'artifacts', 'sbom.cdx.json'), path.join(output, 'SBOM.cdx.json'));
   console.log(`Verified Windows x64 test build: ${output}`);

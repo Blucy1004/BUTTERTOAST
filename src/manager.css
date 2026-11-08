@@ -1,0 +1,8 @@
+/* Temporary, replaceable management UI. */
+* { box-sizing: border-box; } body { margin: 0; font: var(--font); color: var(--text); background: var(--surface); }
+nav { display:flex; gap:var(--spacing); padding:var(--spacing); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+main, #status { margin:var(--spacing); } h1 { font-size:20px; } h2 { font-size:17px; }
+button,input,select { font:inherit; color:inherit; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:var(--spacing); }
+button { cursor:pointer; } button:hover { background:var(--hover); } button:disabled { opacity:.5; cursor:default; }
+label { display:block; margin:var(--spacing) 0; } .entry { padding:var(--spacing) 0; border-bottom:1px solid var(--border); overflow-wrap:anywhere; }
+.entry button { margin:4px; } .detail { color:var(--text); opacity:.8; font-size:var(--small-font); } #status { min-height:20px; } [hidden] { display:none !important; }

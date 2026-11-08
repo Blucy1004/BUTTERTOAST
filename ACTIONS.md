@@ -1,9 +1,9 @@
-# 행동 정책 — v2
+# 행동 정책 — 문서 v2 / Action protocol v2
 
-`src/security/guard.ts`는 protocol/document/id/tab/origin/version/op/target/value의 정확한 필드를 검사한다. document는 필수 문서 ID이며 예전 v1 요청은 거부한다. 승인에는 정확한 행동, 문서, 버전, 탭과 origin을 함께 결합한다. 만료는 단조 시계를 사용한다.
+모델 응답은 reply와 action을 가진 JSON이다. action은 null 또는 op/target/value만 포함한다. CLICK·FILL·SELECT·READ·EXTRACT·VERIFY는 현재 요소 ID를 사용한다. SCROLL·NAVIGATE·WAIT·HANDOFF는 빈 target을 사용한다. 메인이 protocol/document/id/tab/origin/version을 실제 캡처와 결합한다. 모델이 승인·권한·문서 버전을 지정할 수 없다.
 
-Guard는 CLICK, FILL, SELECT, SCROLL, NAVIGATE, WAIT, READ, EXTRACT, VERIFY, HANDOFF를 구분하지만 실제 실험 실행기(`src/toastir/controller.ts`)는 CLICK/READ/EXTRACT/VERIFY만 지원한다. 나머지는 실행하지 않고 거부한다. 임의 JavaScript·OS 명령 필드는 없다.
+CLICK/FILL/SELECT/SCROLL/NAVIGATE는 각각 정확한 문서·버전·인자에 묶인 네이티브 일회성 승인이 필요하다. 웹 이벤트는 전송·삭제·결제를 일으킬 수 있어 write/transmit/delete/pay 권한을 모두 요구한다. 승인은 30초 후 만료된다.
 
-권한 부여, 승인 확인 callback과 승인 토큰은 신뢰된 메인 프로세스 전용이다. 웹페이지·모델에서 제공한 approved 값이나 확인 함수는 신뢰하면 안 된다. CLICK은 전송·삭제·결제 결과를 분류할 수 없으므로 write/transmit/delete/pay 권한과 정확한 행동 승인을 모두 요구한다. 실제 승인 UI는 아직 없다.
+FILL은 민감하지 않은 텍스트 필드만, SELECT는 유일하게 일치하는 옵션 값 또는 표시 이름만 지원한다. SCROLL은 -1000..1000의 0이 아닌 픽셀, WAIT는 1..5000ms다. NAVIGATE는 같은 origin의 HTTPS 주소만 허용한다. VERIFY는 표시 이름과 value의 정확한 일치를 검사한다. HANDOFF는 권한을 회수한다.
 
-승인 대기 전후 상태를 다시 수집해 확인하며 실행 직전 동일 Node/버전/문서를 재확인한다. 페이지 스크립트의 event handler는 계속 불신 대상이다. 이 검증이 클릭 이후 서버 효과나 거래 금액을 증명하지는 않는다. 이미 전달된 click을 소급 취소한다고 보장하지 않는다.
+행동 하나 뒤에는 새 페이지 상태를 확인한다. 요소 교체·버전 변경·회수·중복 ID를 무시하지 않는다. 클릭/탐색 뒤 결과가 불확실하면 사용자 확인을 기다리고 같은 제출을 반복하지 않는다. 이미 전송된 효과를 되돌렸다고 주장하지 않는다.

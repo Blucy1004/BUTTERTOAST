@@ -3,7 +3,7 @@ import { WEB_PREFERENCES, hardenWebContents } from '../security/electron';
 import { restorableUrl, SessionSnapshot, TAB_LIMIT } from './session-store';
 export type TabStatus = 'ready' | 'loading' | 'slow' | 'unresponsive' | 'crashed' | 'suspended';
 type Tab = { id: number; title: string; url: string; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout };
-type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void };
+type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void };
 /** Human tabs only. No AI context, grants or renderer state are persisted or shared here. */
 export class BrowserTabs {
   private tabs: Tab[] = [];
@@ -61,6 +61,18 @@ export class BrowserTabs {
   private reservedWidth = 0;
   reservePanel(width: number): void { this.reservedWidth = Math.max(0, Math.min(480, width)); this.layout(); }
   activeContents(): WebContents | undefined { return this.current()?.view?.webContents; }
+  allContents(): WebContents[] { return this.tabs.flatMap(t => t.view && !t.view.webContents.isDestroyed() ? [t.view.webContents] : []); }
+  revokeOrigin(origin:string):void {
+    for(const tab of this.tabs){
+      try {if(new URL(tab.url).origin!==origin)continue;}catch{continue;}
+      this.detach(tab);tab.status='suspended';tab.error='사이트 권한을 회수해 페이지를 종료했습니다. 탭을 선택하면 다시 엽니다. 입력 내용은 복원되지 않습니다.';
+    }
+    this.changed();
+  }
+  suspendAll():void {
+    for(const tab of this.tabs){this.detach(tab);tab.status='suspended';tab.error='사이트 데이터를 지우기 위해 페이지를 종료했습니다. 탭을 선택하면 다시 엽니다.';}
+    this.changed();
+  }
   layout(): void {
     const [width, height] = this.window.getContentSize();
     for (const tab of this.tabs) tab.view?.setBounds({ x: 0, y: 116, width: Math.max(0, width - this.reservedWidth), height: Math.max(0, height - 116) });
@@ -73,6 +85,7 @@ export class BrowserTabs {
     const clearSlow = () => { clearTimeout(tab.slowTimer); tab.slowTimer = undefined; };
     this.window.contentView.addChildView(view); view.setVisible(tab.id === this.active);
     hardenWebContents(wc); this.hooks.input(wc);
+    wc.on('did-finish-load', () => { if (valid()) { this.hooks.visited?.(wc.getURL(), wc.getTitle()); this.hooks.loaded?.(wc); } });
     wc.on('page-title-updated', (_e, title) => { if (valid()) { tab.title = title.slice(0, 120) || '새 탭'; this.changed(); } });
     wc.on('did-start-loading', () => {
       if (!valid()) return;
@@ -85,7 +98,7 @@ export class BrowserTabs {
       if (valid() && mainFrame) { tab.url = url === 'about:blank' ? '' : url; this.changed(true); }
     };
     wc.on('did-navigate', (e, url) => navigated(e, url));
-    wc.on('did-navigate-in-page', (e, url, main) => navigated(e, url, main));
+    wc.on('did-navigate-in-page', (e, url, main) => { navigated(e, url, main); if (valid() && main) { this.hooks.visited?.(url, wc.getTitle()); this.hooks.loaded?.(wc); } });
     wc.on('did-fail-load', (_e, code, _description, _url, main) => {
       if (valid() && main && code !== -3) { clearSlow(); tab.status = 'ready'; tab.error = `페이지를 불러오지 못했습니다 (${code}). 주소와 연결 상태를 확인하세요.`; this.changed(); }
     });

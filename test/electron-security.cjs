@@ -42,9 +42,12 @@ app.whenReady().then(async()=>{
   console.log('PASS site permissions denied');
   // Verify actual cancellation, not just listener registration.
   let downloadPrevented=false;
+  const nativeDialog=require('electron').dialog, originalDownloadDialog=nativeDialog.showMessageBoxSync;
+  nativeDialog.showMessageBoxSync=(_parent,options)=>{assert.equal(options.defaultId,0);assert.match(options.detail,/자동으로 열거나 실행하지/);return 0};
   content.session.once('will-download',event=>{downloadPrevented=event.defaultPrevented});
   await content.executeJavaScript('document.getElementById("download").click()');
   await until(()=>downloadPrevented);
+  nativeDialog.showMessageBoxSync=originalDownloadDialog;
   console.log('PASS malicious attachment download canceled');
   await content.executeJavaScript(`new Promise(resolve=>{const f=document.createElement('iframe');f.src='http://localhost:${server.address().port}/';f.onload=resolve;document.body.append(f)})`);
   await until(()=>content.mainFrame.frames.length>0 && content.mainFrame.frames[0].url.startsWith('http://localhost:'));

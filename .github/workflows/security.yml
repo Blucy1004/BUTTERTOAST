@@ -38,9 +38,19 @@ jobs:
       - run: npm run test:extended
       - run: npm run test:account
       - run: npm run test:ai
+      - run: npm run test:manager
       - run: npm run audit:deps
       - run: npm run scan:secrets
       - run: npm run sbom
+      - name: Build verified Windows portable app
+        if: runner.os == 'Windows'
+        run: npm run package:win
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: runner.os == 'Windows'
+        with:
+          name: ButterToast-windows-x64
+          path: artifacts/windows/ButterToast-win32-x64
+          if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sbom-${{ matrix.os }}

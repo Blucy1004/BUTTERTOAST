@@ -2,8 +2,9 @@ import type { WebContents } from 'electron';
 import { randomUUID } from 'node:crypto';
 import { ToastGuard, parseAction, PageState, Permission, Op } from '../security/guard';
 import { installToastRuntime } from './runtime';
+import {encodeIR,diffIR,IRDelta} from './codec';
 const WORLD = 1001;
-export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
+export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; parent: string|null; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
 export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean };
 /** Main-only experimental READ/CLICK path, permanently bound to one WebContents.
  * No page/renderer IPC exports. Caller may not substitute snapshots or tab objects.
@@ -52,10 +53,12 @@ export class ToastController {
     if (epoch !== this.generation || !this.guard.canRead(this.state(data))) throw new Error('Context access denied');
     return { ...data, tab: this.contents.id };
   }
+  async binarySnapshot():Promise<Buffer> {const {tab,...snapshot}=await this.snapshot();return encodeIR(snapshot);}
+  async changes(previous:Snapshot):Promise<IRDelta|null> {const next=await this.snapshot();return diffIR(previous,next);}
   /** Callback belongs to trusted UI; model must not supply it or approve based on page text. */
   async requestApproval(input: unknown, confirm: () => Promise<boolean>): Promise<string | null> {
     const action = parseAction(input), epoch = this.generation;
-    if (!action || action.tab !== this.contents.id || !['CLICK'].includes(action.op)) return null;
+    if (!action || action.tab !== this.contents.id || !['CLICK', 'FILL', 'SELECT', 'SCROLL', 'NAVIGATE'].includes(action.op)) return null;
     try {
       const before = await this.capture();
       if (epoch !== this.generation || !this.guard.canRead(this.state(before)) || action.document !== before.document || action.version !== before.version) return null;
@@ -68,7 +71,6 @@ export class ToastController {
   async execute(input: unknown, approval?: string): Promise<Result> {
     const action = parseAction(input);
     if (!action || action.tab !== this.contents.id) return { ok: false, reason: 'schema-or-tab' };
-    if (!['CLICK', 'READ', 'EXTRACT', 'VERIFY'].includes(action.op)) return { ok: false, reason: 'unsupported' };
     if (this.busy) return { ok: false, reason: 'busy' };
     this.busy = true;
     const epoch = this.generation;
@@ -79,7 +81,16 @@ export class ToastController {
       const verdict = this.guard.claim(action, this.state(snapshot), approval);
       if (!verdict.ok) return verdict;
       lease = verdict.lease;
+      if (action.op === 'HANDOFF') return {ok:true};
       if (verdict.signal.aborted) return { ok: false, reason: 'stopped' };
+      if (action.op === 'WAIT') {
+        await new Promise<void>((resolve, reject) => {
+          const cancel = () => { clearTimeout(timer); reject(new Error('Stopped')); };
+          const timer = setTimeout(() => { verdict.signal.removeEventListener('abort', cancel); resolve(); }, Number(action.value));
+          verdict.signal.addEventListener('abort', cancel, { once:true });
+        });
+        return epoch === this.generation && !verdict.signal.aborted ? {ok:true} : {ok:false,reason:'task-changed'};
+      }
       const result = await this.call('perform', verdict.action) as Result;
       // Never deliver data after revocation, even if the renderer operation already finished.
       if (epoch !== this.generation || verdict.signal.aborted) return { ok: false, reason: 'task-changed' };

@@ -15,12 +15,12 @@ export function assertSafeLaunch(): void {
   app.commandLine.removeSwitch(fileFlag);
   assertSafeSwitches(name => app.commandLine.hasSwitch(name));
 }
-export function hardenSession(ses: Session): void {
+export function hardenSession(ses: Session, download?: (event: Electron.Event, item: Electron.DownloadItem, contents: WebContents) => void): void {
   ses.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
   ses.setPermissionCheckHandler(() => false);
   ses.setDevicePermissionHandler(() => false);
   ses.setDisplayMediaRequestHandler((_request, callback) => callback({}));
-  ses.on('will-download', event => event.preventDefault());
+  ses.on('will-download', download ?? (event => event.preventDefault()));
 }
 export function hardenWebContents(wc: WebContents): void {
   let navigatingFromHttps = false;

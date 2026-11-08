@@ -1,32 +1,30 @@
-# ButterToast 0.1.0 — Windows x64 공격 실험용 빌드
+# Windows 11 x64 개발 빌드
 
-1. ZIP을 폴더 전체로 압축 해제한다.
-2. 폴더의 `ButterToast.exe`를 실행한다. Node.js나 npm 설치는 필요 없다.
-3. exe만 별도 위치로 이동하면 안 된다. resources, locales, DLL 등 전체 파일이 필요하다.
+최신 소스의 포터블 폴더와 NSIS 설치 프로그램을 만들 수 있다. **서명 없는 개발 빌드이며 Windows 직접 실행·설치·제거는 아직 검증하지 않았다.** Linux 패키징 검증을 Windows 실행 결과로 취급하지 않는다.
 
-Windows 11 x64 대상의 서명되지 않은 개발 테스트 빌드다. Linux에서 교차 패키징했으며 이 Windows 실행 파일을 Windows에서 직접 실행한 결과는 아직 없다. Windows 코드 서명과 설치 프로그램, 자동 업데이트는 제공하지 않는다. 앱 프로필은 Windows 사용자 계정의 AppData/Roaming/ButterToast에 저장된다.
+## 실행 파일
 
-## 실험 범위
+- 설치 프로그램: `artifacts/ButterToast-0.1.0-Setup-x64.exe`
+- 포터블 실행 파일: `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`
 
-현재 실행 가능한 기능은 탭/주소 입력/탐색과 브라우저 보안 경계다. 사이트·장치 권한, 팝업과 다운로드는 기본 거부한다. 메인 IPC 사칭, 악성 페이지, iframe 격리, 인증서 거부, renderer crash 복구 등의 Linux Electron 결과는 `SECURITY-VALIDATION.md`에 있다.
+포터블은 전체 폴더를 함께 옮겨야 한다. exe 하나만 복사하면 DLL·resources가 없어 실행되지 않는다. 소스 ZIP의 src 폴더에는 실행 파일이 없다.
 
-ToastGuard, 키 저장소, 업데이트 검증기는 소스에 포함된 독립 모듈이며 UI/AI/자동 업데이트 실행 경로에 연결되지 않았다. 이 exe에서 AI 결제/삭제나 API 키 입력을 시험할 수 있는 UI는 아직 없다. 모듈 공격 회귀 테스트는 소스 묶음에서 `npm ci` 후 `npm test`로 실행한다.
+설치 프로그램은 관리자 권한 없이 현재 사용자의 LocalAppData/Programs/ButterToast에 설치하고 시작 메뉴·프로그램 제거·기본 브라우저 후보 등록을 만든다. 기본 브라우저 선택은 앱의 관리 → 설정 → OS 기본 브라우저 설정에서 사용자가 결정한다. 설치/제거 전 앱을 닫아야 한다. 제거해도 AppData/Roaming/ButterToast 프로필은 자동 삭제하지 않는다.
 
-## 배포 바이너리 보안
+## 빌드
 
-Chromium 샌드박스와 사이트 격리를 유지한다. Electron fuse로 RunAsNode, NODE_OPTIONS, Node 검사 인자 및 file 프로토콜 추가 권한을 끈다. ASAR 전용 앱 로딩 및 내장 ASAR 무결성 검증, 쿠키 암호화를 켠다. `BUILD-VERIFICATION.json`에 실제 exe에서 다시 읽은 설정과 해시를 기록한다.
-
-ASAR 무결성은 애플리케이션 코드 변조 감지를 위한 기능이다. 이 테스트 빌드는 코드 서명되지 않았으므로 공격자가 exe 자체와 내장 검증 정보까지 바꾼 경우를 방어한다고 주장하지 않는다. 샌드박스 해제나 TLS 오류 무시 옵션은 사용하지 않는다.
-
-## 재빌드
-
-Node.js 24 권장. 저장소에서:
-
-```text
+```sh
 npm ci
 npm test
-npm run sbom
 npm run package:win
+# NSIS makensis가 설치된 환경
+npm run package:installer
 ```
 
-`artifacts/windows/ButterToast-win32-x64`가 생성된다. Electron의 공식 Windows 바이너리는 패키징 도구가 체크섬 검증 후 사용한다. 프록시가 필요한 Node.js 24 환경은 플랫폼이 제공한 프록시와 인증서 설정을 유지하고 `NODE_USE_ENV_PROXY=1`을 사용할 수 있다.
+프록시가 필요한 Node 24 환경에서는 제공된 프록시/CA를 유지하고 `NODE_USE_ENV_PROXY=1`을 사용할 수 있다. Electron 다운로드 캐시는 저장소의 무시된 artifacts/.electron-cache에 둔다. NSIS 경로를 별도로 지정하려면 MAKENSIS_BIN 환경변수를 사용한다.
+
+패키징은 허용된 앱 자산·고정 운영 지침만 포함하며 ASAR payload, Windows x64 PE, sandbox 관련 fuse와 내장 ASAR 해시를 재검증한다. BUILD-VERIFICATION.json 및 설치 프로그램 옆 JSON에 서명/Windows 검증 여부와 해시를 남긴다.
+
+## 출시 전
+
+실제 Windows에서 키 암호화·탭 복원·기본 브라우저·다운로드·회원가입/복구 콜백·AI 호출을 확인해야 한다. 설치 프로그램은 Authenticode 서명되지 않았다. 업데이트 서버와 게시자 키가 없으므로 현재 자동 업데이트는 비활성이다. 서명과 배포 준비 절차는 [릴리스 설정](RELEASE-SETUP.md)을 참조한다.

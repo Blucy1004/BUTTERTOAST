@@ -10,7 +10,7 @@ export type PageState = { document: string; tab: number; origin: string; version
 export type Scope = { tab: number; origin: string; permissions: ReadonlySet<Permission> };
 const ops = ['CLICK', 'FILL', 'SELECT', 'SCROLL', 'NAVIGATE', 'WAIT', 'READ', 'EXTRACT', 'VERIFY', 'HANDOFF'];
 const targeted = new Set(['CLICK', 'FILL', 'SELECT', 'READ', 'EXTRACT', 'VERIFY']);
-const approvalRequired = new Set(['CLICK', 'FILL', 'SELECT', 'NAVIGATE']);
+const approvalRequired = new Set(['CLICK', 'FILL', 'SELECT', 'SCROLL', 'NAVIGATE']);
 function validOrigin(value: string): boolean {
   try { const url = new URL(value); return url.protocol === 'https:' && url.origin === value; } catch { return false; }
 }
@@ -60,7 +60,7 @@ export class ToastGuard {
     if (this.consumed.has(action.id)) return 'replay';
     if (this.consumed.size >= 512) return 'budget';
     const required: Permission[] = ['READ', 'EXTRACT', 'VERIFY', 'WAIT'].includes(action.op) ? ['read']
-      : action.op === 'CLICK' ? ['write', 'transmit', 'delete', 'pay'] : action.op === 'HANDOFF' ? [] : ['write'];
+      : ['CLICK','FILL','SELECT','SCROLL','NAVIGATE'].includes(action.op) ? ['write', 'transmit', 'delete', 'pay'] : action.op === 'HANDOFF' ? [] : ['write'];
     if (required.some(p => !this.scope!.permissions.has(p))) return 'permission';
     if (action.target) {
       const element = state.elements.get(action.target);

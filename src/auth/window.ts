@@ -18,8 +18,8 @@ export class AccountWindow {
     const network = session.fromPartition('toast-auth-network'); hardenSession(network);
     network.webRequest.onBeforeRequest((details, callback) => {
       const url = new URL(details.url);
-      callback({ cancel: !config || url.origin !== config.origin || details.method !== 'POST'
-        || !['/auth/v1/signup', '/auth/v1/token', '/auth/v1/logout'].includes(url.pathname) });
+      const expected:Record<string,string>={'/auth/v1/signup':'POST','/auth/v1/token':'POST','/auth/v1/logout':'POST','/auth/v1/recover':'POST','/auth/v1/user':'PUT','/auth/v1/reauthenticate':'GET'};
+      callback({ cancel: !config || url.origin !== config.origin || expected[url.pathname] !== details.method });
     });
     this.service = new AuthService(config ? new AuthApi(config, (url, options) => network.fetch(url, options)) : null, () => {
       this.emit(); changed();

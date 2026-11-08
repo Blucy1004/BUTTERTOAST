@@ -20,7 +20,7 @@ const messages: Record<string, string> = {
 /** Owns all credentials. Only the explicit public state crosses IPC. */
 export class AuthService {
   private session?: AuthSession;
-  private pending?: { email: string; verifier: string; receiver: Receiver };
+  private pending?: { email: string; verifier: string; receiver: Receiver; recovery?:boolean };
   private state: AuthState;
   private epoch = 0;
   private operation?: AbortController;
@@ -46,6 +46,7 @@ export class AuthService {
     clearTimeout(this.refreshTimer); this.refreshTimer = undefined;
     clearTimeout(this.expiryTimer); this.expiryTimer = undefined;
     this.clearPending(); this.session = undefined;
+    this.state.recovering = false;
     return this.epoch;
   }
   private signal(): AbortSignal {
@@ -65,7 +66,9 @@ export class AuthService {
   }
   private async refresh(): Promise<void> {
     if (!this.session || !this.api || this.disposed) return;
+    if(this.state.busy){this.refreshTimer=setTimeout(()=>{void this.refresh();},1000);this.refreshTimer.unref();return;}
     const epoch = this.epoch, current = this.session;
+    this.emit({busy:true});
     try {
       const data = await this.api.request('token', { refresh_token: current.refresh }, this.signal(), '?grant_type=refresh_token');
       if (epoch === this.epoch) {
@@ -85,7 +88,8 @@ export class AuthService {
     try {
       const data = await this.api.request('token', { auth_code: code, code_verifier: pending.verifier }, this.signal(), '?grant_type=pkce');
       if (epoch !== this.epoch) return false;
-      this.accept(data, pending.email); return true;
+      this.accept(data, pending.email);
+      if(pending.recovery)this.emit({recovering:true,message:'복구 메일 인증이 완료됐습니다. 새 비밀번호를 입력하세요.'}); return true;
     } catch {
       if (epoch === this.epoch) this.emit({ busy: false, message: '인증 링크를 확인하지 못했습니다. 메일 인증 후 다시 로그인해 주세요.' });
       return false;
@@ -103,10 +107,24 @@ export class AuthService {
       }
       return;
     }
+    if(command.type==='password-update'||command.type==='reauthenticate') {
+      if(!this.api||!this.session||this.state.busy)return;
+      if(command.type==='password-update'&&!this.state.recovering&&!command.currentPassword){this.emit({message:'현재 비밀번호를 입력해 주세요.'});return;}
+      const epoch=this.epoch,current=this.session;this.emit({busy:true,message:''});
+      try {
+        const body=command.type==='password-update'?{password:command.password,...(command.currentPassword?{current_password:command.currentPassword}:{}),...(command.nonce?{nonce:command.nonce}:{})}:null;
+        const result=await this.api.request(command.type==='password-update'?'user':'reauthenticate',body,this.signal(),'',current.access);
+        if(epoch!==this.epoch)return;
+        if(command.type==='password-update'&&(!record(result)||result.id!==current.id))throw new AuthFailure('response');
+        if(command.type==='password-update'){await this.command({type:'logout'});this.emit({message:'비밀번호를 변경했습니다. 새 비밀번호로 로그인하세요.'});}
+        else this.emit({busy:false,message:'재인증 코드가 발송됐다면 아래 코드 입력란에 입력하세요.'});
+      }catch{if(epoch===this.epoch)this.emit({busy:false,message:'변경을 완료하지 못했습니다. 현재 비밀번호와 재인증 코드, 서버 정책을 확인하세요.'});}
+      return;
+    }
     if (!this.api || this.state.busy || this.session) return;
-    if (this.now() < (command.type === 'signup' ? this.nextSignup : this.nextLogin)) { this.emit({ message: '잠시 후 다시 시도해 주세요.' }); return; }
+    if (this.now() < (command.type === 'signup' || command.type==='recover' ? this.nextSignup : this.nextLogin)) { this.emit({ message: '잠시 후 다시 시도해 주세요.' }); return; }
     const epoch = this.invalidate();
-    if (command.type === 'signup') this.nextSignup = this.now() + 60_000;
+    if (command.type === 'signup'||command.type==='recover') this.nextSignup = this.now() + 60_000;
     else this.nextLogin = this.now() + 3000;
     this.emit({ status: 'signed-out', email: '', busy: true, message: '' });
     try {
@@ -115,21 +133,21 @@ export class AuthService {
         if (epoch === this.epoch) this.accept(data, command.email);
       } else {
         const receiver = this.receiverFactory(), verifier = randomBytes(32).toString('base64url');
-        this.pending = { email: command.email, verifier, receiver };
+        this.pending = { email: command.email, verifier, receiver, recovery:command.type==='recover' };
         let redirect: string;
         try { redirect = await receiver.start(code => this.confirm(code, epoch)); }
         catch { throw new AuthFailure('confirmation'); }
         if (epoch !== this.epoch) { receiver.close(); return; }
-        const data = await this.api.request('signup', { email: command.email, password: command.password,
+        const data = await this.api.request(command.type==='recover'?'recover':'signup', { email: command.email, ...(command.type==='signup'?{password:command.password}:{}),
           code_challenge: createHash('sha256').update(verifier).digest('base64url'), code_challenge_method: 's256' },
         this.signal(), `?redirect_to=${encodeURIComponent(redirect)}`);
         if (epoch !== this.epoch) return;
         // A token here means email autoconfirm is enabled; do not silently bypass the intended flow.
         if (!record(data)) throw new AuthFailure('response');
         if ('access_token' in data) throw new AuthFailure('policy');
-        if (typeof data.id !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(data.id) || normalizeEmail(data.email) !== command.email) throw new AuthFailure('response');
+        if (command.type==='signup'&&(typeof data.id !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(data.id) || normalizeEmail(data.email) !== command.email)) throw new AuthFailure('response');
         this.emit({ status: 'pending-email', email: command.email, busy: false,
-          message: '가입 가능한 주소라면 인증 메일이 도착합니다. 앱을 켜 둔 채 같은 컴퓨터에서 링크를 눌러 주세요. 이미 가입했다면 로그인해 주세요.' });
+          message: command.type==='recover'?'가입된 주소라면 복구 메일이 도착합니다. 앱을 켜 둔 채 같은 컴퓨터에서 링크를 눌러 주세요.':'가입 가능한 주소라면 인증 메일이 도착합니다. 앱을 켜 둔 채 같은 컴퓨터에서 링크를 눌러 주세요. 이미 가입했다면 로그인해 주세요.' });
         this.pendingTimer = setTimeout(() => {
           if (epoch !== this.epoch) return;
           this.invalidate(); this.emit({ status: 'signed-out', email: '', busy: false, message: '인증 대기 시간이 지났습니다. 메일 인증 후 로그인해 주세요.' });
