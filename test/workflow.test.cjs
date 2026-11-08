@@ -19,6 +19,32 @@ test('workflow refuses origin changes and malformed automation budgets',async()=
  assert.equal(calls,0);assert.equal(service.publicState().workflow.status,'paused');service.dispose();
  assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:100}),null);assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:1,approved:true}),null);
 });
+test('an early cooldown timer neither bypasses the request interval nor abandons the next workflow step',{timeout:5000},async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ let now=0,calls=0;
+ const settle=()=>new Promise(resolve=>setImmediate(resolve));
+ const host={capture:async()=>({data:{source:'task',origin:'https://example.test',text:'page',elements:[{id:'e1',name:'Search',role:'textbox',actions:['FILL']}]},valid:()=>true,check:async()=>true,dispose(){},click:async()=>false,act:async()=>true}),confirmWorkflow:async()=>true,openTask:async()=>{},closeTask(){},hide(){}};
+ const adapter={models:async()=>['fixture'],chat:async()=>({text:'step',action:++calls===1?{op:'FILL',target:'e1',value:'query'}:null,usage:{input:1,output:1,cached:0}})};
+ const service=new AiService(adapter,{},host,()=>{},()=>now);t.after(()=>service.dispose());
+ await service.command({type:'connect',provider:'compatible',endpoint:'http://127.0.0.1:1234/v1',key:'',remember:false});
+ const started=service.command({type:'run-task',goal:'Search',steps:3});await settle();t.mock.timers.tick(0);await started;
+ const approved=service.command({type:'approve'});await settle();
+ t.mock.timers.tick(1500);await settle();
+ assert.equal(calls,1);assert.equal(service.publicState().busy,true);
+ now=1499;t.mock.timers.tick(1500);await settle();assert.equal(calls,1);assert.equal(service.publicState().busy,true);
+ now=1500;t.mock.timers.tick(1);await approved;
+ assert.equal(calls,2);assert.equal(service.publicState().workflow.status,'completed');
+});
+test('stopping during an awaited workflow page check cannot restore context or send the captured page',{timeout:5000},async t=>{
+ let captures=0,calls=0,disposed=0,releaseCheck,checkStarted;
+ const pendingCheck=new Promise(resolve=>{checkStarted=resolve});
+ const host={capture:async()=>{const number=++captures;return {data:{source:'task',origin:'https://example.test',text:'PRIVATE_PENDING_PAGE',elements:[]},valid:()=>true,check:()=>number===2&&!releaseCheck?new Promise(resolve=>{releaseCheck=resolve;checkStarted()}):Promise.resolve(true),dispose(){disposed++},click:async()=>false}},confirmWorkflow:async()=>true,openTask:async()=>{},closeTask(){},hide(){}};
+ const service=new AiService({models:async()=>['fixture'],chat:async()=>{calls++;return {text:'unexpected',action:null,usage:{input:1,output:1,cached:0}}}},{},host,()=>{});t.after(()=>service.dispose());
+ await service.command({type:'connect',provider:'compatible',endpoint:'http://127.0.0.1:1234/v1',key:'',remember:false});
+ const running=service.command({type:'run-task',goal:'Search',steps:3});await pendingCheck;
+ await service.command({type:'stop'});releaseCheck(true);await running;
+ assert.equal(calls,0);assert.equal(disposed,2);assert.equal(service.publicState().context,null);assert.equal(service.publicState().busy,false);assert.equal(service.publicState().workflow.status,'paused');
+});
 test('password recovery binds PKCE callback to email; password update requires a session and logs out afterwards',async()=>{
  let callback,calls=[];const email='fixture@example.test',id='11111111-1111-4111-8111-111111111111';
  const session={access_token:'fixture-access-token-not-live',refresh_token:'fixture-refresh',expires_in:3600,token_type:'bearer',user:{id,email,email_confirmed_at:new Date().toISOString()}};

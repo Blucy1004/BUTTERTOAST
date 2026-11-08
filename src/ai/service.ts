@@ -3,6 +3,7 @@ import { AiCommand, ChatMessage, Connection, Provider, Usage, Proposal, parsePro
 import { KeyVault } from '../security/vault';
 import { record } from '../security/ipc';
 import {defaultOptions,ModelOptions,estimatedCost} from './options';
+import { performance } from 'node:perf_hooks';
 export type PageContext = { source: 'human' | 'task' | 'controlled'; origin: string; text: string; elements: { id: string; role: string; name: string; actions?: string[] }[] };
 export interface Attachment { data: PageContext; check(): Promise<boolean>; valid(): boolean; click(target: string): Promise<boolean>; act?(proposal: Proposal): Promise<boolean>; dispose(): void }
 export interface AiHost { capture(source: 'human' | 'task' | 'controlled', selectionOnly?:boolean): Promise<Attachment>; openTask(url: string): Promise<void>; closeTask(): void; stopTask?(): void; hide(): void; confirmWorkflow?(origin:string):Promise<boolean>; handoff?(source?:PageContext['source']):void; completed?():void;
@@ -27,7 +28,7 @@ export class AiService {
   private state: AiState = { connected: false, provider: 'openai', endpoint: '', model: '', models: [], busy: false, message: '연결 설정에서 API를 연결해 주세요.', storageAvailable: false,
     options:{...defaultOptions},estimatedCost:0,contextRemaining:null,workflow:null,
     messages: [], usage: { input: 0, output: 0, cached: 0 }, requests: 0, context: null, proposal: null };
-  constructor(private adapter: ModelAdapter, private vault: KeyVault, private host: AiHost, private changed: () => void, private now = Date.now) {}
+  constructor(private adapter: ModelAdapter, private vault: KeyVault, private host: AiHost, private changed: () => void, private now = () => performance.now()) {}
   publicState(): AiState { return structuredClone(this.state); }
   storageAvailable(value: boolean): void { this.emit({ storageAvailable: value }); }
   invalidInput(): void { this.emit({ message: '입력 형식을 확인해 주세요. 외부 API 주소는 HTTPS, 로컬 HTTP는 localhost 또는 127.0.0.1만 지원합니다.' }); }
@@ -194,10 +195,16 @@ export class AiService {
     const epoch=this.invalidate();workflow.status='running';this.emit({busy:true,message:'다음 단계의 페이지를 확인합니다.'});
     let attachment:Attachment|undefined;
     try {
-      await new Promise(resolve=>setTimeout(resolve,Math.max(0,this.nextRequest-this.now())));
+      // Timers may wake early. Enforce the interval using a monotonic clock,
+      // and keep revocation authoritative while waiting for the next request.
+      while(this.now()<this.nextRequest){
+        await new Promise(resolve=>setTimeout(resolve,Math.max(1,Math.ceil(this.nextRequest-this.now()))));
+        if(epoch!==this.epoch)return;
+      }
       if(epoch!==this.epoch)return;
       attachment=await this.host.capture('task');
       if(epoch!==this.epoch||attachment.data.origin!==workflow.origin||!await attachment.check()){attachment.dispose();if(epoch===this.epoch){workflow.status='paused';this.emit({busy:false,message:'사이트가 바뀌었습니다. 새 작업으로 시작해 공유 범위를 다시 승인하세요.'});}return;}
+      if(epoch!==this.epoch){attachment.dispose();return;}
       this.dropContext();this.attachment=attachment;this.state.context=attachment.data;workflow.step++;
       await this.send(`${workflow.goal}\n작업 단계 ${workflow.step}/${workflow.limit}. 현재 페이지를 확인하고 다음 동작 하나를 제안하세요. 이전 동작이 성공했다고 추측하거나 같은 제출을 반복하지 마세요. 완료됐다면 action:null로 결과를 설명하세요.`.slice(0,12000));
       if(epoch===this.epoch&&this.state.busy){workflow.status='paused';this.emit({busy:false});}
