@@ -22,3 +22,9 @@ node scripts/sign-update.mjs --artifact path/to/Setup.exe --url https://updates.
 Ed25519 업데이트 서명과 Windows Authenticode는 별개다. 게시자 코드 서명 인증서/키가 제공되지 않았으므로 서명된 제품으로 표시하지 않는다. 자체서명 인증서나 보안 기능 해제로 OS 경고를 우회하지 않는다.
 
 GitHub Actions는 Windows 회귀와 포터블 패키지 artifact 생성을 포함한다. `08db601`의 Ubuntu/Windows 테스트·audit·비밀정보 검사는 통과했지만 Windows 패키징의 ASAR 파일 조회에서 경로 구분자 오류가 발견됐다. 검증을 생략하지 않고 ASAR API에 호스트 형식의 경로를 전달하도록 수정했다. 최종 CI 결과는 해당 커밋의 Actions 실행을 확인한다. 소스의 Windows 회귀 통과와 설치 프로그램의 설치·제거 검증은 별개다.
+
+## GitHub 사전 릴리스 생성
+
+Actions의 `Publish Windows development build`를 수동 실행한다. `security_run_id`에는 성공한 `main` push의 `Security regression` 실행 번호를, `release_tag`에는 아직 없는 `v0.1.0-dev.1` 형태의 태그를 넣는다. 선택한 실행이 같은 저장소·정해진 보안 워크플로인지 확인한 뒤, 그 실행의 Windows artifact와 정확한 소스 커밋을 사용한다.
+
+공식 Ubuntu NSIS 패키지로 설치 프로그램을 만들고 포터블 ZIP·체크섬·빌드 검증 보고서·SBOM을 첨부한다. GitHub가 보고한 첨부 크기와 SHA-256이 로컬 파일과 모두 일치할 때만 초안을 사전 릴리스로 게시한다. 공개된 기존 릴리스나 첨부를 덮어쓰지 않는다. GitHub 내부 토큰을 사용하므로 개발자 개인 토큰을 앱이나 워크플로에 저장할 필요가 없다.
