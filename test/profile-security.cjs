@@ -7,6 +7,22 @@ process.env.BUTTERTOAST_SUPABASE_URL='https://abcdefghijklmnopqrst.supabase.co';
 process.env.BUTTERTOAST_SUPABASE_PUBLISHABLE_KEY='sb_publishable_local_test_fixture_1234';
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(fn,label){for(let i=0;i<400;i++){if(await fn())return;await wait(20)}throw Error(label)}
+async function capture(window,name,width,height){
+ // A background child window may not have a composited surface yet on Windows.
+ window.setContentSize(width,height);window.show();window.focus();
+ const wc=window.webContents;
+ await wc.executeJavaScript('document.fonts.ready.then(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))');
+ for(let attempt=0;attempt<5;attempt++){
+   try {
+     const picture=await wc.capturePage(undefined,{stayAwake:true});
+     assert.equal(picture.isEmpty(),false,'Expected a rendered screenshot');
+     fs.writeFileSync(`artifacts/${name}.png`,picture.toPNG());return;
+   } catch(error) {
+     if(error.message!=='UnknownVizError'||attempt===4)throw error;
+     console.log(`Waiting for compositor: ${name}, attempt ${attempt+1}`);await wait(150);
+   }
+ }
+}
 const deadline=setTimeout(()=>{console.error('FAIL profile timeout');app.exit(1)},110000);
 let groups=0;const pass=label=>{groups++;console.log('PASS',label)};
 require('../dist/main');
@@ -76,10 +92,10 @@ app.whenReady().then(async()=>{
  assert.equal(await aw.executeJavaScript('getComputedStyle(document.getElementById("profile-save")).borderRadius'),'12px');
  pass('profile form saves nickname, bio, avatar and seven appearance choices; preview is local until server acknowledgement');
 
- const accountWindow=BrowserWindow.fromWebContents(aw);accountWindow.setContentSize(760,1180);await wait(180);
- await aw.executeJavaScript('document.fonts.ready');fs.writeFileSync('artifacts/profile-appearance.png',(await accountWindow.capturePage()).toPNG());
- await aw.executeJavaScript('document.getElementById("profile-tab").click()');accountWindow.setContentSize(760,860);await wait(180);fs.writeFileSync('artifacts/profile-settings.png',(await accountWindow.capturePage()).toPNG());
- main.focus();await wait(180);fs.writeFileSync('artifacts/profile-light-workspace.png',(await main.capturePage()).toPNG());
+ const accountWindow=BrowserWindow.fromWebContents(aw);
+ await capture(accountWindow,'profile-appearance',760,1180);
+ await aw.executeJavaScript('document.getElementById("profile-tab").click()');await capture(accountWindow,'profile-settings',760,860);
+ await capture(main,'profile-light-workspace',1440,900);
  const revision=(await state()).profileRevision;await wait(1100);
  await aw.executeJavaScript(`document.getElementById('profile-name').value='저장하지 않은 초안';document.getElementById('profile-name').dispatchEvent(new Event('input',{bubbles:true}))`);
  await ui.executeJavaScript('document.getElementById("theme-toggle").click()');await until(async()=>(await state()).profileRevision!==revision,'other UI saves theme');
