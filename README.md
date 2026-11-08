@@ -1,9 +1,11 @@
 # ButterToast
 
-<!-- INTRODUCTION: The project owner can edit this opening description independently. -->
 ButterToast is a Chromium-based desktop browser that gives people and AI assistants separate workspaces, with explicit controls for sharing page context and approving browser actions.
 
 사람과 AI가 각자의 공간에서 작업하고, 필요한 순간에 페이지와 제어권을 공유하는 브라우저입니다.
+최근에 여러 AI 브라우저들이 나오고 있는데, 사실 저도 이런 걸 해보고 싶었지만 선례가 없어서 좀 주저했었는데 이런 선례들이 나와서 가능성 있는 아이디어라는 것을 알게 되었고, AI와 협업도 하고 도움도 받고, 필요한 순간에는 지시 사항을 주면 AI가 브라우저에서 작업을 할 수 있는 브라우저인 ButterToast를 만들었습니다.
+자체 ToastIR을 통해 웹페이지의 텍스트와 상호작용 요소를 구조화된 JSON으로 변환해 AI에 전달합니다. 이를 통해 스크린샷이나 전체 HTML 전달에 드는 부담을 줄이고, 정보 처리와 브라우저 조작의 효율 향상을 목표로 합니다.
+
 <!-- END INTRODUCTION -->
 
 **Development preview · Windows 11 x64 · Electron / TypeScript**
@@ -37,13 +39,6 @@ AI models propose structured actions. The application checks their scope, docume
 | Usage visibility | Provider-reported token usage, user-configured cost estimates, request limits and optional encrypted conversation archives |
 
 Search opens the selected search engine's normal results page. The optional Google theme applies local styling to supported search pages.
-
-## OpenAI integration status
-
-The current implementation connects to the **OpenAI API using a user-provided API key**. Requests are sent from the application to the configured provider through a dedicated network session. OpenAI support currently uses the Chat Completions API; compatible and local endpoints must implement the API behavior expected by their adapter.
-
-ChatGPT account sign-in, ChatGPT OAuth authorization and use of a ChatGPT subscription as API access are **not implemented in the current release**. API access and billing are managed by the selected provider and are separate from a ChatGPT subscription.
-
 ButterToast is an independently developed project. This repository does not claim approval, certification or endorsement by OpenAI or other model providers.
 
 ### User control over AI access
