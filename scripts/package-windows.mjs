@@ -7,9 +7,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
 
 const root = path.resolve(import.meta.dirname, '..');
 const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
+const require=createRequire(import.meta.url),electronPackage=require('electron/package.json');
+assert.equal(electronPackage.version,pkg.devDependencies.electron,'Install the locked Electron version before packaging');
+const electronChecksums=require('electron/checksums.json');
 const stage = await fs.mkdtemp(path.join(os.tmpdir(), 'buttertoast-package-'));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 try {
@@ -37,7 +41,7 @@ try {
     dir: stage, out: path.join(root, 'artifacts', 'windows'), name: 'ButterToast',
     executableName: 'ButterToast', platform: 'win32', arch: 'x64',
     electronVersion: pkg.devDependencies.electron, appVersion: pkg.version,
-    download: { cacheRoot: path.join(root, 'artifacts', '.electron-cache') },
+    download: { cacheRoot: path.join(root, 'artifacts', '.electron-cache'),checksums:electronChecksums },
     asar: true, prune: false, overwrite: true,
     win32metadata: { ProductName: 'ButterToast Security Test', 'requested-execution-level': 'asInvoker' }
   });

@@ -23,6 +23,8 @@ Ed25519 업데이트 서명과 Windows Authenticode는 별개다. 게시자 코�
 
 GitHub Actions는 Windows 회귀와 포터블 패키지 artifact 생성을 포함한다. `08db601`의 Ubuntu/Windows 테스트·audit·비밀정보 검사는 통과했지만 Windows 패키징의 ASAR 파일 조회에서 경로 구분자 오류가 발견됐다. 검증을 생략하지 않고 ASAR API에 호스트 형식의 경로를 전달하도록 수정했다. 최종 CI 결과는 해당 커밋의 Actions 실행을 확인한다. 소스의 Windows 회귀 통과와 설치 프로그램의 설치·제거 검증은 별개다.
 
+CI의 `scripts/install-electron.cjs`는 먼저 Electron 자체 설치기를 사용한다. 배포 URL 오류가 있으면 GitHub CLI와 해당 단계의 읽기 토큰으로 같은 공식 릴리스 자산 API를 사용한다. 버전·파일명·자산 크기·API SHA-256·npm 패키지에 포함된 고정 체크섬과 실제 파일을 모두 검증하고, 원래 설치기로 설치한다. 이 다운로드용 토큰은 앱 패키지에 포함하지 않는다.
+
 ## GitHub 사전 릴리스 생성
 
 Actions의 `Publish Windows development build`를 수동 실행한다. `security_run_id`에는 성공한 `main` push의 `Security regression` 실행 번호를, `release_tag`에는 아직 없는 `v0.2.0-dev.1` 형태의 태그를 넣는다. 선택한 실행이 같은 저장소·정해진 보안 워크플로인지 확인한 뒤, 그 실행의 Windows artifact와 정확한 소스 커밋을 사용한다.

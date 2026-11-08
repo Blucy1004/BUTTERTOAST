@@ -45,9 +45,11 @@
 
 새 `test:upgrade`는 실제 Electron에서 폰트, 탭 메뉴·검색, 페이지 찾기/좌표·확대, 일괄 닫기 승인, 다운로드 탐색 경합, 다중 AI 중지와 지연 응답, 위임 중지, 대기 동작 승인 무효화, 충돌 복구의 9개 그룹을 검사한다. 로컬 HTTPS protocol fixture와 가짜 모델 응답을 사용하며 실제 API 호출이나 공용 사이트 공격은 하지 않는다.
 
-최종 로컬 `npm run test:security`에서 단위 테스트 85개와 Electron 112개 그룹이 통과했다. 기존 102개 그룹에 업그레이드 9개와 사이트 데이터 삭제 후 다운로드 1개를 추가했다. npm audit 보고 취약점은 0건이며 지원 비밀정보 패턴은 미검출이었다. 로그는 `/tmp/bt-upgrade-full-security.log`, Windows·Ubuntu CI 결과는 해당 커밋의 Actions에서 확인한다. Windows CI는 실제 NTFS 다운로드의 `Zone.Identifier`도 읽어 확인한다.
+로컬 검증에서 단위 테스트 86개와 Electron 112개 그룹이 통과했다. 기존 102개 그룹에 업그레이드 9개와 사이트 데이터 삭제 후 다운로드 1개를 추가했다. npm audit 보고 취약점은 0건이며 지원 비밀정보 패턴은 미검출이었다. 전체 앱 회귀는 `/tmp/bt-upgrade-full-security.log`, 다운로드 경로 보완 후 단위 검증은 `/tmp/bt-upgrade-final-unit.log`에 기록했다. Windows·Ubuntu CI 결과는 해당 커밋의 Actions에서 확인한다. Windows CI는 실제 NTFS 다운로드의 `Zone.Identifier`도 읽어 확인한다.
 
 엔진은 npm의 최신 안정 버전 조회에서 Electron 45.2.3임을 확인했다. 의존성을 불필요하게 교체하지 않았다. npm audit과 비밀정보 패턴 검사는 완전한 취약점/정보 유출 탐지가 아니다.
+
+최초 CI는 Electron 공식 다운로드 URL의 504 오류로 설치 단계에서 멈췄다. 기본 경로 실패 시 같은 공식 GitHub 릴리스의 asset API로 내려받는 대체 경로를 추가했다. npm lockfile로 고정된 Electron 패키지의 체크섬, 공식 API의 버전·자산 URL·크기·해시, 실제 파일 바이트를 검사한 후 Electron 자체 설치기로 설치한다. 체크섬 검증이나 TLS를 끄지 않는다. 패키징도 패키지의 체크섬을 사용해 원격 체크섬 파일 장애에 영향을 덜 받게 했다.
 
 ## 남은 검증
 
