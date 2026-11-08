@@ -7,6 +7,10 @@ const tabSearch=document.getElementById('tab-search');
 tabSearch.oninput=()=>{if(current)window.renderTabs(current,send,tabSearch.value.trim());};
 tabSearch.onkeydown=e=>{if(e.key==='Escape'){tabSearch.value='';tabSearch.oninput();}if(e.key==='Enter'){document.querySelector('#tabs button')?.click();}};
 document.getElementById('ai-stop-all').onclick=()=>send('ai-stop-all');
+document.getElementById('theme-toggle').onclick=()=>send('theme-cycle');
+function renderThemeButton(){const light=document.documentElement.dataset.theme==='light',button=document.getElementById('theme-toggle');window.icons.set(button,light?'moon':'sun');button.title=light?'다크 테마로 전환':'라이트 테마로 전환';button.setAttribute('aria-label',button.title);}
+window.addEventListener('appearance-updated',renderThemeButton);renderThemeButton();
+let noticeTimer,lastNotice='';
 document.getElementById('find-open').onclick=()=>send('find-open');
 document.getElementById('find-close').onclick=()=>send('find-close');
 let findTimer;
@@ -41,7 +45,12 @@ window.browser.onState(state => {
   document.getElementById('manager-open').disabled = !state.initialized;
   document.getElementById('bookmark').disabled = !state.initialized || !/^https?:/.test(state.url);
   document.getElementById('account-open').disabled = !state.initialized;
-  document.getElementById('account-open').textContent = state.accountSignedIn ? '계정' : '로그인';
+  document.getElementById('account-name').textContent = state.accountSignedIn ? state.accountProfile?.name||'프로필' : '로그인';
+  document.getElementById('account-avatar').replaceChildren(state.accountSignedIn?window.icons.profile(state.accountProfile?.avatar):window.icons.create('user'));
+  document.getElementById('account-open').title=state.accountSignedIn?'내 프로필 · 꾸미기 · 보안 설정':'로그인 · 회원가입';
+  document.getElementById('account-open').setAttribute('aria-label',document.getElementById('account-open').title);
+  document.getElementById('theme-toggle').disabled=!state.initialized||state.accountBusy;
+  if(state.appearanceMessage!==lastNotice){lastNotice=state.appearanceMessage;clearTimeout(noticeTimer);const notice=document.getElementById('appearance-notice');notice.textContent=lastNotice;notice.hidden=!lastNotice;if(lastNotice)noticeTimer=setTimeout(()=>{notice.hidden=true;},6000);}
   document.getElementById('ai-toggle').disabled = !state.initialized;
   document.getElementById('ai-next').disabled = !state.initialized;
   document.getElementById('ai-toggle').textContent = `Toast ${state.aiSlot}`;

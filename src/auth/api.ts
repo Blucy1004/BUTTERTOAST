@@ -21,7 +21,7 @@ export class AuthApi {
   constructor(private config: AuthConfig, private fetcher: AuthFetch) {}
   async request(route: 'signup' | 'token' | 'logout' | 'recover' | 'reauthenticate' | 'user', body: object | null, signal: AbortSignal, query = '', bearer?: string): Promise<unknown> {
     const response = await this.fetcher(`${this.config.origin}/auth/v1/${route}${query}`, {
-      method: route === 'user' ? 'PUT' : route === 'reauthenticate' ? 'GET' : 'POST', headers: { apikey: this.config.publishableKey, 'Content-Type': 'application/json', ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}) },
+      method: route === 'user' ? (body===null?'GET':'PUT') : route === 'reauthenticate' ? 'GET' : 'POST', headers: { apikey: this.config.publishableKey, 'Content-Type': 'application/json', ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}) },
       body: body ? JSON.stringify(body) : undefined, redirect: 'error', credentials: 'omit', cache: 'no-store', signal
     });
     if (response.status >= 300 && response.status < 400) throw new AuthFailure('redirect');

@@ -28,6 +28,10 @@ BTIR v1은 제한된 JSON 스키마를 표준 DEFLATE로 압축한 바이너리�
 
 Supabase 토큰/PKCE verifier는 메인의 별도 인증 네트워크 세션과 RAM에 둔다. 가입·복구 콜백은 예상 이메일과 묶고 로그아웃·만료 후 지연 응답을 거부한다. 계정 로그인은 AI 권한을 부여하지 않는다.
 
+0.3의 `Profile`은 표시용 스키마이며 `AuthService`가 현재 bearer로 Auth `/user`에 `buttertoast_profile` namespace만 저장/조회한다. 사용자 ID·이메일·인증 상태·revision·세션 세대를 검사한다. 메타데이터의 권한 필드는 사용하지 않는다. 새 테이블이나 관리자 키는 필요 없다.
+
+`UiAppearance`는 로그인 프로필 또는 `BrowserLibrary`의 비로그인 설정에서 가져온 옵션을 등록된 앱 뷰에만 전달한다. `appearance.js`는 허용 dataset 값과 디자인 토큰만 적용하며 네이티브 웹 뷰의 크기·권한을 변경하지 않는다. `profile.js`는 서버 저장 전 미리보기와 편집 충돌 표시를 담당한다. `icons.js`는 고정 벡터 path를 생성하며 외부 자산이나 사용자 SVG를 로드하지 않는다. [저장 범위·검증](PROFILE-THEMES-0.3.md)을 참조한다.
+
 Windows 포터블 패키지는 자산 허용 목록과 ASAR/fuse/PE 해시를 검사한다. NSIS는 현재 사용자 폴더에 설치하고 사용자별 URL 등록을 제공한다. 제거는 패키지 파일 목록만 대상으로 하며 사용자 프로필은 보존한다. 코드 서명과 실제 Windows 실행은 별도다.
 
 업데이트는 패키지에 고정된 공개키/HTTPS origin을 신뢰 기준으로 삼는다. 서명된 manifest를 검증한 다음에만 바이너리를 다운로드하고 크기·해시·버전·만료를 재검사한다. 현재 릴리스 설정은 비어 있으므로 요청·설치를 하지 않는다.

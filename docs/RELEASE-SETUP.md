@@ -1,6 +1,6 @@
 # 릴리스·업데이트 준비
 
-개발 빌드는 [GitHub 사전 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1)의 설치 파일·포터블 ZIP으로 배포한다. Authenticode 서명되지 않았으며, 운영 출시 전 실제 Windows 설치/제거·기본 브라우저·DPAPI·메일 콜백과 모델 호출 검증이 필요하다. 저장소 공개 범위와 자동 업데이트 설정은 변경하지 않는다.
+개발 빌드는 [GitHub 사전 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1)의 설치 파일·포터블 ZIP으로 배포한다. Authenticode 서명되지 않았으며, 운영 출시 전 실제 Windows 설치/제거·기본 브라우저·DPAPI·메일 콜백과 모델 호출 검증이 필요하다. 저장소 공개 범위와 자동 업데이트 설정은 변경하지 않는다.
 
 ## 서명된 업데이트
 
@@ -27,6 +27,6 @@ CI의 `scripts/install-electron.cjs`는 먼저 Electron 자체 설치기를 사�
 
 ## GitHub 사전 릴리스 생성
 
-Actions의 `Publish Windows development build`를 수동 실행한다. `security_run_id`에는 성공한 `main` push의 `Security regression` 실행 번호를, `release_tag`에는 아직 없는 `v0.2.0-dev.1` 형태의 태그를 넣는다. 선택한 실행이 같은 저장소·정해진 보안 워크플로인지 확인한 뒤, 그 실행의 Windows artifact와 정확한 소스 커밋을 사용한다.
+Actions의 `Publish Windows development build`를 수동 실행한다. `security_run_id`에는 성공한 `main` push의 `Security regression` 실행 번호를, `release_tag`에는 아직 없는 `v0.3.0-dev.1` 형태의 태그를 넣는다. 선택한 실행이 같은 저장소·정해진 보안 워크플로인지 확인한 뒤, 그 실행의 Windows artifact와 정확한 소스 커밋을 사용한다.
 
 공식 Ubuntu NSIS 패키지로 설치 프로그램을 만들고 포터블 ZIP·체크섬·빌드 검증 보고서·SBOM을 첨부한다. GitHub가 보고한 첨부 크기와 SHA-256이 로컬 파일과 모두 일치할 때만 초안을 사전 릴리스로 게시한다. 공개된 기존 릴리스나 첨부를 덮어쓰지 않는다. GitHub 내부 토큰을 사용하므로 개발자 개인 토큰을 앱이나 워크플로에 저장할 필요가 없다.

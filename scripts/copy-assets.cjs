@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 fs.mkdirSync('dist/guidance', {recursive:true});
 fs.mkdirSync('dist/fonts', {recursive:true});
+for (const name of ['icons.js','appearance.js','profile.js']) fs.copyFileSync(`src/${name}`,`dist/${name}`);
 for (const name of ['PretendardVariable.woff2', 'OFL-Pretendard.txt']) fs.copyFileSync(`src/fonts/${name}`, `dist/fonts/${name}`);
 for (const name of ['workspace.js', 'starfield.png', 'cursor.html', 'cursor.css']) fs.copyFileSync(`src/${name}`, `dist/${name}`);
 for (const name of ['SYSTEM.md','ACTIONS.md','HANDOFF.md','RECOVERY.md']) fs.copyFileSync(name, `dist/guidance/${name}`);

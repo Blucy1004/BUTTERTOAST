@@ -69,7 +69,7 @@ app.whenReady().then(async()=>{
   assert.equal((await callback('attacker-injected-code')).status,400);assert.equal(await aw.executeJavaScript(`observed.at(-1).status`),'pending-email');
   assert.equal((await callback('fixture-valid-code')).status,200);
   await until(async()=>await aw.executeJavaScript(`observed.at(-1).status==='signed-in'`),'confirmed sign in');
-  await until(async()=>await ui.executeJavaScript(`document.getElementById('account-open').textContent==='계정'`),'main account label');
+  await until(async()=>await ui.executeJavaScript(`document.getElementById('account-name').textContent==='프로필'`),'main account profile label');
   assert.equal(await aw.executeJavaScript(`document.getElementById('signed-in-email').textContent`),email);
   const renderer=await aw.executeJavaScript(`JSON.stringify({states:observed,storage:{...localStorage},session:{...sessionStorage},html:document.body.innerHTML})`);
   for(const value of [access,refresh,'code_verifier','fixture-password'])assert.equal(renderer.includes(value),false);
@@ -80,7 +80,8 @@ app.whenReady().then(async()=>{
   await until(async()=>await aw.executeJavaScript(`observed.at(-1).status==='signed-out'`),'local logout');
   const logout=calls.find(c=>new URL(c.url).pathname==='/auth/v1/logout');assert.equal(new URL(logout.url).searchParams.get('scope'),'local');assert.equal(logout.headers.authorization,`Bearer ${access}`);
   pass('logout clears local account immediately and requests only local server session revocation');
-  await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('password').value='wrong-password';document.getElementById('submit').click()`);
+  assert.equal(await aw.executeJavaScript(`document.getElementById('email').value`),'');
+  await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('email').value='${email}';document.getElementById('password').value='wrong-password';document.getElementById('submit').click()`);
   await until(async()=>await aw.executeJavaScript(`observed.at(-1).message.includes('비밀번호를 확인')`),'generic login error');
   assert.equal((await aw.executeJavaScript('document.body.textContent')).includes(access),false);
   await wait(3050);

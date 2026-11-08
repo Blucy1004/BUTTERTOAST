@@ -8,6 +8,7 @@ import { WEB_PREFERENCES } from '../security/electron';
 import { parseManagerCommand } from './manager-protocol';
 import { openDefaultBrowserSettings } from './default-browser';
 import {BrowserUpdates} from './updates';
+import { UiAppearance } from '../profile/appearance';
 export const MANAGER_URL = 'toast-ui://app/manager.html';
 export class BrowserManager {
   private window?: BrowserWindow;
@@ -37,7 +38,7 @@ export class BrowserManager {
     }
     this.emit();
   };
-  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private library: BrowserLibrary, private downloads: DownloadManager, private changedSettings: () => void,private updates:BrowserUpdates) { ipcMain.on('manager:command', this.handler); }
+  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private library: BrowserLibrary, private downloads: DownloadManager, private changedSettings: () => void,private updates:BrowserUpdates,private appearance?:UiAppearance) { ipcMain.on('manager:command', this.handler); }
   bookmark(): void { const wc = this.tabs.activeContents(); if (wc && !wc.isDestroyed()) this.library.bookmark(wc.getURL(), wc.getTitle()); }
   emit(): void {
     const wc = this.window?.webContents;
@@ -45,9 +46,10 @@ export class BrowserManager {
   }
   open(section = 'bookmarks'): void {
     if (this.window && !this.window.isDestroyed()) { this.window.show(); this.window.focus(); this.window.webContents.send('manager:section', section); this.emit(); return; }
-    this.window = new BrowserWindow({ parent: this.parent, width: 900, height: 720, minWidth: 600, minHeight: 450, title: 'ButterToast 관리', autoHideMenuBar: true,
+    this.window = new BrowserWindow({ parent: this.parent, width: 900, height: 720, minWidth: 600, minHeight: 450, title: 'ButterToast 관리', autoHideMenuBar: true,backgroundColor:this.appearance?.state().resolved==='light'?'#f5f7fc':'#0d1732',
       webPreferences: { ...WEB_PREFERENCES, session: this.parent.webContents.session, preload: path.join(__dirname, '..', 'manager-preload.js') } });
     const wc = this.window.webContents;
+    this.appearance?.register(wc,MANAGER_URL);
     wc.setWindowOpenHandler(() => ({ action: 'deny' })); wc.on('will-frame-navigate', e => e.preventDefault()); wc.on('will-redirect', e => e.preventDefault()); wc.on('will-attach-webview', e => e.preventDefault());
     wc.once('did-finish-load', () => { if (!wc.isDestroyed()) wc.send('manager:section', section); this.emit(); });
     this.window.on('closed', () => { this.window = undefined; });

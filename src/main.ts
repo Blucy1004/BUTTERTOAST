@@ -20,6 +20,7 @@ import {BrowserUpdates} from './browser/updates';
 import { isWebUrl } from './policy';
 import { defaultWorkspace, workspaceGeometry } from './browser/workspace';
 import { TabMenu } from './browser/tab-menu';
+import { UiAppearance } from './profile/appearance';
 
 assertSafeLaunch();
 const appVersion=JSON.parse(readFileSync(path.join(__dirname,'..','package.json'),'utf8')).version as string;
@@ -38,6 +39,8 @@ let ai: AiWorkspaces;
 let tabMenu:TabMenu;
 let library: BrowserLibrary;
 let manager: BrowserManager;
+let appearance:UiAppearance;
+let appearanceMessage='';
 let downloads: DownloadManager;
 let updates:BrowserUpdates;
 let workspace=defaultWorkspace(), narrowToast=false, arranging=false, workspaceDirty=false;
@@ -74,11 +77,25 @@ function settingsChanged(): void {
   else void store.save(tabs.snapshot());
   emitState();
 }
+function updateAppearance():void {if(appearance&&library)appearance.set(account?.profile()?.appearance??library.appearance());}
+function accountChanged():void {appearanceMessage='';updateAppearance();emitState();}
+async function cycleTheme():Promise<void> {
+  if(account.busy())return;
+  const next=appearance.state().resolved==='light'?'dark':'light';appearanceMessage='';
+  if(account.signedIn()){
+    if(!await account.changeTheme(next))appearanceMessage='테마를 저장하지 못했어요. 프로필 설정에서 확인해 주세요.';
+  }else{
+    library.configureAppearance({...library.appearance(),theme:next});updateAppearance();
+    if(library.status!=='available')appearanceMessage='이번 실행에 적용했어요. 로그인하면 계정에 저장할 수 있어요.';
+  }
+  emitState();
+}
 function emitState(): void {
   if (!window || window.isDestroyed() || !tabs) return;
   ai?.observe();
   const state = tabs.state();
-  window.webContents.send('browser:state', { ...state,version:appVersion, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+  const profile=account?.profile();
+  window.webContents.send('browser:state', { ...state,version:appVersion, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false,accountProfile:profile?{name:profile.name,avatar:profile.avatar}:null,accountBusy:account?.busy()??false,appearanceMessage, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
 function focusAddress(): void {
   window.webContents.focus(); window.webContents.send('browser:focus-address');
@@ -132,6 +149,7 @@ ipcMain.on('browser:command', (event, input: unknown) => {
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'theme-cycle':void cycleTheme();break;
     case 'tab-menu':tabMenu.open(cmd.id);break;
     case 'find-open':focusTools('find');break;
     case 'find-close':tabs.clearFind();break;
@@ -189,22 +207,23 @@ app.whenReady().then(async () => {
   window.webContents.on('will-redirect', event => event.preventDefault());
   window.webContents.on('will-attach-webview', event => event.preventDefault());
   keyboard(window.webContents);
-  library = new BrowserLibrary(path.join(app.getPath('userData'), 'library.enc'), osCipher, () => manager?.emit());
+  library = new BrowserLibrary(path.join(app.getPath('userData'), 'library.enc'), osCipher, () => {manager?.emit();updateAppearance();});
   await library.load();
+  appearance=new UiAppearance();appearance.register(window.webContents,UI_URL);updateAppearance();
   workspace=library.workspace();
-  account = new AccountWindow(window, emitState);
+  account = new AccountWindow(window, accountChanged,appearance);
   store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
   tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { if (library.settings().restoreTabs) void store.save(snapshot); }, input: keyboard,
     visited: (url, title) => library.visit(url, title), loaded: wc => { void theme.apply(wc, library.settings().theme); } });
   downloads = new DownloadManager(window, () => tabs.activeContents(), () => manager?.emit());
   hardenSession(browsing, downloads.accept); installSitePermissions(browsing, window, library, () => tabs.activeContents());
   updates=new BrowserUpdates(window,()=>manager?.emit());
-  manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates);
-  ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();});
+  manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates,appearance);
+  ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();},appearance);
   tabMenu=new TabMenu(window,tabs,id=>{void ai.delegate(id);});
   window.on('resize', () => emitState());
   window.on('blur',endArrange);
-  window.on('closed', () => { initialized = false;updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose(); });
+  window.on('closed', () => { initialized = false;updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose();appearance.dispose(); });
   void window.loadURL(UI_URL);
   const saved = await store.load();
   if (window.isDestroyed()) return;

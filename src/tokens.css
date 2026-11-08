@@ -3,7 +3,7 @@
   font-family: 'Pretendard'; font-style: normal; font-weight: 100 900;
   font-display: swap; src: url('fonts/PretendardVariable.woff2') format('woff2');
 }
-:root {
+:root, .appearance-preview {
   color-scheme: dark;
   --surface: #080f26; --chrome: #0d1732; --hover: #1b2b50; --text: #eef3ff;
   --muted: #a4b2ce; --border: #293955; --error: #ffb7aa; --accent: #4a91ff;
@@ -11,6 +11,44 @@
   --toolbar-icon: 19px; --heading-font: 22px; --field-height: 40px;
   --font-family: 'Pretendard', 'Segoe UI', sans-serif;
   --display-family: var(--font-family);
-  --font: 14px var(--font-family); --motion: 160ms;
+  --body-size:14px; --font: var(--body-size) var(--font-family); --motion: 160ms;
+  --small-font:calc(var(--body-size) - 2px); --tab-pad:8px 9px;
+  --canvas:#050b1d; --panel:#050914eb; --stage:#050914; --brandbar:#030610b8;
+  --toolbar:#0c1429; --field:#101d37; --selected:#142342; --selected-border:#314a78;
+  --accent-solid:#255fbd; --on-accent:#fff; --accent-soft:#182d50; --link:#9ebeff;
+  --overlay:#0b214bed; --splitter:#627ba76b;
+  --dawn-scene:radial-gradient(ellipse at 78% 84%,#fff0d9c9 0%,transparent 48%),radial-gradient(ellipse at 22% 36%,#ffffff80 0%,transparent 42%),linear-gradient(180deg,#98b6d8 0%,#c9d8e9 42%,#ecdde7 72%,#ffe4d0 100%);
+  --scene:url('starfield.png'); --scene-size:auto 360vh; --stage-size:auto 320%;
 }
-@media (prefers-reduced-motion: reduce) { :root { --motion: 0ms; } }
+:is(:root,.appearance-preview)[data-theme="light"] {
+  color-scheme:light;
+  --surface:#f5f7fce8; --chrome:#eaf0f8; --hover:#e0e8f4; --text:#24334a;
+  --muted:#56657d; --border:#becbdd; --error:#a73536; --accent:#315f9d;
+  --canvas:#d8e2ef; --panel:#f7f9fcde; --stage:#f3f6fb; --brandbar:#f4f7fc94;
+  --toolbar:#edf2f9; --field:#ffffffd9; --selected:#dfe9f7; --selected-border:#99b2d4;
+  --accent-soft:#dde8f9; --link:#2e5d9e; --overlay:#e3edfbf5; --splitter:#7990b180;
+  --scene:var(--dawn-scene); --scene-size:cover; --stage-size:cover;
+}
+:is(:root,.appearance-preview)[data-accent="violet"] {--accent:#bca3f5;--accent-solid:#7044af;--accent-soft:#2b2149;--link:#c5aff9;}
+:is(:root,.appearance-preview)[data-accent="rose"] {--accent:#f0a4c6;--accent-solid:#a93d70;--accent-soft:#402337;--link:#f0b4ce;}
+:is(:root,.appearance-preview)[data-accent="teal"] {--accent:#7ccdc1;--accent-solid:#176e64;--accent-soft:#123c39;--link:#8edbcf;}
+:is(:root,.appearance-preview)[data-accent="amber"] {--accent:#e9c080;--accent-solid:#805513;--accent-soft:#3c3020;--link:#eed09d;}
+:is(:root,.appearance-preview)[data-theme="light"][data-accent="violet"] {--accent:#6e42b8;--accent-soft:#eae1f8;--link:#6e42b8;}
+:is(:root,.appearance-preview)[data-theme="light"][data-accent="rose"] {--accent:#a53965;--accent-soft:#f5e0e9;--link:#a53965;}
+:is(:root,.appearance-preview)[data-theme="light"][data-accent="teal"] {--accent:#157367;--accent-soft:#d9eee9;--link:#157367;}
+:is(:root,.appearance-preview)[data-theme="light"][data-accent="amber"] {--accent:#805513;--accent-soft:#f2e7d2;--link:#805513;}
+:is(:root,.appearance-preview)[data-background="dawn"] {--canvas:#d8e2ef;--scene:var(--dawn-scene);--scene-size:cover;--stage-size:cover;}
+:is(:root,.appearance-preview)[data-background="stars"] {--canvas:#050b1d;--scene:url('starfield.png');--scene-size:auto 360vh;--stage-size:auto 320%;}
+:is(:root,.appearance-preview)[data-background="plain"] {--scene:none;}
+:is(:root,.appearance-preview)[data-text-size="small"] {--body-size:13px;}
+:is(:root,.appearance-preview)[data-text-size="large"] {--body-size:16px;}
+:is(:root,.appearance-preview)[data-density="compact"] {--spacing:6px;--tab-pad:5px 9px;}
+:is(:root,.appearance-preview)[data-corners="rounded"] {--radius:12px;}
+:is(:root,.appearance-preview)[data-corners="square"] {--radius:3px;}
+:is(:root,.appearance-preview)[data-motion="reduced"] {--motion:0ms;}
+button,input,select,textarea {transition:background-color var(--motion),border-color var(--motion);}
+@media (prefers-reduced-motion: reduce) { :root,.appearance-preview { --motion: 0ms; } }
+/* Shared local vector icons. Hit targets and accessible names belong to the button. */
+:root { --icon-size:18px; --icon-small:14px; --avatar-icon:36px; }
+.icon { display:inline-block;width:var(--icon-size);height:var(--icon-size);vertical-align:middle;flex:none;pointer-events:none; }
+[data-icon] { display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;pointer-events:none; }

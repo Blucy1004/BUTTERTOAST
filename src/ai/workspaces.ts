@@ -2,12 +2,13 @@ import type {BrowserWindow} from 'electron';
 import type {BrowserTabs} from '../browser/tabs';
 import {AiPanel} from './panel';
 import type {Bounds} from '../browser/workspace';
+import type {UiAppearance} from '../profile/appearance';
 /** Independent provider credentials, model requests, conversation and task storage for each slot. */
 export class AiWorkspaces {
   private panels:AiPanel[]=[];
   private selected=0;
   private bounds:Bounds={x:0,y:80,width:420,height:650};private visible=true;
-  constructor(private parent:BrowserWindow,private tabs:BrowserTabs,private audit:(origin:string,operation:string,outcome:string)=>void,private visibility:(visible:boolean)=>void=()=>{}){this.panels.push(new AiPanel(parent,tabs,audit,1,visibility));}
+  constructor(private parent:BrowserWindow,private tabs:BrowserTabs,private audit:(origin:string,operation:string,outcome:string)=>void,private visibility:(visible:boolean)=>void=()=>{},private appearance?:UiAppearance){this.panels.push(new AiPanel(parent,tabs,audit,1,visibility,appearance));}
   slot():number{return this.selected+1;}
   toggle():void{this.panels[this.selected].toggle();}
   open():void{this.panels[this.selected].open();}
@@ -16,7 +17,7 @@ export class AiWorkspaces {
   setPresentation(bounds:Bounds,visible:boolean):void{this.bounds=bounds;this.visible=visible;for(let i=0;i<this.panels.length;i++)this.panels[i]?.setPresentation(bounds,visible&&i===this.selected);}
   next():void{
     this.panels[this.selected].hideForSwitch();this.selected=(this.selected+1)%3;
-    if(!this.panels[this.selected])this.panels[this.selected]=new AiPanel(this.parent,this.tabs,this.audit,this.selected+1,this.visibility);
+    if(!this.panels[this.selected])this.panels[this.selected]=new AiPanel(this.parent,this.tabs,this.audit,this.selected+1,this.visibility,this.appearance);
     this.setPresentation(this.bounds,this.visible);
     this.panels[this.selected].open();
   }

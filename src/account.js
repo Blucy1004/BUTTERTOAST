@@ -2,6 +2,7 @@
 (() => {
   const el = id => document.getElementById(id);
   let mode = 'login', state = { configured: false, busy: true, status: 'signed-out' };
+  const renderProfile=window.createProfileEditor();
   function clearPassword() {
     for (const id of ['current-password','new-password','new-password-confirm','reauth-code']) el(id).value = '';
     el('password').value = ''; el('password-confirm').value = ''; el('password-confirm').setCustomValidity('');
@@ -14,6 +15,9 @@
     el('recover').hidden = signedIn; el('recover').disabled = state.busy;
     for (const id of ['reauthenticate','password-update']) el(id).disabled = state.busy;
     el('signed-in-email').textContent = signedIn ? state.email : '';
+    el('account-heading').textContent=signedIn?'내 프로필 · 설정':'내 계정';
+    el('account-intro').hidden=signedIn;
+    renderProfile(state);
     el('confirm-field').hidden = !signup; el('password-confirm').required = signup;
     el('password').minLength = signup ? 8 : 1; el('password').autocomplete = signup ? 'new-password' : 'current-password';
     el('password-hint').textContent = signup ? '(8자 이상)' : '';
@@ -44,7 +48,7 @@
   el('new-password').oninput=()=>el('new-password').setCustomValidity('');
   el('new-password-confirm').oninput=()=>el('new-password-confirm').setCustomValidity('');
   el('logout').onclick = () => { clearPassword(); window.account.command({ type: 'logout' }); };
-  window.account.onState(next => { const previous=state.status; state = next; if (state.status === 'signed-in' && previous !== 'signed-in') clearPassword(); render(); });
+  window.account.onState(next => { const previous=state.status; state = next; if (state.status !== previous){clearPassword();if(previous==='signed-in')el('email').value='';} render(); });
   window.addEventListener('pagehide', clearPassword);
   render(); window.account.command({ type: 'state' });
 })();

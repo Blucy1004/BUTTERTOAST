@@ -1,22 +1,53 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ButterToast 계정</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="account.css"><script src="account.js" defer></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ButterToast 프로필 · 설정</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="account.css"><script src="icons.js" defer></script><script src="appearance.js" defer></script><script src="profile.js" defer></script><script src="account.js" defer></script></head>
 <body><main>
-<h1>ButterToast 계정</h1>
-<p class="hint">계정 없이도 브라우저를 사용할 수 있어요.</p>
+<header class="account-heading"><span class="wordmark">ButterToast</span><h1 id="account-heading">내 계정</h1><p class="hint" id="account-intro">나만의 프로필과 브라우저 설정을 이어서 사용하세요.</p></header>
 <div id="auth-modes" role="group" aria-label="계정 작업"><button id="mode-login" aria-pressed="true">로그인</button><button id="mode-signup" aria-pressed="false">회원가입</button></div>
 <form id="auth-form">
 <label for="email">이메일</label><input id="email" type="email" autocomplete="username" maxlength="254" required>
 <label for="password">비밀번호 <span id="password-hint"></span></label><input id="password" type="password" autocomplete="current-password" maxlength="1024" required>
 <div id="confirm-field" hidden><label for="password-confirm">비밀번호 확인</label><input id="password-confirm" type="password" autocomplete="new-password" maxlength="1024"></div>
 <label class="inline"><input id="show-password" type="checkbox"> 비밀번호 표시</label>
-<button id="submit" type="submit" disabled>로그인</button>
+<button id="submit" class="primary" type="submit" disabled>로그인</button>
 </form><button id="recover" type="button">비밀번호 찾기</button>
-<div id="signed-in" hidden><p id="signed-in-email"></p><p>앱을 종료하면 다시 로그인해야 합니다.</p>
+<div id="signed-in" hidden>
+<div class="identity"><span id="profile-avatar" class="avatar" aria-hidden="true"></span><div><strong id="profile-title">내 프로필</strong><p id="signed-in-email"></p><span class="verified">이메일 인증됨</span></div></div>
+<nav id="profile-tabs" role="tablist" aria-label="프로필 설정"><button id="profile-tab" type="button" role="tab" aria-controls="profile-panel" aria-selected="true">프로필</button><button id="appearance-tab" type="button" role="tab" aria-controls="appearance-panel" aria-selected="false">꾸미기</button><button id="security-tab" type="button" role="tab" aria-controls="security-panel" aria-selected="false">보안</button></nav>
+<p id="profile-warning" class="hint warning" hidden></p>
+<form id="profile-form">
+<section id="profile-panel" role="tabpanel" aria-labelledby="profile-tab">
+<h2>나를 표현하는 프로필</h2><p class="hint">이름과 아바타는 ButterToast 안에서 표시됩니다.</p>
+<fieldset><legend>아바타</legend><div id="avatar-options" class="avatar-options">
+<button type="button" data-avatar="toast" aria-label="토스트 아바타" aria-pressed="true"><span data-icon="toast" aria-hidden="true"></span></button><button type="button" data-avatar="sun" aria-label="태양 아바타" aria-pressed="false"><span data-icon="sun" aria-hidden="true"></span></button><button type="button" data-avatar="moon" aria-label="달 아바타" aria-pressed="false"><span data-icon="moon" aria-hidden="true"></span></button><button type="button" data-avatar="cloud" aria-label="구름 아바타" aria-pressed="false"><span data-icon="cloud" aria-hidden="true"></span></button><button type="button" data-avatar="star" aria-label="별 아바타" aria-pressed="false"><span data-icon="star" aria-hidden="true"></span></button><button type="button" data-avatar="leaf" aria-label="잎 아바타" aria-pressed="false"><span data-icon="leaf" aria-hidden="true"></span></button>
+</div></fieldset>
+<label for="profile-name">닉네임 <small>최대 32자</small></label><input id="profile-name" maxlength="128" autocomplete="nickname" placeholder="어떻게 불러드릴까요?">
+<label for="profile-bio">소개 <small>최대 160자</small></label><textarea id="profile-bio" maxlength="800" rows="3" placeholder="나를 소개하는 한마디"></textarea>
+<p id="profile-counter" class="hint">0 / 160</p>
+</section>
+<section id="appearance-panel" role="tabpanel" aria-labelledby="appearance-tab" hidden>
+<h2>나에게 맞는 분위기</h2><p class="hint">미리보기를 확인하고 저장하면 브라우저 전체에 적용됩니다.</p>
+<div id="appearance-preview" class="appearance-preview" aria-label="꾸미기 미리보기"><div class="preview-brand">ButterToast <span>미리보기</span></div><div class="preview-columns"><div class="preview-side">Butter<div>새 탭</div></div><div class="preview-center"><strong id="preview-greeting">어디로 떠나볼까요?</strong><span>나만의 브라우저</span><button type="button" tabindex="-1" aria-hidden="true">시작하기 <span data-icon="arrow-right" aria-hidden="true"></span></button></div><div class="preview-side">Toast</div></div></div>
+<div class="appearance-fields">
+<label>테마<select id="appearance-theme"><option value="dark">다크 · 밤하늘</option><option value="light">라이트 · 새벽빛</option><option value="system">시스템 설정 따르기</option></select></label>
+<label>강조색<select id="appearance-accent"><option value="blue">블루</option><option value="violet">라벤더</option><option value="rose">로즈</option><option value="teal">민트</option><option value="amber">앰버</option></select></label>
+<label>배경<select id="appearance-background"><option value="theme">테마에 맞게</option><option value="dawn">새벽빛 하늘</option><option value="stars">별이 있는 밤</option><option value="plain">단색</option></select></label>
+<label>글자 크기<select id="appearance-textSize"><option value="small">작게</option><option value="default">기본</option><option value="large">크게</option></select></label>
+<label>목록·설정 간격<select id="appearance-density"><option value="comfortable">여유롭게</option><option value="compact">촘촘하게</option></select></label>
+<label>버튼·입력칸 모서리<select id="appearance-corners"><option value="soft">부드럽게</option><option value="rounded">둥글게</option><option value="square">각지게</option></select></label>
+<label>화면 효과<select id="appearance-motion"><option value="system">시스템 설정 따르기</option><option value="reduced">효과 줄이기</option></select></label>
+</div><p class="hint">웹사이트 본문 크기는 브라우저 확대 기능으로 조절할 수 있어요.</p><button id="appearance-reset" class="text-button" type="button">꾸미기 기본값으로 돌리기</button>
+</section>
+<div class="savebar"><span id="profile-dirty" class="hint" role="status">계정에 저장된 설정</span><button id="profile-discard" type="button">변경 취소</button><button id="profile-save" class="primary" type="submit">저장</button></div>
+</form>
+<section id="security-panel" role="tabpanel" aria-labelledby="security-tab" hidden><h2>계정 보안</h2><p class="hint">비밀번호를 변경하면 로그아웃됩니다. 앱을 종료한 뒤에는 다시 로그인해야 합니다.</p>
 <form id="password-form"><label for="current-password">현재 비밀번호 (복구 메일 인증 후에는 생략 가능)</label><input id="current-password" type="password" autocomplete="current-password" maxlength="1024">
 <label for="new-password">새 비밀번호 (8자 이상)</label><input id="new-password" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required>
 <label for="new-password-confirm">새 비밀번호 확인</label><input id="new-password-confirm" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required>
-<label for="reauth-code">재인증 코드 (요청된 경우)</label><input id="reauth-code" autocomplete="one-time-code" maxlength="128"><button id="reauthenticate" type="button">재인증 코드 받기</button><button id="password-update" type="submit">비밀번호 변경</button></form></div>
+<label for="reauth-code">재인증 코드 (요청된 경우)</label><input id="reauth-code" autocomplete="one-time-code" maxlength="128"><button id="reauthenticate" type="button">재인증 코드 받기</button><button id="password-update" type="submit">비밀번호 변경</button></form></section>
+<button id="profile-reload" class="text-button" type="button">계정 설정 다시 불러오기</button>
+<p class="hint storage-note">프로필과 꾸미기는 로그인한 계정에 저장됩니다. 방문 기록·북마크·웹사이트 로그인·AI 연결은 이 기기에 남습니다.</p>
+</div>
 <p id="account-message" role="status" aria-live="polite"></p>
 <button id="logout" hidden>로그아웃</button>
-<p class="hint" id="session-note">ButterToast 계정의 로그인 상태는 방문 사이트의 로그인과 별도로 관리됩니다.</p>
+<p class="hint" id="session-note">계정 없이도 브라우저를 사용할 수 있어요. ButterToast 계정과 방문 사이트의 로그인은 별도로 관리됩니다.</p>
 </main></body></html>

@@ -14,6 +14,7 @@ import { parseAiCommand, safeText, Proposal } from './protocol';
 import {ConversationArchive} from './archive';
 import { Bounds } from '../browser/workspace';
 import { CursorVisualizer, VisualEvent } from './visualizer';
+import { UiAppearance } from '../profile/appearance';
 export const AI_URL = 'toast-ui://app/ai.html';
 const controlOwners=new WeakMap<WebContents,()=>void>();
 async function bounded<T>(operation: Promise<T>, milliseconds = 5000): Promise<T> {
@@ -41,7 +42,7 @@ export class AiPanel {
   private taskStatus:'none'|'loading'|'ready'|'failed'|'crashed'='none';
   private handler: (event: Electron.IpcMainEvent, value: unknown) => void;
   private archive:ConversationArchive;
-  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private audit: (origin: string, operation: string, outcome: string) => void = () => {},private slot=1, private visibility: (visible:boolean)=>void = () => {}) {
+  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private audit: (origin: string, operation: string, outcome: string) => void = () => {},private slot=1, private visibility: (visible:boolean)=>void = () => {},private appearance?:UiAppearance) {
     this.cursor = new CursorVisualizer(parent,()=>{void this.service.command({type:'handoff'});});
     const suffix=slot===1?'':`-${slot}`;
     this.archive=new ConversationArchive(path.join(app.getPath('userData'),`conversation${suffix}.enc`),osCipher);
@@ -84,6 +85,7 @@ export class AiPanel {
       this.view = new WebContentsView({ webPreferences: { ...WEB_PREFERENCES, session: this.parent.webContents.session, preload: path.join(__dirname, '..', 'ai-preload.js') } });
       this.view.setBorderRadius(18);this.view.setBackgroundColor('#00000000');
       const wc = this.view.webContents;
+      this.appearance?.register(wc,AI_URL);
       wc.setWindowOpenHandler(() => ({ action: 'deny' })); wc.on('will-frame-navigate', e => e.preventDefault()); wc.on('will-redirect', e => e.preventDefault()); wc.on('will-attach-webview', e => e.preventDefault());
       wc.on('render-process-gone', () => { void this.service.command({ type: 'stop' }); });
       this.parent.contentView.addChildView(this.view); void wc.loadURL(AI_URL).catch(() => {});

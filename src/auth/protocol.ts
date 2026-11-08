@@ -1,8 +1,11 @@
 import { exactKeys, record } from '../security/ipc';
 import { AUTH_SETTINGS } from './config';
+import { Profile, parseProfile } from '../profile/model';
 export type AuthCommand = { type: 'state' } | {type:'logout'} | {type:'reauthenticate'} | { type: 'signup' | 'login'; email: string; password: string }
-  | {type:'recover';email:string} | {type:'password-update';password:string;currentPassword:string;nonce:string};
-export type AuthState = { configured: boolean; status: 'signed-out' | 'pending-email' | 'signed-in'; email: string; busy: boolean; message: string; recovering?: boolean };
+  | {type:'recover';email:string} | {type:'password-update';password:string;currentPassword:string;nonce:string}
+  | {type:'profile-save';revision:string;profile:Profile} | {type:'profile-reload';revision:string};
+export type AuthState = { configured: boolean; status: 'signed-out' | 'pending-email' | 'signed-in'; email: string; busy: boolean; message: string; recovering?: boolean;
+  profile:Profile|null;profileRevision:string;profileWarning:string; };
 export function normalizeEmail(value: unknown): string | null {
   if (typeof value !== 'string' || value.length > 254) return null;
   const email = value.trim().toLowerCase();
@@ -10,6 +13,11 @@ export function normalizeEmail(value: unknown): string | null {
 }
 export function parseAuthCommand(input: unknown): AuthCommand | null {
   if (!record(input)) return null;
+  if((input.type==='profile-save'||input.type==='profile-reload')&&typeof input.revision==='string'&&/^[a-f0-9-]{36}$/.test(input.revision)){
+    if(input.type==='profile-reload'&&exactKeys(input,['type','revision']))return {type:'profile-reload',revision:input.revision};
+    if(input.type==='profile-save'&&exactKeys(input,['type','revision','profile'])){const profile=parseProfile(input.profile);return profile?{type:'profile-save',revision:input.revision,profile}:null;}
+    return null;
+  }
   if ((input.type === 'state' || input.type === 'logout' || input.type === 'reauthenticate') && exactKeys(input, ['type'])) return { type: input.type };
   if(input.type==='recover'&&exactKeys(input,['type','email'])) {const email=normalizeEmail(input.email);return email?{type:'recover',email}:null;}
   if(input.type==='password-update'&&exactKeys(input,['type','password','currentPassword','nonce'])&&typeof input.password==='string'&&Array.from(input.password).length>=8&&input.password.length<=1024&&!/[\u0000-\u001f\u007f]/.test(input.password)

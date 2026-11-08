@@ -86,14 +86,14 @@ try {
   };
   await fs.writeFile(path.join(output, 'BUILD-VERIFICATION.json'), JSON.stringify(report, null, 2) + '\n');
   await fs.cp(path.join(root, 'docs', 'SECURITY-VALIDATION.md'), path.join(output, 'SECURITY-VALIDATION.md'));
-  await fs.cp(path.join(root, 'docs', 'UPGRADE-0.2.md'), path.join(output, 'LATEST-VALIDATION.md'));
+  await fs.cp(path.join(root, 'docs', 'PROFILE-THEMES-0.3.md'), path.join(output, 'LATEST-VALIDATION.md'));
   await fs.cp(path.join(root, 'src', 'fonts','OFL-Pretendard.txt'), path.join(output, 'OFL-Pretendard.txt'));
   await fs.cp(path.join(root, 'src', 'fonts','README.md'), path.join(output, 'FONT-NOTICE.md'));
   await fs.cp(path.join(root, 'docs', 'IMPLEMENTATION-STATUS.md'), path.join(output, 'IMPLEMENTATION-STATUS.md'));
   await fs.cp(path.join(root, 'docs', 'WINDOWS-TEST-BUILD.md'), path.join(output, 'READ-ME-FIRST.md'));
   await fs.cp(path.join(root, 'docs', 'DESIGN-IMPLEMENTATION.md'), path.join(output, 'DESIGN-IMPLEMENTATION.md'));
   await fs.mkdir(path.join(output, 'design'), {recursive:true});
-  for(const name of ['BRIEF.md','owner-layout.png','implemented-workspace.png','upgrade-workspace.png']) await fs.cp(path.join(root,'docs','design',name),path.join(output,'design',name));
+  for(const name of ['BRIEF.md','owner-layout.png','implemented-workspace.png','upgrade-workspace.png','profile-light-workspace.png','profile-settings.png','profile-appearance.png']) await fs.cp(path.join(root,'docs','design',name),path.join(output,'design',name));
   await fs.cp(path.join(root, 'artifacts', 'sbom.cdx.json'), path.join(output, 'SBOM.cdx.json'));
   console.log(`Verified Windows x64 test build: ${output}`);
   console.log(`Application payload: ${files.size} files; hardened fuses and embedded ASAR hash verified.`);

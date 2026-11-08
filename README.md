@@ -10,9 +10,11 @@ ButterToast is a Chromium-based desktop browser that gives people and AI assista
 
 **Development preview · Windows 11 x64 · Electron / TypeScript**
 
-[Download](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [AI connection guide](docs/AI-CONNECTION.md)
+[Download](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [AI connection guide](docs/AI-CONNECTION.md)
 
-![ButterToast browser workspace](docs/design/upgrade-workspace.png)
+![ButterToast browser workspace in the dawn light theme](docs/design/profile-light-workspace.png)
+
+Actual application screenshot with a local test profile. [Profiles and appearance settings](docs/PROFILE-THEMES-0.3.md).
 
 ## How it works
 
@@ -35,6 +37,7 @@ AI models propose structured actions. The application checks their scope, docume
 | AI connections | OpenAI, Anthropic Claude, Google Gemini, OpenAI-compatible endpoints and supported local model servers |
 | AI collaboration | Three independent model workspaces, explicit page sharing, per-action approval, bounded multi-step tasks, handoff and emergency stop |
 | Accounts | Supabase email sign-up, email confirmation, sign-in, sign-out, password recovery and password changes |
+| Profiles and appearance | Account nickname, bio and six vector avatars; dark/light/system themes, accents, backgrounds, text size, spacing, corners and reduced effects; local preview and account save/reload |
 | Reliability | Human-tab restart, suspended-tab restoration and consent-based recovery of AI task pages in a fresh isolated session |
 | Usage visibility | Provider-reported token usage, user-configured cost estimates, request limits and optional encrypted conversation archives |
 
@@ -56,13 +59,16 @@ ButterToast is an independently developed project. This repository does not clai
 | Model API keys | Kept in the main process; optionally saved using OS-protected encryption. Sent to the selected provider or configured endpoint. Not stored in Supabase. |
 | Prompts and shared page context | Sent to the selected model provider when the user submits a request. Page sharing is explicit; bounded workflows require separate consent. |
 | ButterToast account credentials | Sent over HTTPS to Supabase Auth for the requested authentication operation. Access and refresh tokens remain in main-process memory. |
-| Bookmarks, history and application settings | Managed locally; persisted using OS-protected encryption when available. |
+| Account profile and appearance | Name, bio, preset avatar and appearance choices are saved to the signed-in user's Supabase Auth metadata. Read on sign-in or explicit reload; no real-time cross-device updates. |
+| Bookmarks, history and device settings | Managed locally; persisted using OS-protected encryption when available. Guest appearance also stays on this device. |
 | Conversation archives | Saved locally only on explicit request, using OS-protected encryption. |
 | AI action audit records | Limited to metadata such as time, site origin, action and outcome; input values and API keys are excluded. |
 
 The application calls model providers directly; it does not operate a central inference relay. Model-provider and authentication-service data policies still apply to requests sent to those services.
 
 Website sessions are handled by Chromium. Human browsing, AI task sessions, application UI, model networking and account networking have distinct security boundaries. ButterToast account sign-in does not itself grant an AI permission to access browsing data or execute actions.
+
+Changing ButterToast accounts changes the displayed profile and appearance. Browsing data, website sessions, saved AI connections and conversation archives remain in the same OS user profile; they are not isolated by ButterToast account or synced to Supabase.
 
 When OS-protected storage is unavailable, protected application data stays in memory or saving fails explicitly. API keys are never silently stored through a plaintext fallback. See [Security](SECURITY.md) and the [AI connection guide](docs/AI-CONNECTION.md) for the precise scope and limitations.
 
@@ -80,15 +86,15 @@ Model responses and webpage content are treated as untrusted input. The model ca
 
 Downloads require native confirmation and a destination selected by the user. Redirect chains and filenames are checked, and Windows downloads receive Internet-zone metadata when the filesystem supports it. These controls do not replace malware scanning.
 
-Security tests cover malicious page fixtures, element substitution, forged IPC, approval bypass attempts, session isolation, cancellation races, renderer crashes and update tampering. Results and remaining risks are documented in [Security](SECURITY.md), [implementation status](docs/IMPLEMENTATION-STATUS.md) and [0.2 validation notes](docs/UPGRADE-0.2.md).
+Security tests cover malicious page fixtures, element substitution, forged IPC, approval bypass attempts, session isolation, cancellation races, renderer crashes, profile injection and update tampering. Results and remaining risks are documented in [Security](SECURITY.md), [implementation status](docs/IMPLEMENTATION-STATUS.md) and [0.3 validation notes](docs/PROFILE-THEMES-0.3.md).
 
 ## Download and run
 
-The current downloadable preview is [**v0.2.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1).
+The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
 
-- [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Setup-x64.exe)
-- [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Windows-x64.zip)
-- [SHA-256 checksums](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/SHA256SUMS.txt)
+- [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Setup-x64.exe)
+- [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Windows-x64.zip)
+- [SHA-256 checksums](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/SHA256SUMS.txt)
 
 Close an existing ButterToast instance before running the installer. For the portable build, extract the complete archive and run `ButterToast-win32-x64/ButterToast.exe`; its DLLs and `resources` directory must remain alongside it. GitHub's source-code archives do not contain the executable.
 
@@ -121,7 +127,7 @@ The CI workflow runs security regressions on Windows and Ubuntu. Packaging verif
 
 ## Project status
 
-ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The linked release's feature and validation record is available in [the 0.2 notes](docs/UPGRADE-0.2.md).
+ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The linked release's feature and validation record is available in [the 0.3 notes](docs/PROFILE-THEMES-0.3.md). Profile saving and account switching have local fixture coverage; live Supabase profile writes and reads from another device still need validation.
 
 Live model inference and complex website task success, production email delivery, end-user Windows installation, Authenticode signing and an operational update service require further validation or configuration. Automatic updates are currently disabled. Passing tests does not establish that a browser is free of vulnerabilities or that every prompt-injection attempt is prevented.
 

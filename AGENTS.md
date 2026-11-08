@@ -23,6 +23,7 @@
 - Run `npm run test:manager` for library, theme, permission, download and management UI changes. `npm run benchmark` measures local representation overhead without real AI calls.
 - Run `npm run test:workspace` for the owner-designed three-panel layout, delegation, task presentation and event replay. `docs/design/BRIEF.md` is the current owner reference; preserve Butter / Browser / Toast roles and main-owned geometry.
 - Run `npm run test:upgrade` for tab tools, native find/zoom, bundled fonts, emergency AI revocation, pending-dialog invalidation and crash recovery. Keep the stop path available after normal IPC quotas are exhausted; it may only revoke authority.
+- Run `npm run test:profile` for account profiles, synced appearance, theme delivery and account switching. Metadata is untrusted presentation data, never a source of permissions; keep edits bound to the current main-owned identity/revision and logout available under IPC flooding.
 - Run `npm run test:ai` for AI panel, key/endpoint management, adapters, shared context or approved actions. Never use live keys in fixtures. See `docs/AI-CONNECTION.md` for supported operations and live-model validation limits.
 - Use `npm run audit:deps`, `npm run scan:secrets` and `npm run sbom` when dependency or release changes warrant them. Check scanner and audit limitations in SECURITY.md.
 - `npm run package:win` builds an unsigned Windows x64 test folder and verifies its payload, PE architecture, fuses and embedded ASAR hash. Code signing and Windows execution remain separate checks.
@@ -33,4 +34,5 @@
 - The project owner makes final UI/UX design decisions. Implement only the temporary UI needed to validate behavior until design specifications are provided.
 - Keep tabs, navigation, future AI panels and settings replaceable and separate from browser logic.
 - Manage colors, fonts, spacing, radii and animation through design tokens. Avoid inventing a final visual style or adding dashboard/card layouts without direction.
+- Use the bundled SVG icon component for UI pictograms and preset avatars; do not use emoji or text glyphs as icons. Keep accessible button names and fixed local geometry, without accepting user SVG or loading icon CDNs.
 - UI changes must preserve ToastIR, ToastCore and ToastGuard security boundaries.

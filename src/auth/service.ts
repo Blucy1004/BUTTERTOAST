@@ -1,9 +1,10 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { AuthApi, AuthFailure, AuthSession, parseAuthSession } from './api';
 import { AuthCommand, AuthState, normalizeEmail } from './protocol';
 import { record } from '../security/ipc';
 import { AUTH_SETTINGS } from './config';
 import { ConfirmationListener } from './confirmation';
+import { PROFILE_KEY, parseProfile, profileFromUser } from '../profile/model';
 
 type Receiver = Pick<ConfirmationListener, 'start' | 'close'>;
 const messages: Record<string, string> = {
@@ -29,13 +30,14 @@ export class AuthService {
   private pendingTimer?: NodeJS.Timeout;
   private nextLogin = 0;
   private nextSignup = 0;
+  private nextProfileWrite = 0;
   private disposed = false;
   constructor(private api: AuthApi | null, private changed: () => void,
     private receiverFactory: () => Receiver = () => new ConfirmationListener(), private now: () => number = Date.now) {
-    this.state = { configured: !!api, status: 'signed-out', email: '', busy: false,
+    this.state = { configured: !!api, status: 'signed-out', email: '', busy: false,profile:null,profileRevision:'',profileWarning:'',
       message: api ? '' : 'Supabase 연결 설정이 필요합니다.' };
   }
-  publicState(): AuthState { return { ...this.state }; }
+  publicState(): AuthState { return structuredClone(this.state); }
   private emit(update: Partial<AuthState>): void { this.state = { ...this.state, ...update }; this.changed(); }
   private clearPending(graceful = false): void {
     clearTimeout(this.pendingTimer); this.pendingTimer = undefined;
@@ -46,6 +48,7 @@ export class AuthService {
     clearTimeout(this.refreshTimer); this.refreshTimer = undefined;
     clearTimeout(this.expiryTimer); this.expiryTimer = undefined;
     this.clearPending(); this.session = undefined;
+    this.state.profile=null;this.state.profileRevision='';this.state.profileWarning='';
     this.state.recovering = false;
     return this.epoch;
   }
@@ -55,12 +58,14 @@ export class AuthService {
   }
   private accept(data: unknown, email: string): void {
     const session = parseAuthSession(data, email, this.now());
+    const {profile,warning}=profileFromUser((data as {user:unknown}).user);
+    const revision=this.session?.id===session.id&&JSON.stringify(profile)===JSON.stringify(this.state.profile)?this.state.profileRevision:randomUUID();
     clearTimeout(this.refreshTimer); clearTimeout(this.expiryTimer);
     this.session = session; this.clearPending(true);
     this.expiryTimer = setTimeout(() => {
       this.invalidate(); this.emit({ status: 'signed-out', email: '', busy: false, message: '로그인이 만료되었습니다. 다시 로그인해 주세요.' });
     }, Math.max(1, session.expiresAt - this.now())); this.expiryTimer.unref();
-    this.emit({ status: 'signed-in', email: session.email, busy: false, message: '로그인되었습니다. 앱을 종료하면 다시 로그인해야 합니다.' });
+    this.emit({ status: 'signed-in', email: session.email, busy: false,profile,profileRevision:revision,profileWarning:warning,message: '로그인되었습니다. 앱을 종료하면 다시 로그인해야 합니다.' });
     const delay = Math.max(500, session.expiresAt - this.now() - Math.min(60_000, (session.expiresAt - this.now()) / 2));
     this.refreshTimer = setTimeout(() => { void this.refresh(); }, delay); this.refreshTimer.unref();
   }
@@ -105,6 +110,25 @@ export class AuthService {
         try { await this.api.request('logout', null, AbortSignal.timeout(10_000), '?scope=local', previous.access); }
         catch { if (epoch === this.epoch) this.emit({ message: '이 앱의 로그인 정보는 지웠습니다. 연결 오류로 서버 세션 해제는 확인하지 못했습니다.' }); }
       }
+      return;
+    }
+    if(command.type==='profile-save'||command.type==='profile-reload'){
+      if(!this.api||!this.session||this.state.busy)return;
+      if(command.revision!==this.state.profileRevision){this.emit({message:'계정이나 프로필이 바뀌었습니다. 현재 설정을 다시 불러온 뒤 저장해 주세요.'});return;}
+      const profile=command.type==='profile-save'?parseProfile(command.profile):null;
+      if(command.type==='profile-save'&&!profile)return;
+      if(command.type==='profile-save'&&this.now()<this.nextProfileWrite){this.emit({message:'잠시 후 프로필을 다시 저장해 주세요.'});return;}
+      if(command.type==='profile-save')this.nextProfileWrite=this.now()+1000;
+      const current=this.session,epoch=this.epoch;
+      this.emit({busy:true,message:command.type==='profile-save'?'계정에 저장하는 중입니다.':'계정 프로필을 불러오는 중입니다.'});
+      try {
+        const data=await this.api.request('user',profile?{data:{[PROFILE_KEY]:profile}}:null,this.signal(),'',current.access);
+        if(epoch!==this.epoch)return;
+        if(!record(data)||data.id!==current.id||normalizeEmail(data.email)!==current.email||typeof data.email_confirmed_at!=='string'||!Number.isFinite(Date.parse(data.email_confirmed_at)))throw new AuthFailure('response');
+        const result=profileFromUser(data);
+        if(profile&&(!record(data.user_metadata)||!Object.hasOwn(data.user_metadata,PROFILE_KEY)||result.warning||JSON.stringify(result.profile)!==JSON.stringify(profile)))throw new AuthFailure('response');
+        this.emit({busy:false,profile:result.profile,profileRevision:randomUUID(),profileWarning:result.warning,message:profile?'프로필과 꾸미기 설정을 계정에 저장했습니다.':'계정 프로필을 다시 불러왔습니다.'});
+      }catch{if(epoch===this.epoch)this.emit({busy:false,message:'프로필 저장·불러오기 결과를 확인하지 못했습니다. 연결을 확인하고 다시 불러오기를 눌러 주세요.'});}
       return;
     }
     if(command.type==='password-update'||command.type==='reauthenticate') {

@@ -1,4 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
+contextBridge.exposeInMainWorld('appearance', {
+  ready:()=>ipcRenderer.send('appearance:ready'),
+  onState:(callback:(state:unknown)=>void)=>ipcRenderer.on('appearance:state',(_event,state)=>callback(state))
+});
 contextBridge.exposeInMainWorld('browser', {
   command: (command: unknown) => { ipcRenderer.send('browser:command', command); },
   onFocusAddress: (callback: () => void) => { ipcRenderer.on('browser:focus-address', () => callback()); },
