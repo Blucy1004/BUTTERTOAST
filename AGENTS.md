@@ -22,6 +22,7 @@
 - Run `npm run test:account` for account UI, IPC, Supabase transport and session changes. Use local fixtures; never disable sandboxing/TLS or commit user passwords/tokens. See `docs/SUPABASE-SETUP.md` for the public client configuration and live validation limits.
 - Run `npm run test:manager` for library, theme, permission, download and management UI changes. `npm run benchmark` measures local representation overhead without real AI calls.
 - Run `npm run test:workspace` for the owner-designed three-panel layout, delegation, task presentation and event replay. `docs/design/BRIEF.md` is the current owner reference; preserve Butter / Browser / Toast roles and main-owned geometry.
+- Run `npm run test:upgrade` for tab tools, native find/zoom, bundled fonts, emergency AI revocation, pending-dialog invalidation and crash recovery. Keep the stop path available after normal IPC quotas are exhausted; it may only revoke authority.
 - Run `npm run test:ai` for AI panel, key/endpoint management, adapters, shared context or approved actions. Never use live keys in fixtures. See `docs/AI-CONNECTION.md` for supported operations and live-model validation limits.
 - Use `npm run audit:deps`, `npm run scan:secrets` and `npm run sbom` when dependency or release changes warrant them. Check scanner and audit limitations in SECURITY.md.
 - `npm run package:win` builds an unsigned Windows x64 test folder and verifies its payload, PE architecture, fuses and embedded ASAR hash. Code signing and Windows execution remain separate checks.

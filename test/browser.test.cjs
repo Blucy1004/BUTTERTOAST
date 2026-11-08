@@ -48,6 +48,11 @@ test('corrupt, oversized and unwritable session files fail closed', async t => {
   }
   const bad=new TabSessionStore(path.join(file,'child'),cipher);await bad.load();await bad.save(sample);assert.equal(bad.status,'failed');
 });
+test('encrypted session version two restores pinned and muted state without executing or storing page content',async t=>{
+ const file=await setup(t),cipher=testCipher(),store=new TabSessionStore(file,cipher);await store.load();
+ const value={version:2,active:1,tabs:[{url:'https://example.test/?private=value',pinned:true,muted:true},{url:'',pinned:false,muted:false}]};
+ await store.save(value);assert.equal((await fs.readFile(file)).includes('private=value'),false);assert.deepEqual(await new TabSessionStore(file,cipher).load(),value);
+});
 test('tracker matching respects host boundaries and leaves first-party/main navigation working', () => {
   for(const host of ['google-analytics.com','sub.google-analytics.com','google-analytics.com.'])assert.equal(shouldBlockTracker(`https://${host}/collect`,'https://example.test/','xhr'),true);
   for(const host of ['evilgoogle-analytics.com','google-analytics.com.evil.test'])assert.equal(shouldBlockTracker(`https://${host}/`,'https://example.test/','script'),false);

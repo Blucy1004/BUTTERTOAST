@@ -3,6 +3,19 @@ const send = (type, extra = {}) => window.browser.command({ type, ...extra });
 const renderToolbar = window.initToolbar(send);
 const renderWorkspace = window.initWorkspace(send);
 let current, tabsSignature='';
+const tabSearch=document.getElementById('tab-search');
+tabSearch.oninput=()=>{if(current)window.renderTabs(current,send,tabSearch.value.trim());};
+tabSearch.onkeydown=e=>{if(e.key==='Escape'){tabSearch.value='';tabSearch.oninput();}if(e.key==='Enter'){document.querySelector('#tabs button')?.click();}};
+document.getElementById('ai-stop-all').onclick=()=>send('ai-stop-all');
+document.getElementById('find-open').onclick=()=>send('find-open');
+document.getElementById('find-close').onclick=()=>send('find-close');
+let findTimer;
+const find=(forward,next)=>{clearTimeout(findTimer);send('find',{text:document.getElementById('find-text').value,forward,next});};
+document.getElementById('find-text').oninput=()=>{clearTimeout(findTimer);findTimer=setTimeout(()=>find(true,false),180);};
+document.getElementById('find-text').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();find(!e.shiftKey,true);}if(e.key==='Escape'){clearTimeout(findTimer);send('find-close');}};
+document.getElementById('find-bar').onsubmit=e=>{e.preventDefault();find(true,true);};
+document.getElementById('find-prev').onclick=()=>find(false,true);document.getElementById('find-next').onclick=()=>find(true,true);
+for(const [id,direction] of [['zoom-out',-1],['zoom-reset',0],['zoom-in',1]])document.getElementById(id).onclick=()=>send('zoom',{direction});
 document.getElementById('ai-next').onclick = () => send('ai-next');
 document.getElementById('ai-toggle').onclick = () => send('ai-toggle');
 document.getElementById('open-toast').onclick = () => send('ai-toggle');
@@ -18,6 +31,13 @@ for (const [id, delta] of [['move-left', -1], ['move-right', 1]]) {
   document.getElementById(id).onclick = () => current && send('move', { id: current.active, delta });
 }
 window.browser.onState(state => {
+  document.getElementById('ai-stop-all').disabled=!state.initialized;
+  document.getElementById('app-version').textContent=`v${state.version||''}`;
+  document.getElementById('zoom-reset').textContent=`${state.zoom}%`;
+  document.getElementById('find-bar').hidden=!state.find.open;
+  document.getElementById('browser-panel').classList.toggle('finding',state.find.open);
+  document.getElementById('find-count').textContent=`${state.find.active} / ${state.find.matches}`;
+  if(!state.find.open){clearTimeout(findTimer);document.getElementById('find-text').value='';}
   document.getElementById('manager-open').disabled = !state.initialized;
   document.getElementById('bookmark').disabled = !state.initialized || !/^https?:/.test(state.url);
   document.getElementById('account-open').disabled = !state.initialized;
@@ -28,12 +48,13 @@ window.browser.onState(state => {
   document.getElementById('delegate').disabled = !state.initialized || !state.url.startsWith('https:');
   current = state; renderWorkspace(state);
   const signature=JSON.stringify([state.tabs,state.active,state.layout?.compact]);
-  if(signature!==tabsSignature){tabsSignature=signature;window.renderTabs(state, send);} renderToolbar(state);
+  if(signature!==tabsSignature){tabsSignature=signature;window.renderTabs(state, send,tabSearch.value.trim());} renderToolbar(state);
   document.getElementById('new').disabled = !state.initialized || state.tabs.length >= 30;
   document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= 30;
   const index = state.tabs.findIndex(tab => tab.id === state.active);
-  document.getElementById('move-left').disabled = index <= 0;
-  document.getElementById('move-right').disabled = index < 0 || index >= state.tabs.length - 1;
+  document.getElementById('move-left').disabled = index <= 0 || state.tabs[index]?.pinned!==state.tabs[index-1]?.pinned;
+  document.getElementById('move-right').disabled = index < 0 || index >= state.tabs.length - 1 || state.tabs[index]?.pinned!==state.tabs[index+1]?.pinned;
 });
 window.browser.onFocusAddress(() => { const input = document.getElementById('address'); input.focus(); input.select(); });
+window.browser.onFocusTools(tool=>{const input=document.getElementById(tool==='find'?'find-text':'tab-search');input.focus();input.select();});
 send('ready');

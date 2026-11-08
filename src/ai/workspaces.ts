@@ -21,6 +21,7 @@ export class AiWorkspaces {
     this.panels[this.selected].open();
   }
   observe():void{for(const panel of this.panels)panel.observe();}
+  stopAll():void{for(const panel of this.panels)panel.emergencyStop();}
   layout():void{this.panels[this.selected].layout();}
   async flush():Promise<void>{await Promise.all(this.panels.map(p=>p.flush()));}
   dispose():void{for(const panel of this.panels)panel.dispose();}

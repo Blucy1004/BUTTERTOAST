@@ -10,7 +10,7 @@ export function parseWorkspace(value: unknown): WorkspacePreferences | null {
   return { left: v.left as number, right: v.right as number, leftCollapsed: v.leftCollapsed, rightCollapsed: v.rightCollapsed };
 }
 /** Main owns both Chromium and UI geometry. Preferences never supply arbitrary bounds. */
-export function workspaceGeometry(width: number, height: number, p: WorkspacePreferences, narrowToast = false) {
+export function workspaceGeometry(width: number, height: number, p: WorkspacePreferences, narrowToast = false, findOpen = false) {
   const margin = 16, gap = 12, top = 80, available = Math.max(0, width - margin * 2);
   const narrow = width < 760;
   const left = p.leftCollapsed || width < 1080 ? 52 : Math.min(p.left, Math.max(160, available - 636));
@@ -22,6 +22,7 @@ export function workspaceGeometry(width: number, height: number, p: WorkspacePre
   const butter: Bounds = { x: margin, y: top, width: left, height: panelHeight };
   const browser: Bounds = { x: margin + left + gap, y: top, width: Math.max(0, center), height: panelHeight };
   const toast: Bounds = { x: width - margin - right, y: top, width: Math.max(0, right), height: panelHeight };
-  const human: Bounds = { x: browser.x + 1, y: top + 117, width: Math.max(0,browser.width-2), height: Math.max(0, panelHeight - 118) };
+  const findHeight=findOpen?40:0;
+  const human: Bounds = { x: browser.x + 1, y: top + 117+findHeight, width: Math.max(0,browser.width-2), height: Math.max(0, panelHeight - 118-findHeight) };
   return { butter, browser, toast, human, browserVisible, toastVisible, compact: left === 52, narrow };
 }

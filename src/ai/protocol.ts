@@ -20,7 +20,7 @@ export function parseConnection(provider: unknown, endpoint: unknown, key: unkno
 export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-context' | 'task-close' | 'approve' | 'reject' | 'continue-task' | 'handoff' | 'save-chat' | 'load-chat' | 'delete-chat' }
   | { type: 'task-display'; mode: 'status' | 'page' | 'controls' }
   | { type: 'visual-options'; speed: number; motion: boolean }
-  | { type: 'replay'; id: number } | { type: 'task-return' }
+  | { type: 'replay'; id: number } | { type: 'task-return' | 'task-recover' }
   | { type: 'share-selection' }
   | { type: 'connect'; provider: Provider; endpoint: string; key: string; remember: boolean }
   | { type: 'restore' | 'forget'; provider: Provider }
@@ -30,7 +30,7 @@ export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-co
   | {type:'run-task';goal:string;steps:number};
 export function parseAiCommand(value: unknown): AiCommand | null {
   if (!record(value)) return null;
-  if(value.type==='task-return'&&exactKeys(value,['type']))return {type:'task-return'};
+  if((value.type==='task-return'||value.type==='task-recover')&&exactKeys(value,['type']))return {type:value.type};
   if(value.type==='share-selection'&&exactKeys(value,['type']))return {type:'share-selection'};
   if(value.type==='task-display'&&exactKeys(value,['type','mode'])&&['status','page','controls'].includes(value.mode as string))return value as AiCommand;
   if(value.type==='visual-options'&&exactKeys(value,['type','speed','motion'])&&[1,.5,.1].includes(value.speed as number)&&typeof value.motion==='boolean')return value as AiCommand;

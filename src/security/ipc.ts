@@ -1,5 +1,6 @@
-export type Command = { type: 'ready' | 'new' | 'back' | 'forward' | 'reload' | 'stop' | 'reopen' | 'restart' | 'suspend' | 'privacy-toggle' | 'account-open' | 'ai-toggle' | 'ai-next' | 'manager-open' | 'bookmark' | 'workspace-resize-end' }
-  | { type: 'move'; id: number; delta: -1 | 1 } | { type: 'select' | 'close' | 'delegate'; id: number } | { type: 'navigate'; address: string }
+export type Command = { type: 'ready' | 'new' | 'back' | 'forward' | 'reload' | 'stop' | 'reopen' | 'restart' | 'suspend' | 'privacy-toggle' | 'account-open' | 'ai-toggle' | 'ai-next' | 'ai-stop-all' | 'manager-open' | 'bookmark' | 'workspace-resize-end' | 'find-open' | 'find-close' }
+  | { type: 'move'; id: number; delta: -1 | 1 } | { type: 'select' | 'close' | 'delegate' | 'tab-menu'; id: number } | { type: 'navigate'; address: string }
+  | {type:'find';text:string;forward:boolean;next:boolean} | {type:'zoom';direction:-1|0|1}
   | { type: 'workspace-toggle'; side: 'left' | 'right' }
   | { type: 'workspace-drag'; active: boolean }
   | { type: 'workspace-resize'; side: 'left' | 'right'; width: number };
@@ -13,8 +14,10 @@ export function exactKeys(value: Record<string, unknown>, keys: string[]): boole
 export function parseCommand(value: unknown): Command | null {
   if (!record(value)) return null;
   const type = value.type;
-  if (['ready', 'new', 'back', 'forward', 'reload', 'stop', 'reopen', 'restart', 'suspend', 'privacy-toggle', 'account-open', 'ai-toggle', 'ai-next', 'manager-open', 'bookmark', 'workspace-resize-end'].includes(type as string) && exactKeys(value, ['type'])) return value as Command;
-  if ((type === 'select' || type === 'close' || type === 'delegate') && exactKeys(value, ['type', 'id']) && Number.isSafeInteger(value.id) && (value.id as number) > 0) return value as Command;
+  if (['ready', 'new', 'back', 'forward', 'reload', 'stop', 'reopen', 'restart', 'suspend', 'privacy-toggle', 'account-open', 'ai-toggle', 'ai-next', 'ai-stop-all', 'manager-open', 'bookmark', 'workspace-resize-end','find-open','find-close'].includes(type as string) && exactKeys(value, ['type'])) return value as Command;
+  if (['select','close','delegate','tab-menu'].includes(type as string) && exactKeys(value, ['type', 'id']) && Number.isSafeInteger(value.id) && (value.id as number) > 0) return value as Command;
+  if(type==='find'&&exactKeys(value,['type','text','forward','next'])&&typeof value.text==='string'&&value.text.length<=256&&!/[\u0000-\u001f\u007f]/.test(value.text)&&typeof value.forward==='boolean'&&typeof value.next==='boolean')return value as Command;
+  if(type==='zoom'&&exactKeys(value,['type','direction'])&&[-1,0,1].includes(value.direction as number))return value as Command;
   if (type === 'workspace-toggle' && exactKeys(value,['type','side']) && ['left','right'].includes(value.side as string)) return value as Command;
   if (type === 'workspace-drag' && exactKeys(value,['type','active']) && typeof value.active === 'boolean') return value as Command;
   if (type === 'workspace-resize' && exactKeys(value,['type','side','width']) && ['left','right'].includes(value.side as string) && Number.isSafeInteger(value.width)

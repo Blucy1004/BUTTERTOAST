@@ -5,16 +5,19 @@ import type { OsCipher } from '../security/vault';
 import { isWebUrl } from '../policy';
 import { exactKeys, record } from '../security/ipc';
 export const TAB_LIMIT = 30;
-export type SessionSnapshot = { version: 1; active: number; tabs: string[] };
+export type SavedTab = { url: string; pinned: boolean; muted: boolean };
+export type SessionSnapshot = { version: 1; active: number; tabs: string[] } | { version: 2; active: number; tabs: SavedTab[] };
 export function restorableUrl(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 4096 && !/[\u0000-\u001f\u007f]/.test(value) && (value === '' || isWebUrl(value));
 }
 export function parseSession(value: unknown): SessionSnapshot | null {
-  if (!record(value) || !exactKeys(value, ['version', 'active', 'tabs']) || value.version !== 1
+  if (!record(value) || !exactKeys(value, ['version', 'active', 'tabs']) || ![1,2].includes(value.version as number)
     || !Array.isArray(value.tabs) || value.tabs.length < 1 || value.tabs.length > TAB_LIMIT
-    || !Array.from(value.tabs).every(restorableUrl) || !Number.isSafeInteger(value.active)
+    || !Number.isSafeInteger(value.active)
     || (value.active as number) < 0 || (value.active as number) >= value.tabs.length) return null;
-  return { version: 1, active: value.active as number, tabs: [...value.tabs] };
+  if(value.version===1) return Array.from(value.tabs).every(restorableUrl) ? {version:1,active:value.active as number,tabs:[...value.tabs]} : null;
+  if(!Array.from(value.tabs).every(t=>record(t)&&exactKeys(t,['url','pinned','muted'])&&restorableUrl(t.url)&&typeof t.pinned==='boolean'&&typeof t.muted==='boolean'))return null;
+  return {version:2,active:value.active as number,tabs:value.tabs.map(t=>({...t}))};
 }
 /** URLs may contain tokens. Never write a plaintext fallback when OS storage is unavailable. */
 export class TabSessionStore {

@@ -1,10 +1,16 @@
 /* Owner's navy / starfield direction. Shared across independently replaceable UI components. */
+@font-face {
+  font-family: 'Pretendard'; font-style: normal; font-weight: 100 900;
+  font-display: swap; src: url('fonts/PretendardVariable.woff2') format('woff2');
+}
 :root {
   color-scheme: dark;
   --surface: #080f26; --chrome: #0d1732; --hover: #1b2b50; --text: #eef3ff;
   --muted: #a4b2ce; --border: #293955; --error: #ffb7aa; --accent: #4a91ff;
   --radius: 8px; --panel-radius: 18px; --spacing: 8px; --small-font: 12px;
   --toolbar-icon: 19px; --heading-font: 22px; --field-height: 40px;
-  --font: 14px system-ui, 'Segoe UI', sans-serif; --motion: 160ms;
+  --font-family: 'Pretendard', 'Segoe UI', sans-serif;
+  --display-family: var(--font-family);
+  --font: 14px var(--font-family); --motion: 160ms;
 }
 @media (prefers-reduced-motion: reduce) { :root { --motion: 0ms; } }

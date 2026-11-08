@@ -1,5 +1,6 @@
 import { app, BrowserWindow, WebContents, ipcMain, session, protocol } from 'electron';
 import path from 'node:path';
+import {readFileSync} from 'node:fs';
 import { parseCommand, RateGate, record } from './security/ipc';
 import { assertSafeLaunch, hardenSession, WEB_PREFERENCES } from './security/electron';
 import { installUiProtocol, UI_URL } from './security/ui-protocol';
@@ -18,8 +19,10 @@ import { installSitePermissions } from './browser/permissions';
 import {BrowserUpdates} from './browser/updates';
 import { isWebUrl } from './policy';
 import { defaultWorkspace, workspaceGeometry } from './browser/workspace';
+import { TabMenu } from './browser/tab-menu';
 
 assertSafeLaunch();
+const appVersion=JSON.parse(readFileSync(path.join(__dirname,'..','package.json'),'utf8')).version as string;
 app.enableSandbox();
 app.commandLine.appendSwitch('site-per-process');
 protocol.registerSchemesAsPrivileged([{ scheme: 'toast-ui', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
@@ -32,14 +35,22 @@ let privacy: ReturnType<typeof installPrivacy>;
 let initialized = false;
 let account: AccountWindow;
 let ai: AiWorkspaces;
+let tabMenu:TabMenu;
 let library: BrowserLibrary;
 let manager: BrowserManager;
 let downloads: DownloadManager;
 let updates:BrowserUpdates;
 let workspace=defaultWorkspace(), narrowToast=false, arranging=false, workspaceDirty=false;
 let arrangeTimer:NodeJS.Timeout|undefined;
+// Native keyboard input only. DOM keyboard dispatch cannot trigger this emergency path.
+app.on('web-contents-created',(_event,wc)=>wc.on('before-input-event',(event,input)=>{
+  const modifier=process.platform==='darwin'?input.meta:input.control;
+  if(input.type==='keyDown'&&modifier&&input.shift&&!input.alt&&input.key.toLowerCase()==='x'){
+    event.preventDefault();ai?.stopAll();
+  }
+}));
 function layoutWorkspace():ReturnType<typeof workspaceGeometry> {
-  const [width,height]=window.getContentSize(),layout=workspaceGeometry(width,height,workspace,narrowToast);
+  const [width,height]=window.getContentSize(),layout=workspaceGeometry(width,height,workspace,narrowToast,tabs?.state().find.open);
   tabs?.setViewport(layout.human,layout.browserVisible&&!arranging);
   ai?.setPresentation(layout.toast,layout.toastVisible&&!arranging);
   return layout;
@@ -67,10 +78,15 @@ function emitState(): void {
   if (!window || window.isDestroyed() || !tabs) return;
   ai?.observe();
   const state = tabs.state();
-  window.webContents.send('browser:state', { ...state, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+  window.webContents.send('browser:state', { ...state,version:appVersion, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
 function focusAddress(): void {
   window.webContents.focus(); window.webContents.send('browser:focus-address');
+}
+function focusTools(tool:'find'|'tabs'):void {
+  if(tool==='find'){narrowToast=false;tabs.openFind();}
+  else {workspace.leftCollapsed=false;emitState();}
+  window.webContents.focus();window.webContents.send('browser:focus-tools',tool);
 }
 /** Native input events work even while an untrusted page owns keyboard focus. */
 function keyboard(wc: WebContents): void {
@@ -80,6 +96,11 @@ function keyboard(wc: WebContents): void {
     let action: (() => void) | undefined;
     if (modifier) {
       if (key === 'l' && !input.shift) action = focusAddress;
+      if (key === 'f' && !input.shift) action = () => focusTools('find');
+      if (key === 'a' && input.shift) action = () => focusTools('tabs');
+      if (['+','='].includes(key)) action = () => tabs.zoom(1);
+      if (key === '-') action = () => tabs.zoom(-1);
+      if (key === '0') action = () => tabs.zoom(0);
       if (key === 'd' && !input.shift) action = () => manager.bookmark();
       if (key === 'h' && !input.shift) action = () => manager.open('history');
       if (key === 'j' && !input.shift) action = () => manager.open('downloads');
@@ -91,7 +112,10 @@ function keyboard(wc: WebContents): void {
       if (key === 'r' && !input.shift) action = () => tabs.history('reload');
     } else if (!input.shift && !input.meta && !input.control) {
       if (key === 'f5') action = () => tabs.history('reload');
-      if (key === 'escape') action = () => tabs.history('stop');
+      if (key === 'escape') action = () => tabs.state().find.open?tabs.clearFind():tabs.history('stop');
+      if (key === 'f3') action = () => tabs.find(tabs.state().find.query,true,true);
+    } else if(key==='f3'&&input.shift&&!input.control&&!input.meta){
+      action=()=>tabs.find(tabs.state().find.query,false,true);
     }
     if (action) { event.preventDefault(); if (commands.allow()) action(); }
   });
@@ -100,12 +124,19 @@ function trusted(event: Electron.IpcMainEvent): boolean {
   return !!window && !window.isDestroyed() && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && event.senderFrame?.url === UI_URL;
 }
 ipcMain.on('browser:command', (event, input: unknown) => {
-  if (!trusted(event) || !(record(input)&&input.type==='workspace-resize'?resizeCommands:commands).allow()) return;
+  if (!trusted(event))return;
+  if(record(input)&&input.type==='ai-stop-all'&&parseCommand(input)){if(initialized)ai.stopAll();return;}
+  if (!(record(input)&&input.type==='workspace-resize'?resizeCommands:commands).allow()) return;
   const cmd = parseCommand(input);
   if (!cmd) return;
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'tab-menu':tabMenu.open(cmd.id);break;
+    case 'find-open':focusTools('find');break;
+    case 'find-close':tabs.clearFind();break;
+    case 'find':tabs.find(cmd.text,cmd.forward,cmd.next);break;
+    case 'zoom':tabs.zoom(cmd.direction);break;
     case 'delegate': void ai.delegate(cmd.id);break;
     case 'workspace-toggle': {
       if(cmd.side==='left')workspace.leftCollapsed=!workspace.leftCollapsed;
@@ -170,6 +201,7 @@ app.whenReady().then(async () => {
   updates=new BrowserUpdates(window,()=>manager?.emit());
   manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates);
   ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();});
+  tabMenu=new TabMenu(window,tabs,id=>{void ai.delegate(id);});
   window.on('resize', () => emitState());
   window.on('blur',endArrange);
   window.on('closed', () => { initialized = false;updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose(); });

@@ -40,6 +40,7 @@ jobs:
       - run: npm run test:ai
       - run: npm run test:manager
       - run: npm run test:workspace
+      - run: npm run test:upgrade
       - run: npm run audit:deps
       - run: npm run scan:secrets
       - run: npm run sbom

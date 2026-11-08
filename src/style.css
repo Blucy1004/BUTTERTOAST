@@ -4,8 +4,20 @@ button { border: 1px solid transparent; background: transparent; border-radius: 
 button:hover { background: var(--hover); } button:focus-visible,input:focus-visible,.splitter:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 button:disabled { opacity: .35; cursor: default; }
 .brandbar { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: #030610b8; }
-.brand { font-size: 24px; letter-spacing: -.7px; } .brand span { display: block; font-size: 10px; letter-spacing: .5px; color: var(--muted); margin-top: 3px; }
+.brand { font-family: var(--display-family); font-size: 24px; font-weight: 600; letter-spacing: -.6px; }
 .brandbar nav { display: flex; gap: 4px; }
+#ai-stop-all { color: var(--error); font-size: 12px; }
+.panel-title strong,.toast-welcome h1 { font-family:var(--display-family); }
+.tab-search { padding:0 8px 8px; }.tab-search input { padding:7px 9px;font-size:12px; }
+#tab-empty {font-size:11px;color:var(--muted);padding:0 10px;text-align:center;}
+.tab .tab-menu {padding:6px;color:var(--muted);}.tab.pinned {border-left-color:var(--accent);}
+.compact .tab-menu {display:none;}.compact .tab-search{padding:0 4px 4px;}.compact .tab-search input{padding:6px 2px;}
+#find-bar {display:flex;height:40px;gap:3px;align-items:center;padding:3px 7px;background:var(--chrome);}
+#find-bar input {min-width:35px;flex:1;padding:6px; font-size:12px;}
+#find-count {white-space:nowrap;min-width:38px;font-size:10px;color:var(--muted);text-align:center;}
+#find-bar button {padding:4px 6px;}
+#browser-panel.finding .browser-empty {height:calc(100% - 156px);}
+.zoom-tools {display:flex;align-items:center;}#app-version{font-size:9px;color:var(--muted);}
 .panel { position: absolute; border: 1px solid #233252; border-radius: var(--panel-radius); overflow: hidden; background: #050914eb; }
 .panel-title { height: 48px; background: var(--surface); display: flex; align-items: center; padding: 0 14px; gap: 10px; white-space: nowrap; }
 .panel-title strong { font-size: 16px; font-weight: 500; } .panel-title span { color: var(--muted); font-size: 11px; } .panel-title button { margin-left: auto; font-size: 11px; padding: 6px; }

@@ -4,11 +4,11 @@ Chromium 기반 AI 협업 브라우저의 개발 버전입니다. 핵심 기능�
 
 ## Windows 다운로드
 
-[개발 빌드 v0.1.0-dev.2](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.2)의 Assets에서 받으세요. 비공개 저장소이므로 접근 권한이 있는 GitHub 계정으로 로그인해야 합니다.
+[개발 빌드 v0.2.0-dev.1](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1)의 Assets에서 받으세요. 비공개 저장소이므로 접근 권한이 있는 GitHub 계정으로 로그인해야 합니다.
 
-- [설치 프로그램 (.exe)](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/ButterToast-0.1.0-Setup-x64.exe): 현재 사용자용 설치 프로그램입니다.
-- [포터블 ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/ButterToast-0.1.0-Windows-x64.zip): 전체를 압축 해제한 뒤 `ButterToast-win32-x64/ButterToast.exe`를 실행하세요.
-- [SHA-256 체크섬](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.1.0-dev.2/SHA256SUMS.txt)
+- [설치 프로그램 (.exe)](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Setup-x64.exe): 현재 사용자용 설치 프로그램입니다.
+- [포터블 ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Windows-x64.zip): 전체를 압축 해제한 뒤 `ButterToast-win32-x64/ButterToast.exe`를 실행하세요.
+- [SHA-256 체크섬](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/SHA256SUMS.txt)
 
 GitHub의 `Source code (zip)`은 소스이며 실행 파일이 없습니다. 설치 프로그램과 포터블 ZIP은 일반 Git 파일 제한(100 MiB)을 넘으므로 Releases에 보관합니다. 이 빌드는 코드 서명되지 않은 사전 테스트 버전이며, 실제 Windows 설치·제거 검증은 아직 남아 있습니다.
 
@@ -16,7 +16,9 @@ GitHub의 `Source code (zip)`은 소스이며 실행 파일이 없습니다. 설
 
 왼쪽 **Butter**(탭·도구), 중앙 **Browser**(사람용 웹), 오른쪽 **Toast**(독립 AI 작업) 구성입니다. 패널 너비 조절·접기, 원본을 유지하는 탭 드래그 위임, 같은 세션의 상태/작업화면 전환, 실제 실행 이벤트의 가상 커서를 지원합니다. [설계·검증·남은 범위](docs/DESIGN-IMPLEMENTATION.md)를 확인하세요.
 
-![ButterToast 3패널 화면](docs/design/implemented-workspace.png)
+![ButterToast 0.2 화면](docs/design/upgrade-workspace.png)
+
+0.2에서는 Pretendard 폰트, 탭 검색·고정·음소거·주소 복제, 페이지 내 찾기·확대, 모든 AI 중지, 승인 후 충돌 복구와 다운로드 출처 표시를 추가했습니다. [변경 내용·사용법·보안 검증](docs/UPGRADE-0.2.md)을 확인하세요. 요청된 JASO Sans는 정확한 배포처/라이선스 확인 전이라 포함하지 않았습니다.
 
 ## 개발 실행
 
@@ -36,7 +38,7 @@ Linux에서는 정상 동작하는 Chromium 샌드박스가 필요합니다. 보
 
 Supabase 가입·로그인·복구·비밀번호 변경 UI, OpenAI·Claude·Gemini·호환/로컬 모델 연결, 독립 AI 작업 공간 3개, 페이지 공유·승인 동작·최대 10단계 작업·제어권 회수·사용량 추정·암호화 보관을 구현했습니다. OS 보호 저장소가 없으면 키·기록을 평문으로 대체 저장하지 않습니다.
 
-**실제 모델 추론·Windows 실행·일반 사용자 SMTP·서명된 운영 배포 검증은 남아 있습니다.** [전체 구현 현황](docs/IMPLEMENTATION-STATUS.md), [사용법·검증](docs/BROWSER-AI-IMPLEMENTATION.md), [보안](SECURITY.md)을 참조하세요.
+**실제 모델 추론·Windows 설치/제거·일반 사용자 SMTP·서명된 운영 배포 검증은 남아 있습니다.** [전체 구현 현황](docs/IMPLEMENTATION-STATUS.md), [최신 사용법·검증](docs/UPGRADE-0.2.md), [보안](SECURITY.md)을 참조하세요.
 
 ## 검증과 빌드
 
@@ -51,7 +53,7 @@ npm run package:installer
 
 `test:security`는 실제 Electron 로컬 공격 회귀, 계정·AI·관리 화면, 의존성 audit과 비밀정보 패턴 검사를 포함합니다. 실제 악성 서비스나 다른 사용자 계정을 공격하지 않습니다. 테스트 통과는 취약점 부재를 보증하지 않습니다.
 
-실행 파일은 `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`, 설치 프로그램은 `artifacts/ButterToast-0.1.0-Setup-x64.exe`입니다. 포터블 폴더는 DLL/resources와 함께 옮겨야 합니다. [Windows 빌드 안내](docs/WINDOWS-TEST-BUILD.md)를 확인하세요. 현재 빌드는 코드 서명되지 않았습니다.
+실행 파일은 `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`, 설치 프로그램은 `artifacts/ButterToast-0.2.0-Setup-x64.exe`입니다. 포터블 폴더는 DLL/resources와 함께 옮겨야 합니다. [Windows 빌드 안내](docs/WINDOWS-TEST-BUILD.md)를 확인하세요. 현재 빌드는 코드 서명되지 않았습니다.
 
 - [AI 연결과 작업](docs/AI-CONNECTION.md)
 - [Supabase 설정](docs/SUPABASE-SETUP.md)

@@ -3,12 +3,14 @@ import { WEB_PREFERENCES, hardenWebContents } from '../security/electron';
 import { restorableUrl, SessionSnapshot, TAB_LIMIT } from './session-store';
 import type { Bounds } from './workspace';
 export type TabStatus = 'ready' | 'loading' | 'slow' | 'unresponsive' | 'crashed' | 'suspended';
-type Tab = { id: number; title: string; url: string; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout };
+type Tab = { id: number; title: string; url: string; pinned: boolean; muted: boolean; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout };
 type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void };
 /** Human tabs only. No AI context, grants or renderer state are persisted or shared here. */
 export class BrowserTabs {
   private tabs: Tab[] = [];
-  private closed: { url: string; title: string }[] = [];
+  private closed: { url: string; title: string; pinned: boolean; muted: boolean }[] = [];
+  private finding = {open:false,query:'',active:0,matches:0};
+  private findRequest = 0;
   private nextId = 1;
   private active = 0;
   private disposed = false;
@@ -41,12 +43,14 @@ export class BrowserTabs {
     if (persist && this.tabs.length) this.hooks.persist(this.snapshot());
     this.hooks.changed();
   }
-  snapshot(): SessionSnapshot { return { version: 1, active: Math.max(0, this.tabs.findIndex(t => t.id === this.active)), tabs: this.tabs.map(t => restorableUrl(t.url) ? t.url : '') }; }
+  snapshot(): SessionSnapshot { return { version: 2, active: Math.max(0, this.tabs.findIndex(t => t.id === this.active)), tabs: this.tabs.map(t => ({url:restorableUrl(t.url)?t.url:'',pinned:t.pinned,muted:t.muted})) }; }
   state() {
     const tab = this.current(), wc = tab?.view?.webContents;
     const live = wc && !wc.isDestroyed() && !wc.isCrashed();
     return {
-      tabs: this.tabs.map(t => ({ id: t.id, title: t.title, status: t.status })), active: this.active,
+      tabs: this.tabs.map(t => ({ id: t.id, title: t.title, status: t.status, pinned:t.pinned, muted:t.muted,
+        host: (()=>{try{return new URL(t.url).hostname;}catch{return '';}})(), audible:!!t.view&&!t.view.webContents.isDestroyed()&&t.view.webContents.isCurrentlyAudible() })), active: this.active,
+      find:{...this.finding}, zoom:live?Math.round(wc.getZoomFactor()*100):100,
       url: tab?.url || '', status: tab?.status || 'ready',
       canBack: !!live && wc.navigationHistory.canGoBack(), canForward: !!live && wc.navigationHistory.canGoForward(),
       loading: tab?.status === 'loading' || tab?.status === 'slow', canReopen: this.closed.length > 0,
@@ -55,7 +59,8 @@ export class BrowserTabs {
   }
   initialize(saved: SessionSnapshot | null): void {
     if (saved) {
-      for (const url of saved.tabs) this.tabs.push({ id: this.nextId++, title: url ? new URL(url).hostname : '새 탭', url, status: 'suspended', error: '복원 대기: 탭을 선택하면 다시 엽니다.' });
+      const entries=saved.version===1?saved.tabs.map(url=>({url,pinned:false,muted:false})):saved.tabs;
+      for (const entry of entries) this.tabs.push({ id: this.nextId++, title: entry.url ? new URL(entry.url).hostname : '새 탭', ...entry, status: 'suspended', error: '복원 대기: 탭을 선택하면 다시 엽니다.' });
       this.active = this.tabs[saved.active].id; this.changed();
     } else this.newTab();
   }
@@ -91,6 +96,13 @@ export class BrowserTabs {
     const clearSlow = () => { clearTimeout(tab.slowTimer); tab.slowTimer = undefined; };
     this.window.contentView.addChildView(view); view.setVisible(tab.id === this.active);
     hardenWebContents(wc); this.hooks.input(wc);
+    wc.setAudioMuted(tab.muted);
+    wc.on('media-started-playing',()=>{if(valid())this.changed();});
+    wc.on('media-paused',()=>{if(valid())this.changed();});
+    wc.on('found-in-page',(_event,result)=>{
+      if(valid()&&this.current()===tab&&this.finding.open&&result.requestId===this.findRequest){this.finding.active=result.activeMatchOrdinal;this.finding.matches=result.matches;this.changed();}
+    });
+    wc.on('did-start-navigation',event=>{if(valid()&&event.isMainFrame&&this.current()===tab)this.clearFind(false);});
     wc.on('did-finish-load', () => { if (valid()) { this.hooks.visited?.(wc.getURL(), wc.getTitle()); this.hooks.loaded?.(wc); } });
     wc.on('page-title-updated', (_e, title) => { if (valid()) { tab.title = title.slice(0, 120) || '새 탭'; this.changed(); } });
     wc.on('did-start-loading', () => {
@@ -115,6 +127,7 @@ export class BrowserTabs {
     tab.status = 'ready'; tab.error = ''; this.layout();
   }
   private detach(tab: Tab): void {
+    if(this.current()===tab)this.clearFind(false);
     const view = tab.view; tab.view = undefined;
     clearTimeout(tab.slowTimer); tab.slowTimer = undefined;
     if (!view) return;
@@ -122,9 +135,11 @@ export class BrowserTabs {
     if (!this.window.isDestroyed()) this.window.contentView.removeChildView(view);
     if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
   }
-  newTab(url = '', title = '새 탭'): void {
+  newTab(url = '', title = '새 탭', options = {pinned:false,muted:false}): void {
     if (this.disposed || this.tabs.length >= TAB_LIMIT || !restorableUrl(url)) return;
-    const tab: Tab = { id: this.nextId++, title, url, status: 'ready', error: '' }; this.tabs.push(tab);
+    this.clearFind(false);
+    const tab: Tab = { id: this.nextId++, title, url, ...options, status: 'ready', error: '' }; this.tabs.push(tab);
+    this.tabs.sort((a,b)=>Number(b.pinned)-Number(a.pinned));
     this.active = tab.id; this.attach(tab);
     for (const t of this.tabs) t.view?.setVisible(t === tab);
     if (url) void tab.view!.webContents.loadURL(url).catch(() => {});
@@ -132,6 +147,7 @@ export class BrowserTabs {
   }
   select(id: number): void {
     const tab = this.tabs.find(t => t.id === id); if (!tab) return;
+    if(this.active!==id)this.clearFind(false);
     this.active = id;
     if (!tab.view && tab.status === 'suspended') {
       this.attach(tab);
@@ -145,23 +161,48 @@ export class BrowserTabs {
   selectNumber(number: number): void { const tab = number === 9 ? this.tabs.at(-1) : this.tabs[number - 1]; if (tab) this.select(tab.id); }
   move(id: number, delta: -1 | 1): void {
     const index = this.tabs.findIndex(t => t.id === id), next = index + delta;
-    if (index < 0 || next < 0 || next >= this.tabs.length) return;
+    if (index < 0 || next < 0 || next >= this.tabs.length || this.tabs[index].pinned!==this.tabs[next].pinned) return;
     [this.tabs[index], this.tabs[next]] = [this.tabs[next], this.tabs[index]]; this.changed(true);
   }
   close(id = this.active): void {
     const index = this.tabs.findIndex(t => t.id === id); if (index < 0) return;
+    if(this.active===id)this.clearFind(false);
     const [tab] = this.tabs.splice(index, 1);
-    this.closed.push({ url: restorableUrl(tab.url) ? tab.url : '', title: tab.title }); if (this.closed.length > 10) this.closed.shift();
+    this.closed.push({ url: restorableUrl(tab.url) ? tab.url : '', title: tab.title, pinned:tab.pinned, muted:tab.muted }); if (this.closed.length > 20) this.closed.shift();
     this.detach(tab);
     if (!this.tabs.length) this.newTab();
     else if (this.active === id) this.select(this.tabs[Math.min(index, this.tabs.length - 1)].id);
     else this.changed(true);
   }
-  reopen(): void { if (this.tabs.length >= TAB_LIMIT) return; const old = this.closed.pop(); if (old) this.newTab(old.url, old.title); }
+  reopen(): void { if (this.tabs.length >= TAB_LIMIT) return; const old = this.closed.pop(); if (old) this.newTab(old.url, old.title,{pinned:old.pinned,muted:old.muted}); }
+  pin(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(!tab)return;tab.pinned=!tab.pinned;this.tabs.sort((a,b)=>Number(b.pinned)-Number(a.pinned));this.changed(true);}
+  mute(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(!tab)return;tab.muted=!tab.muted;if(tab.view&&!tab.view.webContents.isDestroyed())tab.view.webContents.setAudioMuted(tab.muted);this.changed(true);}
+  duplicate(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(tab)this.newTab(restorableUrl(tab.url)?tab.url:'',tab.title,{pinned:false,muted:tab.muted});}
+  closableOthers(id:number):number[] {return this.tabs.some(t=>t.id===id)?this.tabs.filter(t=>t.id!==id&&!t.pinned).map(t=>t.id):[];}
+  closeMany(ids:number[]):void {for(const id of ids)this.close(id);}
+  openFind():void {this.finding.open=true;this.changed();}
+  clearFind(notify=true):void {
+    this.findRequest=0;
+    const wc=this.activeContents();if(wc&&!wc.isDestroyed()&&!wc.isCrashed())wc.stopFindInPage('clearSelection');
+    this.finding={open:false,query:'',active:0,matches:0};if(notify)this.changed();
+  }
+  find(text:string,forward=true,next=false):void {
+    const wc=this.activeContents();if(!wc||wc.isDestroyed()||wc.isCrashed()||wc.isLoading()||text.length>256)return;
+    const same=this.finding.query===text;
+    this.findRequest=0;this.finding={open:true,query:text,active:0,matches:0};
+    if(text)this.findRequest=wc.findInPage(text,{forward,findNext:next&&same});else wc.stopFindInPage('clearSelection');
+    this.changed();
+  }
+  zoom(direction:-1|0|1):void {
+    const wc=this.activeContents();if(!wc||wc.isDestroyed()||wc.isCrashed())return;
+    const levels=[.5,.67,.8,.9,1,1.1,1.25,1.5,1.75,2,2.5,3],current=wc.getZoomFactor();
+    const next=direction===0?1:direction>0?levels.find(n=>n>current+.01)??3:[...levels].reverse().find(n=>n<current-.01)??.5;
+    wc.setZoomFactor(next);this.changed();
+  }
   setError(message: string): void { const tab = this.current(); if (tab) { tab.error = message; this.changed(); } }
   navigate(url: string): void {
     const tab = this.current(); if (!tab || !restorableUrl(url) || !url) return;
-    if (tab.status === 'unresponsive') this.detach(tab);
+    if (tab.status === 'unresponsive' || tab.status === 'crashed') this.detach(tab);
     this.attach(tab); tab.url = url; tab.error = '';
     void tab.view!.webContents.loadURL(url).catch(() => {}); this.changed(true);
   }

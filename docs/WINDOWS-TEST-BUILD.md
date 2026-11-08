@@ -4,13 +4,15 @@
 
 ## 실행 파일
 
-- GitHub 다운로드: [v0.1.0-dev.2 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.2)의 Assets. `Source code` 대신 `ButterToast-0.1.0-Setup-x64.exe` 또는 `ButterToast-0.1.0-Windows-x64.zip`을 선택한다. 비공개 저장소 접근 권한이 있는 계정으로 로그인해야 한다.
-- 설치 프로그램: `artifacts/ButterToast-0.1.0-Setup-x64.exe`
+- GitHub 다운로드: [v0.2.0-dev.1 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1)의 Assets. `Source code` 대신 `ButterToast-0.2.0-Setup-x64.exe` 또는 `ButterToast-0.2.0-Windows-x64.zip`을 선택한다. 비공개 저장소 접근 권한이 있는 계정으로 로그인해야 한다.
+- 설치 프로그램: `artifacts/ButterToast-0.2.0-Setup-x64.exe`
 - 포터블 실행 파일: `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`
 
 포터블은 전체 폴더를 함께 옮겨야 한다. exe 하나만 복사하면 DLL·resources가 없어 실행되지 않는다. 소스 ZIP의 src 폴더에는 실행 파일이 없다.
 
 설치 프로그램은 관리자 권한 없이 현재 사용자의 LocalAppData/Programs/ButterToast에 설치하고 시작 메뉴·프로그램 제거·기본 브라우저 후보 등록을 만든다. 기본 브라우저 선택은 앱의 관리 → 설정 → OS 기본 브라우저 설정에서 사용자가 결정한다. 설치/제거 전 앱을 닫아야 한다. 제거해도 AppData/Roaming/ButterToast 프로필은 자동 삭제하지 않는다.
+
+0.2.0 Setup은 같은 설치 경로를 사용한다. 이전 앱을 완전히 종료하고 새 파일을 실행한다. Pretendard 라이선스는 `OFL-Pretendard.txt`로 포함된다. 0.1의 암호화된 탭 목록은 읽지만 새 v2 탭 목록은 이전 앱에서 읽을 수 없다. 실제 Windows 덮어설치·제거는 별도 수동 검증 대상이다. [기능과 보안 변경](UPGRADE-0.2.md)을 확인한다.
 
 ## 빌드
 

@@ -83,7 +83,7 @@ app.whenReady().then(async()=>{
   const longUrl=`${other}/${'x'.repeat(4100)}`;
   await postRestored.executeJavaScript(`history.replaceState(null,'',${JSON.stringify(longUrl)})`);
   await until(()=>manager.state().url===longUrl,'live address must not retain previous URL');
-  assert.equal(manager.snapshot().tabs.at(-1),'');
+  assert.equal(manager.snapshot().tabs.at(-1).url,'');
   console.log('PASS overlong page-controlled URL updates address display but is excluded from restore');
   // Keep logical tabs while releasing all their WebContents; creation is bounded to 30.
   while(manager.state().tabs.length<8)manager.newTab();

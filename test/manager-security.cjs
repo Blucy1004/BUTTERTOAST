@@ -48,14 +48,16 @@ app.whenReady().then(async()=>{
  human=webContents.getAllWebContents().find(w=>w.getURL().startsWith('https://www.google.com/search'));
  assert.equal(await human.executeJavaScript('navigator.permissions.query({name:"notifications"}).then(p=>p.state)'),'denied');dialog.showMessageBox=original;
  pass('HTTPS permission request needs native approval; owner can revoke the stored origin rule');
- server=http.createServer((req,res)=>{if(req.url==='/file'){res.writeHead(200,{'Content-Disposition':'attachment; filename="sample.txt"','Content-Type':'text/plain'});res.end('approved fixture download')}else{res.setHeader('Content-Type','text/html');res.end('<a id="get" href="/file" download>Download</a>')}});
+ server=http.createServer((req,res)=>{if(req.url==='/redirect-file'){res.writeHead(302,{Location:'/file'});res.end();}else if(req.url==='/file'){res.writeHead(200,{'Content-Disposition':'attachment; filename="sample.txt"','Content-Type':'text/plain'});res.end('approved fixture download')}else{res.setHeader('Content-Type','text/html');res.end('<a id="get" href="/file" download>Download</a>')}});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const url=`http://127.0.0.1:${server.address().port}`;await human.loadURL(url);
  const message=dialog.showMessageBoxSync,save=dialog.showSaveDialogSync,destination=path.join(profile,'saved.txt');
  let prompts=0;dialog.showMessageBoxSync=()=>{prompts++;return 0};dialog.showSaveDialogSync=()=>destination;
  let denied=false;human.session.once('will-download',e=>{denied=e.defaultPrevented});await human.executeJavaScript('document.getElementById("get").click()');await until(()=>denied,'download denied');assert.equal(fs.existsSync(destination),false);
  await wait(1550);dialog.showMessageBoxSync=()=>{prompts++;return 1};await human.executeJavaScript('document.getElementById("get").click()');
  await until(async()=>await manager.executeJavaScript('states.at(-1).downloads.some(d=>d.state==="completed")'),'download completed');
- assert.equal(fs.readFileSync(destination,'utf8'),'approved fixture download');assert.equal(prompts,2);dialog.showMessageBoxSync=message;dialog.showSaveDialogSync=save;
+ assert.equal(fs.readFileSync(destination,'utf8'),'approved fixture download');assert.equal(prompts,2);
+ if(process.platform==='win32'){const zone=fs.readFileSync(destination+':Zone.Identifier','utf8');assert.match(zone,/ZoneId=3/);assert.match(zone,/HostUrl=http:\/\/127\.0\.0\.1:/);assert.equal(await manager.executeJavaScript('states.at(-1).downloads.at(-1).protection'),'marked');}
+ dialog.showMessageBoxSync=message;dialog.showSaveDialogSync=save;
  pass('cancelled download writes nothing; native approved destination receives exact bytes and manager reports completion');
  await manager.executeJavaScript('window.manager.command({type:"history-clear"});window.manager.command({type:"entry-remove",kind:"bookmarks",id:states.at(-1).bookmarks[0].id})');
  await until(async()=>await manager.executeJavaScript('states.at(-1).history.length===0&&states.at(-1).bookmarks.length===0'),'deletions');
@@ -67,5 +69,8 @@ app.whenReady().then(async()=>{
  await ui.executeJavaScript('document.querySelector(".tab.active button").click()');await until(()=>webContents.getAllWebContents().some(w=>w.getURL().startsWith(url)&&!w.isLoading()),'tab reopened after data clear');
  const reopened=webContents.getAllWebContents().find(w=>w.getURL().startsWith(url));assert.equal(await reopened.executeJavaScript('localStorage.getItem("clear-fixture")'),null);assert.equal(await reopened.executeJavaScript('document.cookie'),'');dialog.showMessageBox=original;
  pass('site-data deletion closes live writers and reopened page has no previous cookies or storage');
+ await wait(1550);const afterClear=path.join(profile,'after-clear.txt');dialog.showMessageBoxSync=()=>1;dialog.showSaveDialogSync=()=>afterClear;
+ await reopened.executeJavaScript('document.getElementById("get").href="/redirect-file";document.getElementById("get").click()');await until(async()=>await manager.executeJavaScript('states.at(-1).downloads.some(d=>d.name==="after-clear.txt"&&d.state==="completed")'),'download still works after clearing data');assert.equal(fs.readFileSync(afterClear,'utf8'),'approved fixture download');dialog.showMessageBoxSync=message;dialog.showSaveDialogSync=save;
+ pass('clearing site data cancels existing transfers but permits a later explicitly approved download');
  console.log(`Manager security: ${groups} groups passed`);clearTimeout(deadline);server.close();app.exit(0);
 }).catch(e=>{console.error('FAIL',e);server?.close();clearTimeout(deadline);app.exit(1)});

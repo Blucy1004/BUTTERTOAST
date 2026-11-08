@@ -7,7 +7,7 @@ import { ToastController } from '../toastir/controller';
 import { WEB_PREFERENCES, hardenSession } from '../security/electron';
 import { osCipher } from '../security/os-cipher';
 import { KeyVault } from '../security/vault';
-import { RateGate } from '../security/ipc';
+import { RateGate, record, exactKeys } from '../security/ipc';
 import { ModelAdapter } from './adapter';
 import { AiService, Attachment, PageContext } from './service';
 import { parseAiCommand, safeText, Proposal } from './protocol';
@@ -36,6 +36,9 @@ export class AiPanel {
   private cursor: CursorVisualizer;
   private visual = {speed:1,motion:true};
   private delegating = false;
+  private intent=0;
+  private recovering=false;
+  private taskStatus:'none'|'loading'|'ready'|'failed'|'crashed'='none';
   private handler: (event: Electron.IpcMainEvent, value: unknown) => void;
   private archive:ConversationArchive;
   constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private audit: (origin: string, operation: string, outcome: string) => void = () => {},private slot=1, private visibility: (visible:boolean)=>void = () => {}) {
@@ -54,19 +57,25 @@ export class AiPanel {
     void Promise.resolve(osCipher.available()).then(value => this.service.storageAvailable(value), () => this.service.storageAvailable(false));
     this.handler = (event, value) => {
       const wc = this.view?.webContents;
-      if (!this.visible || !this.presented || !wc || wc.isDestroyed() || event.sender !== wc || event.senderFrame !== wc.mainFrame || event.senderFrame?.url !== AI_URL || !this.gate.allow()) return;
+      if (!this.visible || !this.presented || !wc || wc.isDestroyed() || event.sender !== wc || event.senderFrame !== wc.mainFrame || event.senderFrame?.url !== AI_URL) return;
+      // Revocation remains available when a renderer has exhausted its normal request quota.
+      if(record(value)&&exactKeys(value,['type'])&&value.type==='stop'){this.emergencyStop();return;}
+      if(!this.gate.allow())return;
       const command = parseAiCommand(value);
       if (!command) { this.service.invalidInput(); return; }
       if (command.type==='task-display') { this.mode=command.mode;this.layout();this.emit();return; }
       if (command.type==='visual-options') {this.visual={speed:command.speed,motion:command.motion};this.cursor.clear();this.emit();return;}
       if (command.type==='replay') {const e=this.events.find(e=>e.id===command.id);if(e&&e.document===this.taskDocument&&this.mode==='page'&&e.outcome==='executed')this.cursor.show(e,this.taskBounds(),this.visual.speed,this.visual.motion);return;}
       if (command.type==='task-return') {void this.returnResult().catch(()=>{});return;}
+      if (command.type==='task-recover') {void this.recoverTask().catch(()=>{});return;}
+      if(command.type==='task-close'||command.type==='handoff')this.intent++;
       void this.service.command(command);
     };
     ipcMain.on('ai:command', this.handler);
   }
-  private emit(): void { const wc = this.view?.webContents; if (wc && !wc.isDestroyed() && wc.getURL() === AI_URL) wc.send('ai:state', {...this.service.publicState(), display:{mode:this.mode,slot:this.slot,url:this.task?.view.webContents.getURL()??'',events:this.events,visual:this.visual,hasTask:!!this.task}}); }
+  private emit(): void { const wc = this.view?.webContents; if (wc && !wc.isDestroyed() && wc.getURL() === AI_URL) wc.send('ai:state', {...this.service.publicState(), display:{mode:this.mode,slot:this.slot,url:this.task?.view.webContents.getURL()??'',status:this.taskStatus,events:this.events,visual:this.visual,hasTask:!!this.task}}); }
   observe(): void { this.service.observe(); }
+  emergencyStop():void {this.intent++;this.cursor.clear();void this.service.command({type:'stop'});}
   toggle(): void { if (this.visible) { void this.service.command({ type: 'hide' }); return; } this.show(); }
   open():void {this.show();}
   hideForSwitch():void {this.service.workspaceHidden();this.hide();}
@@ -92,6 +101,7 @@ export class AiPanel {
   }
   async delegate(id:number):Promise<void> {
     if(this.delegating)return;this.delegating=true;
+    const intent=this.intent;
     try {
       const wc=this.tabs.contentsFor(id);if(!wc||wc.isDestroyed()||wc.isLoading())return;
       const original=wc.getURL(),frame=wc.mainFrame,url=new URL(original);
@@ -99,29 +109,42 @@ export class AiPanel {
       // Query/fragment can contain login links or secrets. Never copy them implicitly.
       url.search='';url.hash='';
       const answer=await dialog.showMessageBox(this.parent,{type:'question',title:'Toast에 보내기',message:'이 페이지를 별도 AI 세션에서 열까요?',detail:`${url.href}\n원본 탭은 그대로 유지합니다. 쿠키·로그인·선택 텍스트·검색 인자는 복사하지 않습니다. 기존 Toast 작업은 종료됩니다. 모델 전송과 실제 동작은 별도로 승인합니다.`,buttons:['취소','Toast에서 열기'],defaultId:0,cancelId:0,noLink:true});
-      if(answer.response!==1||wc.isDestroyed()||wc.getURL()!==original||wc.mainFrame!==frame)return;
+      if(answer.response!==1||intent!==this.intent||this.parent.isDestroyed()||wc.isDestroyed()||wc.getURL()!==original||wc.mainFrame!==frame)return;
       this.mode='status';this.show();await this.service.command({type:'stop'});await this.service.command({type:'task-open',url:url.href});
     } catch {this.tabs.setError('HTTPS 페이지를 연 뒤 다시 Toast에 보내세요.');} finally {this.delegating=false;}
   }
   private async returnResult():Promise<void> {
+    const intent=this.intent;
     const wc=this.task?.view.webContents;if(!wc||wc.isDestroyed())return;
     const url=wc.getURL();let parsed:URL;try{parsed=new URL(url);}catch{return;}
     if(parsed.protocol!=='https:'||parsed.username||parsed.password)return;
     const answer=await dialog.showMessageBox(this.parent,{type:'question',title:'결과 탭 가져오기',message:'결과 주소를 중앙 새 탭에서 열까요?',detail:`${safeText(url,4096)}\nAI 세션의 쿠키나 입력값을 복사하지 않습니다.`,buttons:['취소','새 탭에서 열기'],defaultId:0,cancelId:0,noLink:true});
-    if(answer.response===1&&!wc.isDestroyed()&&this.task?.view.webContents===wc&&wc.getURL()===url)this.tabs.newTab(url);
+    if(answer.response===1&&intent===this.intent&&!this.parent.isDestroyed()&&!wc.isDestroyed()&&this.task?.view.webContents===wc&&wc.getURL()===url)this.tabs.newTab(url);
+  }
+  private async recoverTask():Promise<void> {
+    const task=this.task,wc=task?.view.webContents;if(!task||!wc||wc.isDestroyed()||this.recovering)return;
+    const url=wc.getURL();try{const parsed=new URL(url);if(parsed.protocol!=='https:'||parsed.username||parsed.password)return;}catch{return;}
+    this.emergencyStop();const intent=this.intent;this.recovering=true;
+    try {
+      const {response}=await dialog.showMessageBox(this.parent,{type:'warning',title:'AI 작업 페이지 복구',message:'이 주소를 새 AI 세션에서 다시 열까요?',detail:`${safeText(url,4096)}\n입력 내용·AI 사이트 로그인은 복원되지 않습니다. 이전 명령·제출·승인은 다시 실행하지 않습니다.`,buttons:['취소','주소만 다시 열기'],defaultId:0,cancelId:0,noLink:true});
+      if(response===1&&intent===this.intent&&this.task===task&&!wc.isDestroyed()&&wc.getURL()===url)await this.service.command({type:'task-open',url});
+    }finally{this.recovering=false;}
   }
   private async openTask(url: string): Promise<void> {
     this.closeTask();const task=createAiTask();this.task=task;
+    this.taskStatus='loading';
     this.parent.contentView.addChildView(task.view);this.layout();
     const wc=task.view.webContents;
     wc.on('did-start-navigation',e=>{if(e.isMainFrame&&this.task===task){this.taskDocument='';this.cursor.clear();this.service.observe();this.emit();}});
-    wc.on('did-navigate',()=>this.emit());wc.on('did-stop-loading',()=>this.emit());
-    wc.on('render-process-gone',()=>{this.taskDocument='';this.cursor.clear();this.service.revokeContext();this.emit();});
+    wc.on('did-start-loading',()=>{if(this.task===task){this.taskStatus='loading';this.emit();}});
+    wc.on('did-navigate',()=>this.emit());wc.on('did-stop-loading',()=>{if(this.task===task&&this.taskStatus==='loading')this.taskStatus='ready';this.emit();});
+    wc.on('did-fail-load',(_e,code,_description,_url,main)=>{if(this.task===task&&main&&code!==-3){this.taskStatus='failed';this.emit();}});
+    wc.on('render-process-gone',()=>{if(this.task!==task)return;this.taskStatus='crashed';this.taskDocument='';this.mode='status';this.emergencyStop();this.layout();this.emit();});
     try {await bounded(wc.loadURL(url),20000);}catch {if(!wc.isDestroyed())wc.stop();throw new Error('Task navigation failed');}
     this.layout();this.emit();
   }
   private closeTask(): void {
-    const task=this.task;this.task=undefined;this.taskDocument='';this.events=[];this.cursor.clear();
+    const task=this.task;this.task=undefined;this.taskStatus='none';this.taskDocument='';this.events=[];this.cursor.clear();
     this.service.revokeContext();
     if(task){if(!this.parent.isDestroyed())this.parent.contentView.removeChildView(task.view);void task.close().catch(()=>{});}
     this.emit();

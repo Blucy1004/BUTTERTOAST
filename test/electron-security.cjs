@@ -21,7 +21,7 @@ app.whenReady().then(async()=>{
   const ui=win.webContents;
   await until(async()=>await ui.executeJavaScript('!!window.browser'));
   await until(()=>webContents.getAllWebContents().some(w=>w.id!==ui.id));
-  const content=webContents.getAllWebContents().find(w=>w.id!==ui.id);
+  let content=webContents.getAllWebContents().find(w=>w.id!==ui.id);
   assert.ok(content);
   const prefs=content.getLastWebPreferences();assert.equal(prefs.sandbox,true);assert.equal(prefs.nodeIntegration,false);assert.equal(prefs.contextIsolation,true);assert.equal(prefs.webSecurity,true);
   console.log('PASS sandbox and isolation preferences');
@@ -66,10 +66,13 @@ app.whenReady().then(async()=>{
   }
   await assert.rejects(ui.session.fetch(url));
   console.log('PASS UI asset allowlist and outbound network restriction');
+  const crashedContent=content,crashedSession=content.session;
   content.forcefullyCrashRenderer();
   await until(async()=> (await ui.executeJavaScript('document.getElementById("message").textContent')).includes('탭 프로세스가 종료'));
   await ui.executeJavaScript(`window.browser.command({type:'navigate',address:${JSON.stringify(url)}})`);
-  await until(()=>content.getURL()===url && !content.isLoading() && !content.isCrashed());
+  await until(()=>{content=webContents.getAllWebContents().find(w=>w.id!==crashedContent.id&&w.session===crashedSession);return content&&content.getURL()===url&&!content.isLoading()&&!content.isCrashed();});
+  assert.equal(crashedContent.isDestroyed(),true);
+  for(const flag of ['sandbox','contextIsolation','webSecurity'])assert.equal(content.getLastWebPreferences()[flag],true);
   assert.deepEqual(await content.executeJavaScript('[typeof require,typeof browser]'),['undefined','undefined']);
   console.log('PASS renderer crash reported; navigation recovers with isolation intact');
   const certDir=fs.mkdtempSync(path.join(os.tmpdir(),'bt-tls-'));

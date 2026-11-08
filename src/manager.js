@@ -29,7 +29,7 @@ window.manager.onState(state => {
   // Do not replace a bookmark title while the owner is editing it.
   if (!$('bookmark-list').contains(document.activeElement)) entries('bookmarks'); entries('history');
   $('download-list').replaceChildren();
-  for (const item of state.downloads) { const e=row($('download-list'),item.name,`${item.origin} · ${item.state} · ${item.received} / ${item.total || '?'} bytes`); const live=['progressing','interrupted'].includes(item.state);
+  for (const item of state.downloads) { const protection=item.protection==='marked'?' · Windows 인터넷 출처 표시됨':item.protection==='unavailable'?' · Windows 출처 표시를 기록하지 못함':'';const e=row($('download-list'),item.name,`${item.origin} · ${item.state} · ${item.received} / ${item.total || '?'} bytes${protection}`); const live=['progressing','interrupted'].includes(item.state);
     for (const [action,label] of (live ? [[item.paused || item.state==='interrupted'?'resume':'pause',item.paused || item.state==='interrupted'?'계속':'일시정지'],['cancel','취소']] : item.state==='completed' ? [['show','폴더에서 보기'],['remove','목록에서 제거']] : [['remove','목록에서 제거']])) button(e,label,() => send('download',{id:item.id,action})); }
   $('permission-list').replaceChildren();
   for (const rule of state.permissions) { const e=row($('permission-list'),rule.origin,`${rule.permission}: ${rule.decision}`); for (const [decision,label] of [['ask','다시 묻기'],['deny','차단'],['allow','허용']]) button(e,label,() => send('permission',{origin:rule.origin,permission:rule.permission,decision})); }

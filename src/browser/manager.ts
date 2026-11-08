@@ -58,7 +58,7 @@ export class BrowserManager {
     this.busy = true;
     try {
       const answer = await dialog.showMessageBox(this.window, { type: 'warning', message: '웹사이트 쿠키·저장소·캐시를 지울까요?', detail: '사람 탭을 종료하고 다운로드를 취소합니다. 입력 내용이 사라지고 웹사이트에서 로그아웃될 수 있습니다. ButterToast 계정과 AI 작업 창·API 키는 별도로 관리됩니다.', buttons: ['취소', '삭제'], defaultId: 0, cancelId: 0 });
-      if (answer.response === 1) { const browsing = session.fromPartition('persist:human');this.tabs.suspendAll();this.downloads.dispose();await browsing.closeAllConnections();await browsing.clearAuthCache(); await browsing.clearStorageData(); await browsing.clearCache(); this.message = '웹사이트 데이터를 지웠습니다.'; }
+      if (answer.response === 1) { const browsing = session.fromPartition('persist:human');this.tabs.suspendAll();this.downloads.cancelAll();await browsing.closeAllConnections();await browsing.clearAuthCache(); await browsing.clearStorageData(); await browsing.clearCache(); this.message = '웹사이트 데이터를 지웠습니다.'; }
     } catch { this.message = '사이트 데이터 삭제에 실패했습니다.'; } finally { this.busy = false; this.emit(); }
   }
   dispose(): void { ipcMain.removeListener('manager:command', this.handler); this.window?.destroy(); }
