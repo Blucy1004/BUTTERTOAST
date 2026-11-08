@@ -68,6 +68,10 @@ app.whenReady().then(async()=>{
  await ai.executeJavaScript('window.ai.command({type:"visual-options",speed:0.1,motion:true});window.ai.command({type:"replay",id:states.at(-1).display.events[0].id})');await wait(120);assert.equal(await task.executeJavaScript('clicked'),1);assert.equal(calls,1);
  pass('virtual cursor corresponds to an approved real action; slow replay cannot repeat actions or model calls');
  const cursorView=main.contentView.children.find(v=>v.webContents===cursor);
+ await ai.executeJavaScript('window.ai.command({type:"visual-options",speed:1,motion:false});window.ai.command({type:"replay",id:states.at(-1).display.events[0].id})');
+ await until(()=>cursorView.getVisible(),'stationary marker');await wait(30);
+ const dot=await cursor.executeJavaScript('(()=>{const r=document.querySelector("i").getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()'),marker=cursorView.getBounds(),page=view.getBounds();
+ assert.ok(Math.abs(marker.x+dot.x-page.x-event.point.x)<=.5);assert.ok(Math.abs(marker.y+dot.y-page.y-event.point.y)<=.5);
  main.setContentSize(1200,800);await wait(100);assert.equal(cursorView.getVisible(),false);await ai.executeJavaScript('window.ai.command({type:"replay",id:states.at(-1).display.events[0].id})');await wait(70);assert.equal(cursorView.getVisible(),false);
  pass('viewport resize cancels cursor playback and historical coordinates cannot drift over a new layout');
  await task.session.cookies.set({url:'https://workspace.test',name:'ai-only',value:'TASK_COOKIE'});await ai.executeJavaScript('document.getElementById("task-return").click()');
