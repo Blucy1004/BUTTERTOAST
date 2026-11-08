@@ -1,62 +1,139 @@
 # ButterToast
 
-Chromium 기반 AI 협업 브라우저의 개발 버전입니다. 핵심 기능과 보안을 우선하며 최종 UI/UX는 프로젝트 오너의 명세로 결정합니다. 현재 메인 화면은 오너가 제공한 3패널 디자인을 적용했습니다. 계정·상세 설정 화면은 기능 검증용 컴포넌트입니다.
+<!-- INTRODUCTION: The project owner can edit this opening description independently. -->
+ButterToast is a Chromium-based desktop browser that gives people and AI assistants separate workspaces, with explicit controls for sharing page context and approving browser actions.
 
-## Windows 다운로드
+사람과 AI가 각자의 공간에서 작업하고, 필요한 순간에 페이지와 제어권을 공유하는 브라우저입니다.
+<!-- END INTRODUCTION -->
 
-[개발 빌드 v0.2.0-dev.1](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1)의 Assets에서 받으세요. 비공개 저장소이므로 접근 권한이 있는 GitHub 계정으로 로그인해야 합니다.
+**Development preview · Windows 11 x64 · Electron / TypeScript**
 
-- [설치 프로그램 (.exe)](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Setup-x64.exe): 현재 사용자용 설치 프로그램입니다.
-- [포터블 ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Windows-x64.zip): 전체를 압축 해제한 뒤 `ButterToast-win32-x64/ButterToast.exe`를 실행하세요.
-- [SHA-256 체크섬](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/SHA256SUMS.txt)
+[Download](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [AI connection guide](docs/AI-CONNECTION.md)
 
-GitHub의 `Source code (zip)`은 소스이며 실행 파일이 없습니다. 설치 프로그램과 포터블 ZIP은 일반 Git 파일 제한(100 MiB)을 넘으므로 Releases에 보관합니다. 이 빌드는 코드 서명되지 않은 사전 테스트 버전이며, 실제 Windows 설치·제거 검증은 아직 남아 있습니다.
+![ButterToast browser workspace](docs/design/upgrade-workspace.png)
 
-## 오너 디자인 적용
+## How it works
 
-왼쪽 **Butter**(탭·도구), 중앙 **Browser**(사람용 웹), 오른쪽 **Toast**(독립 AI 작업) 구성입니다. 패널 너비 조절·접기, 원본을 유지하는 탭 드래그 위임, 같은 세션의 상태/작업화면 전환, 실제 실행 이벤트의 가상 커서를 지원합니다. [설계·검증·남은 범위](docs/DESIGN-IMPLEMENTATION.md)를 확인하세요.
+ButterToast organizes the browser into three areas:
 
-![ButterToast 0.2 화면](docs/design/upgrade-workspace.png)
+- **Butter** — human-owned tabs, bookmarks, history, downloads and browser settings.
+- **Browser** — the active page used directly by the person.
+- **Toast** — an AI workspace with its own browsing session, model connection and task controls.
 
-0.2에서는 Pretendard 폰트, 탭 검색·고정·음소거·주소 복제, 페이지 내 찾기·확대, 모든 AI 중지, 승인 후 충돌 복구와 다운로드 출처 표시를 추가했습니다. [변경 내용·사용법·보안 검증](docs/UPGRADE-0.2.md)을 확인하세요. 요청된 JASO Sans는 정확한 배포처/라이선스 확인 전이라 포함하지 않았습니다.
+A person can share a page for reading, authorize control of a human tab, or open an address in a separate AI session. Sending a tab to Toast opens its address while preserving the original tab; website cookies and login state are not copied into the AI session.
 
-## 개발 실행
+AI models propose structured actions. The application checks their scope, document identity, page version and target before execution. Clicks, form fills, selections, scrolling and navigation require native user approval. A global stop control revokes pending AI work across all three AI slots.
 
-Node.js 22.12 이상과 npm이 필요합니다.
+## Current capabilities
+
+| Area | Implemented capabilities |
+| --- | --- |
+| Browsing | Multiple tabs, navigation, tab search, pinning, muting, address duplication, reopening, session restoration, page search and zoom |
+| Browser management | Bookmarks, history, download approval and progress, site permissions, privacy settings and search-provider selection |
+| AI connections | OpenAI, Anthropic Claude, Google Gemini, OpenAI-compatible endpoints and supported local model servers |
+| AI collaboration | Three independent model workspaces, explicit page sharing, per-action approval, bounded multi-step tasks, handoff and emergency stop |
+| Accounts | Supabase email sign-up, email confirmation, sign-in, sign-out, password recovery and password changes |
+| Reliability | Human-tab restart, suspended-tab restoration and consent-based recovery of AI task pages in a fresh isolated session |
+| Usage visibility | Provider-reported token usage, user-configured cost estimates, request limits and optional encrypted conversation archives |
+
+Search opens the selected search engine's normal results page. The optional Google theme applies local styling to supported search pages.
+
+## OpenAI integration status
+
+The current implementation connects to the **OpenAI API using a user-provided API key**. Requests are sent from the application to the configured provider through a dedicated network session. OpenAI support currently uses the Chat Completions API; compatible and local endpoints must implement the API behavior expected by their adapter.
+
+ChatGPT account sign-in, ChatGPT OAuth authorization and use of a ChatGPT subscription as API access are **not implemented in the current release**. API access and billing are managed by the selected provider and are separate from a ChatGPT subscription.
+
+ButterToast is an independently developed project. This repository does not claim approval, certification or endorsement by OpenAI or other model providers.
+
+### User control over AI access
+
+1. Choose a provider and enter a key inside the application's connection settings. Supported local servers can be configured without a key.
+2. Choose a model. Model-list retrieval confirms connectivity; it does not verify inference quality or task success.
+3. Share page context explicitly, or approve a bounded workflow that can recapture the authorized task page.
+4. Review proposed actions and their target site before approving execution.
+5. Stop work or revoke sharing at any time. Effects already accepted by a website or model provider cannot be undone by stopping the application.
+
+## Data handling
+
+| Data | Handling |
+| --- | --- |
+| Model API keys | Kept in the main process; optionally saved using OS-protected encryption. Sent to the selected provider or configured endpoint. Not stored in Supabase. |
+| Prompts and shared page context | Sent to the selected model provider when the user submits a request. Page sharing is explicit; bounded workflows require separate consent. |
+| ButterToast account credentials | Sent over HTTPS to Supabase Auth for the requested authentication operation. Access and refresh tokens remain in main-process memory. |
+| Bookmarks, history and application settings | Managed locally; persisted using OS-protected encryption when available. |
+| Conversation archives | Saved locally only on explicit request, using OS-protected encryption. |
+| AI action audit records | Limited to metadata such as time, site origin, action and outcome; input values and API keys are excluded. |
+
+The application calls model providers directly; it does not operate a central inference relay. Model-provider and authentication-service data policies still apply to requests sent to those services.
+
+Website sessions are handled by Chromium. Human browsing, AI task sessions, application UI, model networking and account networking have distinct security boundaries. ButterToast account sign-in does not itself grant an AI permission to access browsing data or execute actions.
+
+When OS-protected storage is unavailable, protected application data stays in memory or saving fails explicitly. API keys are never silently stored through a plaintext fallback. See [Security](SECURITY.md) and the [AI connection guide](docs/AI-CONNECTION.md) for the precise scope and limitations.
+
+## Security architecture
+
+ButterToast retains Chromium sandboxing, Site Isolation, context isolation and TLS certificate verification. Website content receives no Node.js access or application IPC bridge. Application views load from a fixed local asset allowlist with a restrictive Content Security Policy.
+
+The AI execution path has three parts:
+
+- **ToastIR** builds a bounded page representation and maintains document and element identities.
+- **ToastCore** executes supported structured operations through the browser.
+- **ToastGuard** enforces permissions, document freshness, target validity and one-time approval.
+
+Model responses and webpage content are treated as untrusted input. The model cannot submit arbitrary JavaScript, OS commands or permission grants through the action protocol. Sensitive input fields, stale targets, cross-document approvals and replayed approvals are rejected.
+
+Downloads require native confirmation and a destination selected by the user. Redirect chains and filenames are checked, and Windows downloads receive Internet-zone metadata when the filesystem supports it. These controls do not replace malware scanning.
+
+Security tests cover malicious page fixtures, element substitution, forged IPC, approval bypass attempts, session isolation, cancellation races, renderer crashes and update tampering. Results and remaining risks are documented in [Security](SECURITY.md), [implementation status](docs/IMPLEMENTATION-STATUS.md) and [0.2 validation notes](docs/UPGRADE-0.2.md).
+
+## Download and run
+
+The current downloadable preview is [**v0.2.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.2.0-dev.1).
+
+- [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Setup-x64.exe)
+- [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/ButterToast-0.2.0-Windows-x64.zip)
+- [SHA-256 checksums](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.2.0-dev.1/SHA256SUMS.txt)
+
+Close an existing ButterToast instance before running the installer. For the portable build, extract the complete archive and run `ButterToast-win32-x64/ButterToast.exe`; its DLLs and `resources` directory must remain alongside it. GitHub's source-code archives do not contain the executable.
+
+These are **unsigned development builds**. Actual installation, upgrade and removal on end-user Windows machines remain separate validation steps. See the [Windows build guide](docs/WINDOWS-TEST-BUILD.md).
+
+## Development
+
+Use Node.js 24 LTS, npm and an operational Chromium sandbox.
 
 ```sh
 npm ci
-npx --no-install install-electron
+node scripts/install-electron.cjs
 npm start
 ```
 
-Linux에서는 정상 동작하는 Chromium 샌드박스가 필요합니다. 보안 해제 플래그나 TLS 우회는 사용하지 않습니다.
-
-## 현재 기능
-
-탭·탐색·충돌 복구, 북마크·방문 기록, 승인받은 다운로드, 검색·사이트 권한·개인정보 설정, Google 검색 테마를 제공합니다. 검색은 원래 검색 페이지를 열며 자체 결과 화면으로 재구성하지 않습니다.
-
-Supabase 가입·로그인·복구·비밀번호 변경 UI, OpenAI·Claude·Gemini·호환/로컬 모델 연결, 독립 AI 작업 공간 3개, 페이지 공유·승인 동작·최대 10단계 작업·제어권 회수·사용량 추정·암호화 보관을 구현했습니다. OS 보호 저장소가 없으면 키·기록을 평문으로 대체 저장하지 않습니다.
-
-**실제 모델 추론·Windows 설치/제거·일반 사용자 SMTP·서명된 운영 배포 검증은 남아 있습니다.** [전체 구현 현황](docs/IMPLEMENTATION-STATUS.md), [최신 사용법·검증](docs/UPGRADE-0.2.md), [보안](SECURITY.md)을 참조하세요.
-
-## 검증과 빌드
+Validation and packaging:
 
 ```sh
 npm test
 npm run test:security
 npm run benchmark
 npm run package:win
-# NSIS 설치 후
+# Requires NSIS / makensis
 npm run package:installer
 ```
 
-`test:security`는 실제 Electron 로컬 공격 회귀, 계정·AI·관리 화면, 의존성 audit과 비밀정보 패턴 검사를 포함합니다. 실제 악성 서비스나 다른 사용자 계정을 공격하지 않습니다. 테스트 통과는 취약점 부재를 보증하지 않습니다.
+The CI workflow runs security regressions on Windows and Ubuntu. Packaging verifies the application payload, Windows executable architecture, Electron fuses and embedded ASAR integrity. Release assets include checksums, a build-verification report and an SBOM.
 
-실행 파일은 `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`, 설치 프로그램은 `artifacts/ButterToast-0.2.0-Setup-x64.exe`입니다. 포터블 폴더는 DLL/resources와 함께 옮겨야 합니다. [Windows 빌드 안내](docs/WINDOWS-TEST-BUILD.md)를 확인하세요. 현재 빌드는 코드 서명되지 않았습니다.
+[CI results](https://github.com/Blucy1004/BUTTERTOAST/actions/workflows/security.yml) · [Release setup](docs/RELEASE-SETUP.md) · [Supabase configuration](docs/SUPABASE-SETUP.md)
 
-- [AI 연결과 작업](docs/AI-CONNECTION.md)
-- [Supabase 설정](docs/SUPABASE-SETUP.md)
-- [아키텍처](docs/ARCHITECTURE.md)
-- [릴리스·업데이트 준비](docs/RELEASE-SETUP.md)
-- [원래 제품 요구사항](docs/PRODUCT-REQUIREMENTS.md)
+## Project status
+
+ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The linked release's feature and validation record is available in [the 0.2 notes](docs/UPGRADE-0.2.md).
+
+Live model inference and complex website task success, production email delivery, end-user Windows installation, Authenticode signing and an operational update service require further validation or configuration. Automatic updates are currently disabled. Passing tests does not establish that a browser is free of vulnerabilities or that every prompt-injection attempt is prevented.
+
+Performance targets in the project requirements are goals, not measured guarantees. The project owner retains final UI/UX direction; browser logic and replaceable UI components remain separated.
+
+## Third-party notices
+
+ButterToast uses Electron/Chromium and other components under their respective licenses. The bundled Pretendard font is distributed under the [SIL Open Font License](src/fonts/OFL-Pretendard.txt); its [source and checksum](src/fonts/README.md) are included in the repository and distribution.
+
+Additional technical documentation is available in the [`docs`](docs) directory, primarily in Korean.
