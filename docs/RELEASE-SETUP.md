@@ -1,6 +1,6 @@
 # 릴리스·업데이트 준비
 
-현재 개발 빌드는 게시하지 않았으며 Authenticode 서명되지 않았다. 실제 Windows 설치/제거·기본 브라우저·DPAPI·메일 콜백과 모델 호출을 먼저 검증한다.
+개발 빌드는 [GitHub 사전 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.1.0-dev.1)의 설치 파일·포터블 ZIP으로 배포한다. Authenticode 서명되지 않았으며, 운영 출시 전 실제 Windows 설치/제거·기본 브라우저·DPAPI·메일 콜백과 모델 호출 검증이 필요하다. 저장소 공개 범위와 자동 업데이트 설정은 변경하지 않는다.
 
 ## 서명된 업데이트
 
@@ -21,4 +21,4 @@ node scripts/sign-update.mjs --artifact path/to/Setup.exe --url https://updates.
 
 Ed25519 업데이트 서명과 Windows Authenticode는 별개다. 게시자 코드 서명 인증서/키가 제공되지 않았으므로 서명된 제품으로 표시하지 않는다. 자체서명 인증서나 보안 기능 해제로 OS 경고를 우회하지 않는다.
 
-GitHub Actions는 Windows 회귀와 포터블 패키지 artifact 생성을 포함한다. 워크플로 파일을 추가한 것은 원격 CI가 실행됐다는 뜻이 아니다. 원격 push/릴리스/환경 게시는 이번 작업에서 하지 않았다.
+GitHub Actions는 Windows 회귀와 포터블 패키지 artifact 생성을 포함한다. `08db601`의 Ubuntu/Windows 테스트·audit·비밀정보 검사는 통과했지만 Windows 패키징의 ASAR 파일 조회에서 경로 구분자 오류가 발견됐다. 검증을 생략하지 않고 ASAR API에 호스트 형식의 경로를 전달하도록 수정했다. 최종 CI 결과는 해당 커밋의 Actions 실행을 확인한다. 소스의 Windows 회귀 통과와 설치 프로그램의 설치·제거 검증은 별개다.

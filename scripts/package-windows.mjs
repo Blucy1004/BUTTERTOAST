@@ -56,10 +56,12 @@ try {
   const asar = path.join(output, 'resources', 'app.asar');
   for (const name of listPackage(asar)) {
     const normalized = name.replaceAll('\\', '/').replace(/^\//, '');
-    if (files.has(normalized)) assert.deepEqual(extractFile(asar, normalized), files.get(normalized));
+    // @electron/asar traverses directories using the host's path separator.
+    // Keep the allowlist portable, but pass native paths to its extraction API.
+    if (files.has(normalized)) assert.deepEqual(extractFile(asar, path.normalize(normalized)), files.get(normalized));
     else assert([...files.keys()].some(p => p.startsWith(normalized + '/')), `Unexpected ASAR entry ${name}`);
   }
-  for (const [name, content] of files) assert.deepEqual(extractFile(asar, name), content);
+  for (const [name, content] of files) assert.deepEqual(extractFile(asar, path.normalize(name)), content);
   const executable = await fs.readFile(exePath);
   assert.equal(executable.toString('ascii', 0, 2), 'MZ');
   const peOffset = executable.readUInt32LE(0x3c);
