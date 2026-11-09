@@ -1,0 +1,176 @@
+{
+  "startedAt": "2026-11-09T07:07:38.705Z",
+  "finishedAt": "2026-11-09T07:08:00.873Z",
+  "versions": {
+    "node": "24.22.2",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.9",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.3",
+    "merve": "1.2.2",
+    "modules": "150",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.11",
+    "simdutf": "7.7.0",
+    "sqlite": "3.53.4",
+    "tz": "2026e",
+    "undici": "7.30.1",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.6.75.27-electron.0",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "45.2.3",
+    "chrome": "156.0.8078.80"
+  },
+  "mock": true,
+  "realModel": false,
+  "records": [
+    {
+      "id": "DOM-01 mock CLICK changes actual page exactly once",
+      "status": "pass",
+      "elapsedMs": 705.740014
+    },
+    {
+      "id": "DOM-02 FILL dispatches input and updates value",
+      "status": "pass",
+      "elapsedMs": 523.5224900000003
+    },
+    {
+      "id": "DOM-03 checkbox and SELECT trigger expected states/events",
+      "status": "pass",
+      "elapsedMs": 1041.0120379999998
+    },
+    {
+      "id": "DOM-04 READ/VERIFY actual evidence and mismatched verification",
+      "status": "pass",
+      "elapsedMs": 1044.4391849999997
+    },
+    {
+      "id": "DOM-05 SCROLL changes real scroll position",
+      "status": "pass",
+      "elapsedMs": 742.126389
+    },
+    {
+      "id": "DOM-06 link navigation changes actual URL",
+      "status": "pass",
+      "elapsedMs": 739.0604600000006
+    },
+    {
+      "id": "DOM-07 approved form submission emits one POST",
+      "status": "pass",
+      "elapsedMs": 1260.4877780000006
+    },
+    {
+      "id": "SHADOW-01 open and nested roots click actual handlers",
+      "status": "pass",
+      "elapsedMs": 1041.5512069999995
+    },
+    {
+      "id": "SHADOW-02 FILL crosses host with composed input event",
+      "status": "pass",
+      "elapsedMs": 520.0619029999998
+    },
+    {
+      "id": "SHADOW-03 closed root and private inputs remain opaque",
+      "status": "pass",
+      "elapsedMs": 174.49272699999892
+    },
+    {
+      "id": "DYNAMIC-01 late element is actionable only after fresh capture",
+      "status": "pass",
+      "elapsedMs": 765.5111770000003
+    },
+    {
+      "id": "DYNAMIC-02 element replacement during approval is blocked",
+      "status": "pass",
+      "elapsedMs": 743.4486340000003
+    },
+    {
+      "id": "DYNAMIC-03 layout movement during approval never hits another target",
+      "status": "pass",
+      "elapsedMs": 742.3922610000009
+    },
+    {
+      "id": "DYNAMIC-04 SPA navigation changes route and revokes stale proposal",
+      "status": "pass",
+      "elapsedMs": 757.4722579999998
+    },
+    {
+      "id": "DYNAMIC-05 document replacement cannot execute pending click",
+      "status": "pass",
+      "elapsedMs": 783.2709279999999
+    },
+    {
+      "id": "SAFE-01 native denial and cancel revoke exact proposal",
+      "status": "pass",
+      "elapsedMs": 1458.6284759999999
+    },
+    {
+      "id": "SAFE-02 prompt injection grants no authority, malformed action cannot execute",
+      "status": "pass",
+      "elapsedMs": 350.3210909999998
+    },
+    {
+      "id": "WORKFLOW-01 model observes real fill/search result and reconstructs delta",
+      "status": "pass",
+      "elapsedMs": 843.5881960000006
+    },
+    {
+      "id": "SAFE-03 cancelled delayed model result cannot restore action",
+      "status": "pass",
+      "elapsedMs": 984.8929649999991
+    },
+    {
+      "id": "NAV-01 approved navigation recaptures new document before automatic continuation",
+      "status": "pass",
+      "elapsedMs": 613.0178180000003
+    },
+    {
+      "id": "NAV-02 approved SPA recaptures current route before automatic continuation",
+      "status": "pass",
+      "elapsedMs": 569.4672129999999
+    },
+    {
+      "id": "SHADOW-04 removed/recreated shadow button cannot reuse approval",
+      "status": "pass",
+      "elapsedMs": 970.3224440000013
+    },
+    {
+      "id": "WORKFLOW-02 actual EXTRACT/VERIFY observation reaches mock as untrusted data",
+      "status": "pass",
+      "elapsedMs": 347.95655500000066
+    },
+    {
+      "id": "NAV-03 user stop during pending navigation prevents model continuation",
+      "status": "pass",
+      "elapsedMs": 1340.1678370000009
+    },
+    {
+      "id": "NAV-04 cross-origin click cannot capture or continue on destination",
+      "status": "pass",
+      "elapsedMs": 574.000468000002
+    },
+    {
+      "id": "NAV-05 navigation while native approval is pending cannot create dispatch receipt",
+      "status": "pass",
+      "elapsedMs": 748.761817999999
+    },
+    {
+      "id": "NAV-06 direct task keyboard input during navigation prevents recapture",
+      "status": "pass",
+      "elapsedMs": 748.7341019999985
+    }
+  ]
+}

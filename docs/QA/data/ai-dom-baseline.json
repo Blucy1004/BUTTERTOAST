@@ -1,0 +1,137 @@
+{
+  "startedAt": "2026-11-09T06:38:13.074Z",
+  "finishedAt": "2026-11-09T06:38:29.850Z",
+  "versions": {
+    "node": "24.22.2",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.9",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.3",
+    "merve": "1.2.2",
+    "modules": "150",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.11",
+    "simdutf": "7.7.0",
+    "sqlite": "3.53.4",
+    "tz": "2026e",
+    "undici": "7.30.1",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.6.75.27-electron.0",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "45.2.3",
+    "chrome": "156.0.8078.80"
+  },
+  "mock": true,
+  "realModel": false,
+  "records": [
+    {
+      "id": "DOM-01 mock CLICK changes actual page exactly once",
+      "status": "pass",
+      "elapsedMs": 699.127667
+    },
+    {
+      "id": "DOM-02 FILL dispatches input and updates value",
+      "status": "pass",
+      "elapsedMs": 521.7291380000001
+    },
+    {
+      "id": "DOM-03 checkbox and SELECT trigger expected states/events",
+      "status": "pass",
+      "elapsedMs": 1043.0669149999999
+    },
+    {
+      "id": "DOM-04 READ/VERIFY actual evidence and mismatched verification",
+      "status": "pass",
+      "elapsedMs": 1039.7502749999999
+    },
+    {
+      "id": "DOM-05 SCROLL changes real scroll position",
+      "status": "pass",
+      "elapsedMs": 751.1838950000001
+    },
+    {
+      "id": "DOM-06 link navigation changes actual URL",
+      "status": "pass",
+      "elapsedMs": 742.5533720000003
+    },
+    {
+      "id": "DOM-07 approved form submission emits one POST",
+      "status": "pass",
+      "elapsedMs": 1265.7991359999996
+    },
+    {
+      "id": "SHADOW-01 open and nested roots click actual handlers",
+      "status": "pass",
+      "elapsedMs": 1046.7688689999995
+    },
+    {
+      "id": "SHADOW-02 FILL crosses host with composed input event",
+      "status": "fail",
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at /workspace/BUTTERTOAST/test/torture/ai-dom.cjs:37:139\n    at async check (/workspace/BUTTERTOAST/test/torture/ai-dom.cjs:12:63)\n    at async /workspace/BUTTERTOAST/test/torture/ai-dom.cjs:37:2",
+      "elapsedMs": 523.6896260000003
+    },
+    {
+      "id": "SHADOW-03 closed root and private inputs remain opaque",
+      "status": "pass",
+      "elapsedMs": 176.9256409999998
+    },
+    {
+      "id": "DYNAMIC-01 late element is actionable only after fresh capture",
+      "status": "pass",
+      "elapsedMs": 1492.4451310000004
+    },
+    {
+      "id": "DYNAMIC-02 element replacement during approval is blocked",
+      "status": "pass",
+      "elapsedMs": 743.5330909999993
+    },
+    {
+      "id": "DYNAMIC-03 layout movement during approval never hits another target",
+      "status": "pass",
+      "elapsedMs": 749.4172579999995
+    },
+    {
+      "id": "DYNAMIC-04 SPA navigation changes route and revokes stale proposal",
+      "status": "pass",
+      "elapsedMs": 745.3714469999995
+    },
+    {
+      "id": "DYNAMIC-05 document replacement cannot execute pending click",
+      "status": "pass",
+      "elapsedMs": 765.4195129999989
+    },
+    {
+      "id": "SAFE-01 native denial and cancel revoke exact proposal",
+      "status": "pass",
+      "elapsedMs": 1442.208192
+    },
+    {
+      "id": "SAFE-02 prompt injection grants no authority, malformed action cannot execute",
+      "status": "pass",
+      "elapsedMs": 346.25226999999904
+    },
+    {
+      "id": "WORKFLOW-01 model observes real fill/search result and reconstructs delta",
+      "status": "pass",
+      "elapsedMs": 756.1112400000002
+    },
+    {
+      "id": "SAFE-03 cancelled delayed model result cannot restore action",
+      "status": "pass",
+      "elapsedMs": 979.5346310000004
+    }
+  ]
+}

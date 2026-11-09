@@ -1,6 +1,6 @@
 const {app,BrowserWindow,webContents,session,dialog}=require('electron'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict');
 const {MockProvider}=require('./mock-provider.cjs'),modelContext=require('../fixtures/model-context.cjs'),{route}=require('./pages.cjs'),{until,wait,stats}=require('./long-common.cjs'),{treeMetrics}=require('../../scripts/benchmark-support.cjs');
-if(app.isPackaged||!process.env.DISPLAY)throw Error('Development test with display required');app.setPath('userData',fs.mkdtempSync(path.join(os.tmpdir(),'bt-mock-browsing-')));
+if(app.isPackaged||(process.platform==='linux'&&!process.env.DISPLAY))throw Error('Development test with display required');app.setPath('userData',fs.mkdtempSync(path.join(os.tmpdir(),'bt-mock-browsing-')));
 const deadline=setTimeout(()=>app.exit(2),110000);let mock,ai,task;require('../../dist/main');
 app.whenReady().then(async()=>{
  mock=await new MockProvider().start();const main=BrowserWindow.getAllWindows()[0],ui=main.webContents;main.setContentSize(1440,1000);main.show();await until(async()=>!ui.isLoading()&&await ui.executeJavaScript('!document.getElementById("new").disabled'),'main');

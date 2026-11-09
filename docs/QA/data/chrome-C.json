@@ -1,0 +1,232 @@
+{
+  "schema": "toast-torture-long/1",
+  "engine": "Google Chrome for Testing",
+  "version": "157.0.8103.38",
+  "source": {
+    "officialBinary": "/tmp/bt-chrome-reference/chrome-linux64/chrome"
+  },
+  "scenario": "C",
+  "tabCount": 50,
+  "requiredMs": 300000,
+  "configuredMs": 300000,
+  "elapsedMs": 301962.323279,
+  "wallElapsedMs": 301962,
+  "qualifiedDuration": true,
+  "startedAt": "2026-11-09T07:19:15.340Z",
+  "finishedAt": "2026-11-09T07:24:23.119Z",
+  "ok": true,
+  "setupMs": 4977.334577,
+  "loads": {
+    "samples": 81,
+    "medianMs": 83.68788199999926,
+    "p95Ms": 120.42802000000029,
+    "minMs": 26.40139700000873,
+    "maxMs": 133.2060419999998,
+    "stddevMs": 33.30742773946069
+  },
+  "switches": {
+    "samples": 151,
+    "medianMs": 29.262361999979476,
+    "p95Ms": 39.80395799999678,
+    "minMs": 21.281863999989582,
+    "maxMs": 66.51247599999988,
+    "stddevMs": 6.455518868908544
+  },
+  "scrolls": {
+    "samples": 51,
+    "medianMs": 2.1964790000056382,
+    "p95Ms": 6.509576999989804,
+    "minMs": 1.4075300000258721,
+    "maxMs": 7.663801000000603,
+    "stddevMs": 1.4549523773435196
+  },
+  "restores": {
+    "samples": 50,
+    "medianMs": 16.380438999971375,
+    "p95Ms": 24.47293200000422,
+    "minMs": 2.195676999981515,
+    "maxMs": 28.11399900005199,
+    "stddevMs": 4.3604025505312585
+  },
+  "ticks": 151,
+  "samples": [
+    {
+      "elapsedMs": 143.5005340000007,
+      "wallElapsedMs": 143,
+      "processes": 61,
+      "rssMiB": 8446.7734375,
+      "pssMiB": 1215.2451171875,
+      "privateMiB": 934,
+      "pssProcesses": 61,
+      "cpuTicks": 1364,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 30072.661676000003,
+      "wallElapsedMs": 30073,
+      "processes": 62,
+      "rssMiB": 8707.74609375,
+      "pssMiB": 1086.96484375,
+      "privateMiB": 799.64453125,
+      "pssProcesses": 62,
+      "cpuTicks": 1621,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 60101.620122,
+      "wallElapsedMs": 60101,
+      "processes": 62,
+      "rssMiB": 8817.859375,
+      "pssMiB": 1122.2431640625,
+      "privateMiB": 833.11328125,
+      "pssProcesses": 62,
+      "cpuTicks": 1857,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 90042.22132,
+      "wallElapsedMs": 90042,
+      "processes": 62,
+      "rssMiB": 8873.6171875,
+      "pssMiB": 1126.5859375,
+      "privateMiB": 840.63671875,
+      "pssProcesses": 62,
+      "cpuTicks": 2046,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 120064.78725899999,
+      "wallElapsedMs": 120065,
+      "processes": 62,
+      "rssMiB": 8887.74609375,
+      "pssMiB": 1116.720703125,
+      "privateMiB": 832.0546875,
+      "pssProcesses": 62,
+      "cpuTicks": 2214,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 150451.583061,
+      "wallElapsedMs": 150451,
+      "processes": 61,
+      "rssMiB": 8796.26953125,
+      "pssMiB": 1110.1826171875,
+      "privateMiB": 832.53125,
+      "pssProcesses": 61,
+      "cpuTicks": 2395,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 180049.946398,
+      "wallElapsedMs": 180050,
+      "processes": 62,
+      "rssMiB": 8906.0078125,
+      "pssMiB": 1123.501953125,
+      "privateMiB": 841.1171875,
+      "pssProcesses": 62,
+      "cpuTicks": 2546,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 210033.534396,
+      "wallElapsedMs": 210033,
+      "processes": 62,
+      "rssMiB": 8919.47265625,
+      "pssMiB": 1127.7099609375,
+      "privateMiB": 845.87109375,
+      "pssProcesses": 62,
+      "cpuTicks": 2679,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 240036.84203600002,
+      "wallElapsedMs": 240037,
+      "processes": 62,
+      "rssMiB": 8929.37890625,
+      "pssMiB": 1132.12109375,
+      "privateMiB": 848.71875,
+      "pssProcesses": 62,
+      "cpuTicks": 2814,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 270034.675813,
+      "wallElapsedMs": 270035,
+      "processes": 62,
+      "rssMiB": 8941.359375,
+      "pssMiB": 1136.9755859375,
+      "privateMiB": 855.22265625,
+      "pssProcesses": 62,
+      "cpuTicks": 2958,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    },
+    {
+      "elapsedMs": 300020.018365,
+      "wallElapsedMs": 300020,
+      "processes": 62,
+      "rssMiB": 8954.5859375,
+      "pssMiB": 1154.6474609375,
+      "privateMiB": 878.51171875,
+      "pssProcesses": 62,
+      "cpuTicks": 3140,
+      "logicalTabs": 50,
+      "livePages": 50,
+      "suspended": null,
+      "unresponsive": null
+    }
+  ],
+  "events": [
+    {
+      "elapsedMs": 155072.11271100002,
+      "type": "renderer-crash",
+      "reason": "crashed",
+      "intentional": true
+    }
+  ],
+  "recoveries": [
+    {
+      "success": true,
+      "elapsedMs": 396.05277199999546
+    }
+  ],
+  "unexpectedCrashes": 0,
+  "unresponsive": null,
+  "cpuMeasurement": "cpuTicks sums live /proc process-tree counters; 100 ticks/sec; intervals with process exits are incomplete lower bounds",
+  "policy": {
+    "memorySaver": "Chrome default; not forced",
+    "input": "CDP tab activation; fixed JS page scroll",
+    "headless": true,
+    "unresponsive": "Not directly observable; CDP operation failures recorded",
+    "recovery": "driver recreates crashed page and restores URL; Chrome native reload not verified"
+  }
+}

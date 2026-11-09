@@ -1,5 +1,20 @@
 # ButterToast 개발 상태
 
+## Operation Toast Torture 완료 — 2026-11-09
+
+- 기준: 깨끗한 `d22be6e954eac38b61cd66b2f3159502d77e9b45` / 0.4.0. 기존 산출물과 사용자 데이터 보존.
+- 06:33:55 UTC에 기준 dist를 `artifacts/torture/baseline-app`에 고정하고 A 10탭/15분 → B 20탭/30분 → C 50탭/5분 측정 시작. Chrome for Testing과 같은 로컬 HTTP fixture·742×686 콘텐츠 크기를 사용. 동일 호스트에서 동시에 실행하므로 자원 경합/다른 QA 부하와 드라이버 차이를 명시하며 성능 우열을 주장하지 않는다.
+- 진행 JSON: `artifacts/torture/long-baseline/*.progress.json`, 실행 로그: `/tmp/bt-torture-long-baseline.log`. 짧은 예비 실행은 별도 `long-pilot`이며 장시간 통과로 집계하지 않는다.
+- 장시간 실행 세션: `91930`. A 시작 06:33:55 UTC. 기준 코드의 고정 복사본만 실행하므로 수정 중 dist와 섞이지 않는다.
+- Mock 공급자, 실제 DOM 작업, 강제 종료 복구, 보안/회귀 검사와 최종 QA 보고서 완료. 실제 AI/OAuth 호출·공개 릴리스 없음.
+- 재현·수정: Shadow DOM FILL의 composed input 누락, 페이지 이벤트 무한 대기 시 ToastIR perform 제한 누락. 전자는 실제 host listener 0→1, 후자는 6.5초 미종료→5.0초 실패/권한 회수.
+- Mock HTTP 9개 검사(실제 60.002초 timeout 포함), 생산 AI/DOM 27개, 강제 SIGKILL 10탭 복구, Xvfb 실제 포인터/키/주소 Enter/파일 선택 요청 검증. 저장 복구는 테스트 AES-GCM 주입이며 OS DPAPI 증거가 아님.
+- 세 번째 P1 결함도 수정: 승인된 CLICK/NAVIGATE 전달 receipt와 같은 origin 로딩을 main에서 확인한 뒤 새 controller/snapshot으로 진행. 이전 권한/본문은 폐기. 중단·직접 입력·외부 origin·승인 중 교체 회귀 통과.
+- 수정 소스 `63b917b` / 0.4.1. 최종 기능/보안 298개 그룹 통과(단위 120 + 기존 Electron 133 포함). CDP/ToastIR 각각 7작업×3회 성공. 수정 전 탐색/SPA 6회 실패 원자료 보존.
+- A/B/C 두 엔진 모두 실제 900초/1800초/300초 충족, 비의도 충돌 0. B 12탭 suspend/20 URL 복구, C 의도적 crash 복구 성공. Chrome D 자동 복구 실패는 별도 한계로 보존.
+- Windows x64 폴더 빌드와 96파일/ASAR/fuse 검사 완료. 보고서 `docs/QA/TOAST-TORTURE-REPORT.md`와 raw JSON/로그 요약을 작성했으며 장시간 결과와 installer/ZIP 최종 해시 확정. 서명 및 Windows 실행은 미검증. GitHub 공개 Release/push 없음.
+
+
 갱신: 2026-11-09 UTC. Operation Golden Toast의 **0.4.0 개발 빌드**를 준비했다. 이전 게시 릴리스는 0.3.0-dev.1이며 이번 변경을 아직 원격으로 push/공개 게시하지 않았다.
 
 ## 기준과 구조

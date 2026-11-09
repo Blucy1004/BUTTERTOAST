@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-11-09T06:51:21.698Z",
+  "rows": [
+    {
+      "engine": "ButterToast",
+      "round": 1,
+      "elapsedMs": 495.323696,
+      "version": "45.2.3"
+    },
+    {
+      "engine": "Chrome",
+      "round": 1,
+      "elapsedMs": 447.3940049999999,
+      "version": "157.0.8103.38"
+    },
+    {
+      "engine": "Chrome",
+      "round": 2,
+      "elapsedMs": 408.0212250000002,
+      "version": "157.0.8103.38"
+    },
+    {
+      "engine": "ButterToast",
+      "round": 2,
+      "elapsedMs": 554.001096,
+      "version": "45.2.3"
+    },
+    {
+      "engine": "ButterToast",
+      "round": 3,
+      "elapsedMs": 462.54977199999985,
+      "version": "45.2.3"
+    },
+    {
+      "engine": "Chrome",
+      "round": 3,
+      "elapsedMs": 360.30405999999994,
+      "version": "157.0.8103.38"
+    }
+  ],
+  "summaries": [
+    {
+      "engine": "ButterToast",
+      "samples": 3,
+      "medianMs": 495.323696,
+      "p95Ms": 554.001096,
+      "minMs": 462.54977199999985,
+      "maxMs": 554.001096,
+      "stddevMs": 37.83078115689917
+    },
+    {
+      "engine": "Chrome",
+      "samples": 3,
+      "medianMs": 408.0212250000002,
+      "p95Ms": 447.3940049999999,
+      "minMs": 360.30405999999994,
+      "maxMs": 447.3940049999999,
+      "stddevMs": 35.60867896808405
+    }
+  ],
+  "scope": "Fresh profiles, headless, inherited OS file cache not cleared. Parent spawn-to-automation-ready, ButterToast production UI/IPC vs Chrome blank-page/CDP. Different readiness probes and Chromium versions; concurrent A/B/C workload. Not cold-machine startup or a performance ranking."
+}

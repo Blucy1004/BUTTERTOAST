@@ -1,0 +1,77 @@
+{
+  "scenario": "D",
+  "ok": true,
+  "profile": "/tmp/bt-torture-restore-efwAvY",
+  "killed": {
+    "code": null,
+    "signal": "SIGKILL"
+  },
+  "before": {
+    "pid": 69388,
+    "urls": [
+      "http://127.0.0.1:42319/restore/0",
+      "http://127.0.0.1:42319/restore/1",
+      "http://127.0.0.1:42319/restore/2",
+      "http://127.0.0.1:42319/restore/3",
+      "http://127.0.0.1:42319/restore/4",
+      "http://127.0.0.1:42319/restore/5",
+      "http://127.0.0.1:42319/restore/6",
+      "http://127.0.0.1:42319/restore/7",
+      "http://127.0.0.1:42319/restore/8",
+      "http://127.0.0.1:42319/restore/9"
+    ],
+    "elapsedMs": 3820.796564,
+    "checkpoint": true
+  },
+  "after": {
+    "pid": 69581,
+    "urls": [
+      "http://127.0.0.1:42319/restore/0",
+      "http://127.0.0.1:42319/restore/1",
+      "http://127.0.0.1:42319/restore/2",
+      "http://127.0.0.1:42319/restore/3",
+      "http://127.0.0.1:42319/restore/4",
+      "http://127.0.0.1:42319/restore/5",
+      "http://127.0.0.1:42319/restore/6",
+      "http://127.0.0.1:42319/restore/7",
+      "http://127.0.0.1:42319/restore/8",
+      "http://127.0.0.1:42319/restore/9"
+    ],
+    "elapsedMs": 2198.0100159999997,
+    "scope": "actual SIGKILL/restart of production main; test AES-GCM cipher, not OS keychain/DPAPI",
+    "versions": {
+      "node": "24.22.2",
+      "acorn": "8.18.0",
+      "ada": "4.0.0",
+      "amaro": "1.1.11",
+      "ares": "1.34.9",
+      "brotli": "1.2.0",
+      "cldr": "48.0",
+      "icu": "78.2",
+      "llhttp": "9.4.3",
+      "merve": "1.2.2",
+      "modules": "150",
+      "napi": "10",
+      "nbytes": "0.1.4",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.70.0",
+      "nghttp3": "",
+      "ngtcp2": "",
+      "openssl": "0.0.0",
+      "simdjson": "4.6.11",
+      "simdutf": "7.7.0",
+      "sqlite": "3.53.4",
+      "tz": "2026e",
+      "undici": "7.30.1",
+      "unicode": "17.0",
+      "uv": "1.52.1",
+      "uvwasi": "0.0.23",
+      "v8": "15.6.75.27-electron.0",
+      "zlib": "1.3.2.1-motley",
+      "zstd": "1.6.0",
+      "electron": "45.2.3",
+      "chrome": "156.0.8078.80"
+    }
+  },
+  "generatedAt": "2026-11-09T07:01:06.803Z"
+}

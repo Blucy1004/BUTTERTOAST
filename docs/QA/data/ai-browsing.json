@@ -1,0 +1,136 @@
+{
+  "scenario": "E",
+  "versions": {
+    "node": "24.22.2",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.9",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.3",
+    "merve": "1.2.2",
+    "modules": "150",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.11",
+    "simdutf": "7.7.0",
+    "sqlite": "3.53.4",
+    "tz": "2026e",
+    "undici": "7.30.1",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.6.75.27-electron.0",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "45.2.3",
+    "chrome": "156.0.8078.80"
+  },
+  "durationMs": 60276.99600299999,
+  "wallElapsedMs": 60277,
+  "tabCount": 10,
+  "ticks": 225,
+  "switches": {
+    "samples": 225,
+    "medianMs": 178.9282560000065,
+    "p95Ms": 183.44318499999645,
+    "minMs": 176.1133289999998,
+    "maxMs": 195.36784599999373,
+    "stddevMs": 2.1601942973179495
+  },
+  "nativeInput": {
+    "samples": 225,
+    "medianMs": 1.8456900000019232,
+    "p95Ms": 31.890070000001288,
+    "minMs": 0.9535350000005565,
+    "maxMs": 41.123008999999,
+    "stddevMs": 9.930891748423885
+  },
+  "mockRequests": 294,
+  "modelSteps": 294,
+  "completions": 98,
+  "actualClicks": 196,
+  "errors": [],
+  "samples": [
+    {
+      "elapsedMs": 215.40114499999981,
+      "processes": 20,
+      "rssMiB": 1069.640625,
+      "pssMiB": 402.275390625,
+      "privateMiB": 313.5390625,
+      "pssProcesses": 20,
+      "cpuTicks": 472
+    },
+    {
+      "elapsedMs": 8184.458005,
+      "processes": 20,
+      "rssMiB": 1114.24609375,
+      "pssMiB": 426.6591796875,
+      "privateMiB": 345.9375,
+      "pssProcesses": 20,
+      "cpuTicks": 880
+    },
+    {
+      "elapsedMs": 16204.338624,
+      "processes": 20,
+      "rssMiB": 1152.93359375,
+      "pssMiB": 476.732421875,
+      "privateMiB": 384.38671875,
+      "pssProcesses": 20,
+      "cpuTicks": 1292
+    },
+    {
+      "elapsedMs": 24168.173838,
+      "processes": 20,
+      "rssMiB": 1201.48046875,
+      "pssMiB": 523.73046875,
+      "privateMiB": 430.78515625,
+      "pssProcesses": 20,
+      "cpuTicks": 1714
+    },
+    {
+      "elapsedMs": 32188.339452999997,
+      "processes": 20,
+      "rssMiB": 1210.0859375,
+      "pssMiB": 530.3896484375,
+      "privateMiB": 437.38671875,
+      "pssProcesses": 20,
+      "cpuTicks": 2163
+    },
+    {
+      "elapsedMs": 40187.409958000004,
+      "processes": 20,
+      "rssMiB": 1208.390625,
+      "pssMiB": 526.662109375,
+      "privateMiB": 432.3125,
+      "pssProcesses": 20,
+      "cpuTicks": 2638
+    },
+    {
+      "elapsedMs": 48226.556003000005,
+      "processes": 20,
+      "rssMiB": 1228.85546875,
+      "pssMiB": 547.72265625,
+      "privateMiB": 454.25,
+      "pssProcesses": 20,
+      "cpuTicks": 3124
+    },
+    {
+      "elapsedMs": 56335.559624,
+      "processes": 20,
+      "rssMiB": 1264.90625,
+      "pssMiB": 584.083984375,
+      "privateMiB": 491.18359375,
+      "pssProcesses": 20,
+      "cpuTicks": 3634
+    }
+  ],
+  "comparison": "ButterToast only; Chrome has no equivalent AI pipeline. Test native confirmations are automatic; no real API."
+}

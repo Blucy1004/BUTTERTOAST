@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-11-09T06:57:29.411Z",
+  "platform": "linux",
+  "release": "6.18.57",
+  "arch": "x64",
+  "node": "24.22.1",
+  "logicalCpu": 5,
+  "cpuModel": "AMD EPYC 7763 64-Core Processor",
+  "totalMemoryMiB": 34087.89453125,
+  "availableMemory": [
+    "MemAvailable:   32181092 kB",
+    "SwapTotal:             0 kB"
+  ],
+  "cpuQuota": "400000 100000",
+  "memoryLimit": "34359738368",
+  "baseCommit": "d22be6e954eac38b61cd66b2f3159502d77e9b45",
+  "initialClean": true,
+  "electron": "45.2.3",
+  "network": "Unrestricted managed proxy; no real AI/OAuth calls in this operation",
+  "nativeDisplay": "Xvfb :92, MIT-MAGIC-COOKIE-1, -nolisten tcp",
+  "windowsExecution": false
+}

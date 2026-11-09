@@ -1,0 +1,271 @@
+✔ deletion function derives the target from verified auth identity, reauthenticates and never returns credentials (42.120061ms)
+✔ foreign target injection, wrong fresh identity, missing auth, browser CSRF and backend errors cannot delete an account (8.659667ms)
+✔ account customization stays local until explicit per-account sync opt-in, and disabling stops profile traffic (58.469741ms)
+✔ remembered login stores only encrypted refresh credentials and revalidates the same user on startup (23.098344ms)
+✔ foreign refresh response and late restoration after logout cannot revive a saved account (15.092791ms)
+✔ logout deletion wins over pending OS encryption and never erases separate customization (7.853076ms)
+✔ OS storage failure never writes plaintext, and old-device confirmation cannot target a later session (3.913284ms)
+✔ hard expiry removes remembered credentials and late refresh cannot restore them (10.342314ms)
+✔ failure to replace remembered credentials also removes the previous remembered identity (7.804534ms)
+✔ AI connections pin official hosts; compatible plaintext is loopback-only and credentials cannot enter URLs (3.679308ms)
+✔ AI IPC never accepts caller grants, arbitrary tools, tokens, partitions or extra fields (0.923279ms)
+✔ OpenAI, Claude and compatible requests preserve authority roles and report server token usage (48.167262ms)
+✔ AI raw errors, redirected and oversized responses cannot leak secrets or become actions (4.675702ms)
+✔ connected state contains no API key; OS-unavailable storage fails closed with explicit memory use (2.120577ms)
+✔ forget wins over delayed connection; no stale key or model list can be restored into active state (0.973572ms)
+✔ chat without explicit context sends no page; sharing is one-shot and clicks require matching stored proposal (2.735872ms)
+✔ human page can be read but model clicks on human snapshots never receive a proposal (0.8169ms)
+✔ stop, tab change and revoked page context discard late responses and approvals (1.699274ms)
+✔ approved proposals execute once; provider change drops history and page authority (1.141314ms)
+✔ transcript archive refuses unavailable cipher, forged roles and oversized transcripts; delete serializes after save (27.158661ms)
+✔ account configuration rejects secret keys, alternate hosts, credentials, paths and HTTP (1.433321ms)
+✔ auth IPC enforces exact schema, 8-character signup and bounded unmodified passwords (1.418344ms)
+✔ API never follows redirects or accepts oversized, malformed or secret-bearing error bodies (25.023515ms)
+✔ session parsing requires confirmed expected identity and bounded token lifetime (0.782625ms)
+✔ signup binds PKCE proof and email, never exposes tokens in public state (3.269175ms)
+✔ foreign-account confirmation and unconfirmed login never establish a session (1.847848ms)
+✔ logout wins against delayed login and confirmation, even if transport ignores abort (4.096213ms)
+✔ overlapping attempts and local retry floods are bounded; logout does not reset rate limit (0.413153ms)
+✔ refresh cannot resurrect a logged-out session and a changed user id is rejected (1.894494ms)
+✔ loopback receiver rejects hostile Host/Origin/method, ambiguous codes and replay (41.532079ms)
+✔ malformed signup or server autoconfirm cannot produce a signed-in or pending account (1.982739ms)
+✔ hard session expiry clears login even while refresh transport is stuck (0.829211ms)
+✔ email wait expires and closes receiver; a disposed service ignores late work (1.078378ms)
+✔ opaque 12-character Supabase refresh tokens are accepted; malformed values stay rejected (0.421248ms)
+✔ Chrome bookmark import is bounded inert text, rejects dangerous URLs and safely roundtrips HTML entities (7.445479ms)
+✔ Takeout history and settings imports accept only supported data; permissions and account authority cannot be imported (1.02117ms)
+✔ local suggestions rank bookmark prefixes, deduplicate URLs, bound results and reject invalid targets (1.502872ms)
+✔ session restore accepts only bounded URL snapshots and copies caller data (1.928107ms)
+✔ session persistence has no plaintext fallback or secret-bearing errors (17.996508ms)
+✔ overlapping saves retain the latest detached snapshot, including at shutdown (12.807182ms)
+✔ corrupt, oversized and unwritable session files fail closed (19.812668ms)
+✔ encrypted session version two restores pinned and muted state without executing or storing page content (11.900154ms)
+✔ tracker matching respects host boundaries and leaves first-party/main navigation working (1.049363ms)
+✔ privacy headers minimize cross-origin referrers while preserving auth and origin (0.675204ms)
+✔ new tab management IPC rejects extra authority, arbitrary sites and movement amounts (0.607577ms)
+✔ download history is bounded and contains no live item, credentialed origin or relative file authority (1.957603ms)
+✔ download history roundtrips only OS cipher bytes and keeps plaintext off disk when encryption is unavailable (23.227195ms)
+✔ engine download fallback binds official asset metadata, size and bytes to the package-pinned SHA-256 (14.425148ms)
+✔ trusted instructions use fixed packaged files rather than same-named files in the working directory (14.81664ms)
+✔ library preserves bookmarks/settings/deletions through encrypted serialization; unavailable cipher writes nothing (44.238247ms)
+✔ library and management IPC reject unsafe URLs, authority fields and arbitrary paths (0.984783ms)
+✔ download paths and redirect chains cannot smuggle local paths, credentials or HTTPS downgrades (1.335619ms)
+✔ search providers only navigate normal URLs and Google theme is scoped to exact search hosts (1.326572ms)
+✔ library coalesces pending writes instead of accumulating snapshots during a slow OS cipher (12.984172ms)
+✔ navigation settlement returns only a dispatch receipt, never revoked document data or permissions (3.830306ms)
+✔ navigation settlement rejects foreign redirect chains, wrong destinations, floods, missing receipts and cancellation (1.332813ms)
+✔ a failed renderer call without a receipt cannot become success merely because the URL matches (2.329028ms)
+✔ accept only web URLs without credentials (1.323335ms)
+✔ addresses default to HTTPS, searches are encoded and unsafe schemes rejected (1.444041ms)
+✔ free browser and ToastIR capabilities cannot be paywalled or upgraded by untrusted metadata (2.782456ms)
+✔ profile and appearance schemas accept only bounded presentation data, never authority, URLs or CSS (3.304593ms)
+✔ profile IPC binds edits to a revision and rejects caller identities, bearer tokens and injected fields (0.698977ms)
+✔ profile transport uses the fixed authenticated user endpoint and distinguishes GET from PUT (35.74234ms)
+✔ confirmed sign-in imports only a detached profile and logout erases all account customization state (4.057642ms)
+✔ profile saves use only the current account bearer and survive metadata property reordering (1.632524ms)
+✔ foreign, unconfirmed, missing and malformed update responses never become saved profile state (6.557278ms)
+✔ late profile reads and writes after logout cannot overwrite the next account or revive credentials (3.430107ms)
+✔ profile writes are detached, serialized and bounded; unsigned users cannot read or edit profiles (0.94605ms)
+✔ guest appearance migrates from old library data and is encrypted without persisting an account profile (28.083ms)
+✔ credential scan detects a fixture and reports location without printing its value (50.180224ms)
+✔ 10,000 hostile JSON schema mutations fail closed without parser crashes or prototype pollution (65.970925ms)
+✔ 2,000 address mutations never return a credentialed or non-web navigation target (8.661104ms)
+✔ UI asset resolver never escapes the exact packaged file set under encoding/path mutations (0.768718ms)
+✔ all known unsafe launch switches are rejected without enabling them in Chromium (0.961208ms)
+✔ approval storage cap, expiry and action scope cannot be bypassed by token flooding (3.626264ms)
+✔ each signed manifest/signature/artifact byte tamper is rejected (60.755838ms)
+✔ IPC rejects forged shapes, extra privileges, huge data and prototype tricks (11.341829ms)
+✔ IPC floods are bounded and capacity recovers (0.377066ms)
+✔ model prompt injection cannot add code, approval, roles or arbitrary operations (0.748821ms)
+✔ ungranted scope, foreign tab/origin and stale DOM are denied (2.227377ms)
+✔ hidden, disabled, sensitive, removed and changed targets fail closed (0.965877ms)
+✔ click cannot bypass payment/deletion/transmission permissions by claiming it is harmless (0.622455ms)
+✔ approval is exact, expires, is one-shot and cannot authorize a changed value (1.878795ms)
+✔ concurrent action, duplicate replay, and user stop cannot continue (0.297577ms)
+✔ approval invalidates on navigation/DOM version change and control scope replacement (3.855012ms)
+✔ validated action and granted permissions are detached from mutable caller state (0.485429ms)
+✔ key vault fails closed without an OS cipher and rejects provider path traversal (21.122716ms)
+✔ vault disk stores only cipher output; deletion and sanitized cipher failures (6.206632ms)
+✔ old completion cannot release a newer execution lock (0.685312ms)
+✔ model retries stop at a bounded task budget (11.531044ms)
+✔ key deletion waits for pending encryption and cannot resurrect a deleted key (6.525508ms)
+✔ repeated invalid model requests exhaust the attempt budget and revoke scope (1.929831ms)
+✔ approval cannot cross document reloads even if origin/version/element IDs repeat (1.280776ms)
+✔ old protocol without document binding is rejected (0.18691ms)
+✔ binary IR roundtrips bounded data and deltas invalidate across documents (17.399081ms)
+✔ model proposals cannot carry authority, execute code, cross origins or exceed operation bounds (1.405139ms)
+✔ Gemini adapter pins header authentication, translates roles and reports usage without leaking thought text (83.283712ms)
+✔ model options reject nonfinite costs and token limits; estimate separates cached input (1.159119ms)
+✔ compact IR and deltas reconstruct the exact ordered snapshot and never mutate input (6.52146ms)
+✔ IR deltas reject absent, foreign, stale, duplicate and incomplete baselines without accepting authority (1.693739ms)
+✔ workflow delta reaches the model only with its exact full baseline; revoke and archives erase page frames (9.08086ms)
+✔ no free-tier request count or synthetic cooldown blocks sequential chat, and shared page is one-shot (8.771451ms)
+✔ plain or malformed no-action replies do not report task completion (0.618427ms)
+✔ update client authenticates metadata before downloading and rejects redirects, foreign URLs and corrupted bytes (41.628503ms)
+✔ valid signed package accepted and returned artifact detached from input (5.778591ms)
+✔ tampered manifest, signature, package and wrong signing key are rejected (3.085934ms)
+✔ signed rollback, expiration, alternate host, HTTP and unexpected fields still rejected (3.052832ms)
+✔ tab settings survive versioned snapshots while legacy data and invalid authority remain distinct (2.882413ms)
+✔ find, zoom and emergency commands cannot select foreign contents, submit code or smuggle approval (0.724135ms)
+✔ download names retain dangerous suffixes, strip visual spoofing and reject Windows device aliases (1.136597ms)
+✔ download Internet-zone metadata contains no tokens or metadata line injection (0.717893ms)
+✔ bundled font has one fixed UI route and never broadens external request permissions (1.402995ms)
+✔ bounded workflow shares only approved task origin, waits for execution approval, recaptures then completes (7.035773ms)
+✔ workflow refuses origin changes and malformed automation budgets (1.395752ms)
+✔ only provider Retry-After delays workflow continuation; early timers cannot bypass it (9.608325ms)
+✔ stopping during an awaited workflow page check cannot restore context or send the captured page (1.669423ms)
+✔ password recovery binds PKCE callback to email; password update requires a session and logs out afterwards (3.45862ms)
+✔ workspace bounds remain inside the window and never overlap at supported sizes (5.50517ms)
+✔ workspace and visual IPC reject substituted URLs, authority, invalid widths and fake events (1.121819ms)
+✔ legacy encrypted library schema migrates to default workspace preferences (2.352751ms)
+ℹ tests 120
+ℹ suites 0
+ℹ pass 120
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1158.05399
+PASS sandbox and isolation preferences
+PASS hostile page has no Node/bridge; popup denied
+PASS local file navigation and title HTML injection blocked
+PASS site permissions denied
+PASS malicious attachment download canceled
+PASS cross-site iframe runs in a different renderer process
+PASS malformed privileged IPC rejected
+PASS same-URL foreign renderer cannot impersonate shell IPC
+PASS UI asset allowlist and outbound network restriction
+PASS renderer crash reported; navigation recovers with isolation intact
+PASS invalid TLS certificate rejected before document request
+PASS unavailable OS storage rejected (OS encryption round trip NOT RUN)
+PASS legitimate tab creation after rejected attacks
+PASS native tab shortcuts work from page focus and UI focus
+PASS trusted temporary UI suspends, resumes and restarts a tab
+PASS site exception is derived in main; caller-supplied origin rejected
+PASS page context is unavailable before explicit read scope
+PASS isolated mapping cannot be forged by page globals; form values omitted
+PASS hidden labels and nested form values do not enter the snapshot
+PASS missing/forged/injected approvals denied; exact approval dispatches once
+PASS same DOM id/name/markup replacement invalidates old element and approval
+PASS remove/reinsert ABA invalidates references even for original Node
+PASS DOM change while approval dialog is pending cannot approve new action
+PASS same-origin navigation and regenerated IDs cannot reuse old approval
+PASS stop while capture is pending prevents queued click
+PASS last-moment DOM swap is caught by synchronous mutation drain
+PASS overlay cannot redirect an approved click
+PASS human cookies/storage and same-origin AI task storage stay separate
+PASS BroadcastChannel reaches human peer but not isolated AI tasks
+PASS IndexedDB human-profile positive control and AI-task isolation
+PASS CacheStorage never crosses human/AI or AI-task partitions
+PASS foreign tab and foreign document IDs never retrieve another tab data
+PASS approval token cannot be spent by a different task
+PASS model string payload cannot escape fixed executor code
+PASS FILL requires exact approval and does not expose current field values
+PASS field switched to password after approval cannot be filled
+PASS SELECT dispatches only an approved existing option
+PASS WAIT is promptly cancellable and HANDOFF revokes read/control scope
+PASS real DOM snapshots encode to bounded binary IR and produce versioned deltas
+PASS open Shadow DOM is mapped and clickable without exporting private descendants
+PASS Shadow DOM remove/reinsert invalidates document-bound approval
+PASS private or hidden shadow hosts cannot bypass composed ancestor checks
+PASS property-only checkbox changes and disabled option groups cannot bypass approval
+PASS large pages are bounded and report clipping without claiming complete coverage
+PASS closed AI task clears cookies, localStorage, IndexedDB and CacheStorage
+ToastIR security groups: 29 passed
+PASS URL-only session restore stays dormant until selected; one tab loads with GET
+PASS tab ordering, close and recently closed URL reopen
+PASS manual memory release destroys contents; explicit resume creates an isolated fresh page
+PASS slow network load signaled and stopped
+PASS crashed tab recreated with same logical ID; other-site tab remains responsive
+PASS real infinite-loop renderer detected and replaced without stopping other-site tab
+PASS restart stores URLs only and does not replay POST or form data
+PASS overlong page-controlled URL updates address display but is excluded from restore
+PASS eight tabs release all contents; one selection recreates only one; 64-tab limit holds
+PASS real third-party requests blocked; exact-origin exception works; GPC/DNT and reduced Referrer observed at server
+PASS direct navigation and first-party resources remain usable; duplicate privacy handlers refused
+PASS runtime renderer security configuration and no remote preload
+PASS UI path/encoding/host/credentials/method attacks rejected; canonical alias stays in asset allowlist
+PASS actual UI inline/external script, iframe, form and fetch injection blocked
+PASS remote content cannot read UI assets, create popups or instantiate privileged webviews
+PASS page-driven local/custom/internal/data/blob navigation cannot escape allowed web URLs
+PASS untrusted dedicated worker has no Node or privileged bridge
+PASS cross-origin frame and CORS reads denied with same-origin positive control
+PASS camera/microphone/geolocation/notification and display capture remain denied
+PASS HTTPS page and redirect downgrade rejected before insecure fixture request
+PASS malformed IPC burst is bounded and normal user command recovers
+PASS page synthetic shortcuts and postMessage cannot invoke privileged commands
+PASS alternate unsafe launch switches rejected without disabling real sandbox
+Extended security groups: 12 passed
+PASS account window remains sandboxed; renderer network denied; network/human/UI sessions separated
+PASS web tabs, forged same-URL renderer and browser UI cannot invoke account IPC
+PASS actual signup form enforces minimum/confirmation, clears passwords, sends only PKCE challenge
+PASS injected code rejected; valid PKCE signs in; no access/refresh tokens in renderer state/storage/DOM
+PASS logout clears local account immediately and requests only local server session revocation
+PASS password login succeeds and server error body is never displayed
+PASS account component can close/reopen without persisting credentials
+PASS cancel/logout invalidates delayed password response in the production app
+Account security groups: 8 passed
+PASS AI panel, model network and human page are isolated; no remote bridge or renderer network
+PASS same-URL forged AI renderer cannot configure credentials or approve actions
+PASS actual form connects OpenAI, clears key, renders model text safely and sends no implicit page data
+PASS explicit human sharing omits private inputs/hidden content and never offers a human-tab click
+PASS switching the human tab revokes attached page context
+PASS separate AI task has no human session; model click proposal waits for native approval and cancellation prevents click
+PASS element swap while native approval is pending blocks the real click
+PASS exact approved click executes once through production ToastController and ToastGuard
+PASS same UI uses Claude messages protocol with separate auth header and cleared conversation
+PASS stop aborts in-flight vendor call and rejects its delayed response
+PASS model FILL travels through production UI, exact native approval and isolated executor
+PASS approved bounded workflow recaptures page and completes without replaying the approved step
+PASS real loopback OpenAI-compatible HTTP server works without a key or forwarded vendor credential
+PASS human control requires native consent and real keyboard input immediately revokes the shared scope
+PASS independent AI slots do not share credentials, conversation or network session; hidden panel IPC is rejected
+PASS task close destroys isolated contents; forgetting connection clears active key state
+AI security groups: 16 passed
+PASS production manager records history/bookmarks, safely renders titles, web page has no management bridge
+PASS forged same-URL sender, extra authority fields and manager outbound requests are rejected
+PASS actual Google-origin fixture is themed, lookalike host excluded, disabling removes CSS
+PASS HTTPS permission request needs native approval; owner can revoke the stored origin rule
+PASS cancelled download writes nothing; native approved destination receives exact bytes and manager reports completion
+PASS owner can delete bookmarks and browsing history through production IPC
+PASS site-data deletion closes live writers and reopened page has no previous cookies or storage
+PASS clearing site data cancels existing transfers but permits a later explicitly approved download
+PASS owner three-panel shell fits desktop and compact widths without overlap or horizontal overflow
+PASS delegation requires native consent, strips URL secrets and preserves the original tab without session copying
+PASS status/page switches preserve the same task and form state while central browsing continues independently
+PASS resize/collapse preserves task identity and hidden-panel or malformed IPC cannot close or resize tasks
+PASS explicit selected-text preview excludes form values and does not automatically send to a model
+PASS virtual cursor corresponds to an approved real action; slow replay cannot repeat actions or model calls
+PASS viewport resize cancels cursor playback and historical coordinates cannot drift over a new layout
+PASS bringing a result to the center opens a human tab without copying AI cookies or destroying its task
+Workspace security groups: 8 passed
+PASS bundled Pretendard loads offline through a fixed route; removed tagline stays absent and external fonts stay blocked
+PASS production tab menu pins/mutes/duplicates without copying forms; pinned ordering and title/site search work
+PASS native find and zoom target only the active human page; viewport matches UI and tab switch drops old find results
+PASS bulk close requires native consent and preserves pinned tabs; reopening retains mute state
+PASS same-URL navigation during a download destination prompt revokes consent before any save path is assigned
+PASS global stop bypasses exhausted normal quotas, revokes hidden and visible slots, and discards both late model responses
+PASS native emergency shortcut invalidates a pending delegation so a late confirmation cannot start another task
+PASS panel stop remains available under IPC flooding; approving a previously open native dialog cannot execute after revocation
+PASS crashed AI task requires recovery consent, uses a fresh isolated session, and replays no model request, action, cookie or form
+Upgrade security groups: 9 passed
+PASS guest light theme renders a local dawn sky without account traffic, external assets or geometry changes
+PASS confirmed account profile replaces guest settings in every trusted window without exposing credentials or metadata roles
+PASS profile form saves nickname, bio, avatar and seven appearance choices; preview is local until server acknowledgement
+PASS unsaved edits survive concurrent theme changes; stale revisions are rejected and explicit reload gets current server data
+PASS foreign same-URL windows, web pages and injected identities, CSS or avatar URLs cannot read or modify profile settings
+PASS untrusted profile text stays literal in account and browser headers without HTML execution
+PASS logout survives IPC flooding, clears editable account data, restores guest appearance and discards a late profile response
+PASS signing into a different account isolates profile settings and signing back restores only the original server profile
+PASS system mode follows native theme changes in all app views and custom text still fits the narrow browser layout
+Profile security groups: 9 passed
+PASS production reorder uses existing logical tab IDs and preserves unrelated tabs
+PASS native pointer drag reorders rendered tabs without activating the dragged tab or delegating it
+PASS real address UI receives local bookmark/history suggestions
+PASS new browsing window owns its toolbar and sandboxed page without changing the primary tab
+PASS blocked popups open only after native approval, without an opener connection
+PASS navigation invalidates pending popup consent even when the same URL is restored
+PASS opt-in idle release destroys only eligible background pages and preserves active tabs and form contents
+Golden Toast groups: 7 passed
+found 0 vulnerabilities
+No supported credential patterns found (not an exhaustive scan).

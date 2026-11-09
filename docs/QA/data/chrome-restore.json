@@ -1,0 +1,1 @@
+{"scenario":"D","ok":false,"error":"Error: Chrome restored tab count\n    at until (/workspace/BUTTERTOAST/test/torture/long-common.cjs:7:153)\n    at async /workspace/BUTTERTOAST/scripts/torture-chrome-restore.cjs:10:59","profile":"/tmp/bt-chrome-restore-gDetGc","urls":["chrome://new-tab-page/"]}

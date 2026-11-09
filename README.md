@@ -90,7 +90,7 @@ Security tests cover malicious page fixtures, element substitution, forged IPC, 
 
 ## Download and run
 
-**Source version 0.4.0 is prepared locally and has not been published as a new release.** The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
+**Source version 0.4.1 is prepared locally and has not been published as a new release.** See the [Toast Torture QA report](docs/QA/TOAST-TORTURE-REPORT.md) for local tests and remaining limits. The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
 
 - [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Setup-x64.exe)
 - [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Windows-x64.zip)

@@ -1,0 +1,21 @@
+{
+  "appVersion": "0.4.1",
+  "productionSourceCommit": "63b917bc72bd45be4399f64171ab674b8be91ad5",
+  "generatedAt": "2026-11-09T07:30:45.867068+00:00",
+  "windowsExecutionTested": false,
+  "signed": false,
+  "installerGenerated": true,
+  "portableZipCrcVerified": true,
+  "files": [
+    {
+      "file": "ButterToast-0.4.1-Setup-x64.exe",
+      "bytes": 122389737,
+      "sha256": "58c70cf85450a9cc6e6fa2d3bcc935f1829e8783e0e563e323daba39bd85bedf"
+    },
+    {
+      "file": "ButterToast-0.4.1-Windows-x64.zip",
+      "bytes": 166871677,
+      "sha256": "045972a4274471d8b58b27c18b31c0971b62576c26e2bb7faa26f5685fe261d8"
+    }
+  ]
+}

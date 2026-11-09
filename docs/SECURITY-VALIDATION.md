@@ -1,6 +1,6 @@
 # 보안 검증 기록 — 2026-11-07
 
-> 과거 버전의 구현/검증 기록입니다. 현재 0.4 변경 사항·보안 범위·최신 검사 수치는 [Golden Toast 기록](GOLDEN-TOAST-0.4.md)을 참고하세요.
+> 과거 버전의 구현/검증 기록입니다. 현재 QA·보안 회귀·측정 수치는 [Toast Torture 보고서](QA/TOAST-TORTURE-REPORT.md)를 참고하세요. 0.4 구현 기록은 [Golden Toast](GOLDEN-TOAST-0.4.md)에 보존했습니다.
 
 이 문서는 초기 셸 검증 기록이다. 최신 공식 공지·정적 검사·확대 공격 결과는 [확대 보안 검사](EXPANDED-SECURITY-REVIEW.md)에 있다. 최신 탭·자원·개인정보 기능과 전체 회귀 결과는 [추가 구현 기록](CHROMIUM-IMPROVEMENTS.md)에 있다. 이후 Guard v2 및 ToastIR/탭 경계 변경과 추가 결과는 [추가 검증 기록](TOASTIR-SECURITY-VALIDATION.md)에 있다.
 

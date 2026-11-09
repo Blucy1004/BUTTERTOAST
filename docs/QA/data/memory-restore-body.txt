@@ -1,0 +1,8 @@
+PASS production reorder uses existing logical tab IDs and preserves unrelated tabs
+PASS native pointer drag reorders rendered tabs without activating the dragged tab or delegating it
+PASS real address UI receives local bookmark/history suggestions
+PASS new browsing window owns its toolbar and sandboxed page without changing the primary tab
+PASS blocked popups open only after native approval, without an opener connection
+PASS navigation invalidates pending popup consent even when the same URL is restored
+PASS opt-in idle release destroys only eligible background pages and preserves active tabs and form contents
+Golden Toast groups: 7 passed

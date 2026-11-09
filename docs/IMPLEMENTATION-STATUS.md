@@ -1,4 +1,6 @@
-# ButterToast 구현 현황 — 2026-11-09 / 0.4.0
+# ButterToast 구현 현황 — 2026-11-09 / 0.4.1
+
+0.4.1의 QA·세 가지 결함 수정·측정 및 남은 한계는 [Toast Torture 보고서](QA/TOAST-TORTURE-REPORT.md)를 참고한다.
 
 기존 0.3에서 ToastIR·브라우징·계정의 실제 실행 경로를 보강했다. [0.4 변경/검증/로드맵](GOLDEN-TOAST-0.4.md), [시작 감사](audit/GOLDEN-TOAST-BASELINE.md), [원본 목표](requirements/GOLDEN-TOAST.md)를 구분한다. **Chrome 동등성이나 출시 검증 완료를 뜻하지 않는다.** 오너의 3패널 디자인과 Pretendard·SVG 아이콘을 유지한다. JASO Sans는 정확한 출처/배포 허용 확인 전이라 포함하지 않았다.
 

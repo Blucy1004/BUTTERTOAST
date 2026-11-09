@@ -1,0 +1,22 @@
+{
+  "appVersion": "0.4.1",
+  "electronVersion": "45.2.3",
+  "platform": "win32",
+  "arch": "x64",
+  "signed": false,
+  "windowsExecutionTested": false,
+  "payloadFiles": 96,
+  "fuses": {
+    "RunAsNode": false,
+    "EnableCookieEncryption": true,
+    "EnableNodeOptionsEnvironmentVariable": false,
+    "EnableNodeCliInspectArguments": false,
+    "EnableEmbeddedAsarIntegrityValidation": true,
+    "OnlyLoadAppFromAsar": true,
+    "GrantFileProtocolExtraPrivileges": false
+  },
+  "embeddedAsarHeaderHashVerified": true,
+  "asarSha256": "39bb8c18e6df9f0125de7eaba29a2af707859ce9adfd46a822d590be6a38aeee",
+  "executableSha256": "7986d4d6b4fcb60acf6bc0ab1909368390ddf0da71f29c442104aa21e580ae25",
+  "builtAt": "2026-11-09T07:16:53.193Z"
+}
