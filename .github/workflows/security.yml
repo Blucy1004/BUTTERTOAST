@@ -46,6 +46,17 @@ jobs:
       - run: npm run test:golden
       - run: npm run test:compatibility
       - run: npm run test:profile
+      - name: Run Mock AI and ToastIR defect regressions
+        run: npm run test:torture
+      - name: Preserve targeted regression results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: torture-${{ matrix.os }}
+          path: |
+            artifacts/torture/*-suite.log
+            artifacts/torture/*.json
+          if-no-files-found: ignore
       - run: npm run audit:deps
       - run: npm run scan:secrets
       - run: npm run sbom

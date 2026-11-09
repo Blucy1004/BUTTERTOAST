@@ -90,11 +90,11 @@ Security tests cover malicious page fixtures, element substitution, forged IPC, 
 
 ## Download and run
 
-**Source version 0.4.1 is prepared locally and has not been published as a new release.** See the [Toast Torture QA report](docs/QA/TOAST-TORTURE-REPORT.md) for local tests and remaining limits. The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
+The **0.4.1 development preview** fixes ToastIR renderer timeouts, Shadow DOM input events and approved navigation recovery. See the [release and downloads](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.4.1-dev.1) and [Toast Torture QA report](docs/QA/TOAST-TORTURE-REPORT.md) for validation results and remaining limits.
 
-- [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Setup-x64.exe)
-- [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Windows-x64.zip)
-- [SHA-256 checksums](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/SHA256SUMS.txt)
+- [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/ButterToast-0.4.1-Setup-x64.exe)
+- [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/ButterToast-0.4.1-Windows-x64.zip)
+- [SHA-256 checksums](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/SHA256SUMS.txt)
 
 Close an existing ButterToast instance before running the installer. For the portable build, extract the complete archive and run `ButterToast-win32-x64/ButterToast.exe`; its DLLs and `resources` directory must remain alongside it. GitHub's source-code archives do not contain the executable.
 
@@ -129,7 +129,7 @@ The CI workflow runs security regressions on Windows and Ubuntu. Packaging verif
 
 ## Project status
 
-ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The source changes and current tests are in [the 0.4 notes](docs/GOLDEN-TOAST-0.4.md); the separately linked published download still has [0.3 behavior](docs/PROFILE-THEMES-0.3.md). Profile saving and account switching have local fixture coverage; live Supabase profile writes and reads from another device still need validation.
+ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately in [the 0.4 notes](docs/GOLDEN-TOAST-0.4.md) and [0.4.1 QA report](docs/QA/TOAST-TORTURE-REPORT.md). Profile saving and account switching have local fixture coverage; live Supabase profile writes and reads from another device still need validation.
 
 Live model inference and complex website task success, production email delivery, end-user Windows installation, Authenticode signing and an operational update service require further validation or configuration. Automatic updates are currently disabled. Passing tests does not establish that a browser is free of vulnerabilities or that every prompt-injection attempt is prevented.
 

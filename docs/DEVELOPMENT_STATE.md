@@ -1,5 +1,12 @@
 # ButterToast 개발 상태
 
+## 0.4.1 릴리스 진행 — 2026-11-09
+
+- 오너가 이 채팅에서 GitHub Release 게시를 승인했다. 새 태그 `v0.4.1-dev.1`로 사전 릴리스를 준비하며 기존 태그·사용자 데이터는 보존한다.
+- Windows·Ubuntu의 같은 소스 커밋에 대한 Security regression 통과 후, 기존 배포 workflow로 Windows CI 산출물의 설치 프로그램·ZIP을 만든다. 서버 업로드 해시까지 일치할 때 공개한다.
+- Toast Torture 결함 회귀 검사를 CI에 추가했다. 이전 로컬 검사 298개와 50분 실험 결과는 아래 QA 당시 기록이며, 릴리스 파일 해시는 릴리스의 SHA256SUMS.txt로 확인해야 한다.
+- Windows 실기기 설치·제거·업데이트와 실제 AI 모델 검증은 별도 미검증 항목이다. 게시 URL과 최종 CI 결과는 완료 후 기록한다.
+
 ## Operation Toast Torture 완료 — 2026-11-09
 
 - 기준: 깨끗한 `d22be6e954eac38b61cd66b2f3159502d77e9b45` / 0.4.0. 기존 산출물과 사용자 데이터 보존.

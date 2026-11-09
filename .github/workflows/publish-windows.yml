@@ -10,7 +10,7 @@ on:
       release_tag:
         description: New development release tag
         required: true
-        default: v0.3.0-dev.1
+        default: v0.4.1-dev.1
         type: string
 
 permissions:
@@ -112,11 +112,19 @@ jobs:
 
           탭·충돌 복구, 북마크·기록·다운로드·권한·Google 검색 테마, Supabase 계정 UI, 여러 AI 제공사 연결, 독립 AI 작업 공간과 승인 기반 조작을 포함합니다. 메인 UI는 오너의 3패널 디자인을 적용했습니다. 계정·상세 설정은 검증용 UI입니다.
 
-          0.3 변경: 새벽빛 라이트/다크/시스템 테마, 로그인 계정 닉네임·소개·6종 아바타, 7종 꾸미기와 미리보기·저장·다시 불러오기, 문자/이모지를 대체한 로컬 SVG 아이콘. 프로필은 현재 사용자 Auth 메타데이터에만 저장하며 브라우징 데이터·AI 키·대화는 기기에 남습니다. 신원·revision 검증, 지연 응답 폐기, HTML/CSS/외부 아바타 주입 차단과 IPC 폭주 중 로그아웃을 검사합니다. 상세: [0.3 구현·검증](https://github.com/{os.environ['GITHUB_REPOSITORY']}/blob/{os.environ['SOURCE_SHA']}/docs/PROFILE-THEMES-0.3.md).
+          **0.4.1 수정**
 
-          프로필 저장·전환은 로컬 fixture로 검증했으며 실제 Supabase 프로필 쓰기·다른 기기에서 재읽기는 미검증입니다. 기기 간 실시간 갱신이나 계정별 브라우징 데이터 격리는 제공하지 않습니다. 기존 프로필 형식은 읽지만 새 꾸미기를 저장한 뒤 이전 버전으로의 다운그레이드 호환성은 보장하지 않습니다.
+          - 페이지 이벤트가 멈춰도 ToastIR 실행은 5초 제한 안에 실패하고 권한을 회수합니다. 실행 여부가 불확실한 작업을 자동 재시도하지 않습니다.
+          - 열린 Shadow DOM의 입력 이벤트가 바깥 컴포넌트까지 전달되도록 수정했습니다.
+          - 승인한 같은 origin 탐색·SPA 이동 후 새 문서를 다시 읽어 작업을 이어갑니다. 이전 문서 권한은 폐기하며 다음 조작은 다시 승인받습니다. 중단·직접 입력·외부 origin 이동은 자동 진행을 차단합니다.
 
-          실제 Windows 설치·제거, 실제 AI 추론, 일반 사용자 SMTP, 코드 서명과 운영 업데이트 검증은 남아 있습니다. 자동 업데이트는 비활성입니다. 자동 검사 통과는 취약점 부재를 보증하지 않습니다. 저장소가 비공개인 경우 접근 가능한 GitHub 계정으로 로그인해야 다운로드할 수 있습니다.
+          **0.4 기능**: ToastIR 전체/변경분 JSON과 관찰 결과, 승인 기반 다단계 작업, 주소 추천·탭 드래그·새 창·탭 메모리 절약, 암호화 다운로드 기록을 포함합니다. 프로필 저장은 로컬이 기본이며 서버 동기화·로그인 기억은 선택 사항입니다. 새벽빛 라이트/다크 테마와 오너의 UI 디자인을 유지했습니다. [구현 범위](https://github.com/{os.environ['GITHUB_REPOSITORY']}/blob/{os.environ['SOURCE_SHA']}/docs/GOLDEN-TOAST-0.4.md).
+
+          **Operation Toast Torture**: 로컬 기능·보안 298개 검사/그룹, 일반 자동화·ToastIR 비교 42/42 작업 결과를 확인했습니다. 고정한 0.4.0 기준 빌드와 Chrome for Testing에서 각각 실제 15분/30분/5분 실험을 수행했습니다. 엔진 버전·측정 조건 차이로 성능 우열이나 실제 모델 토큰 절감을 주장하지 않습니다. Chrome 자동 세션 복구 실험 실패도 보고서에 보존했습니다. [QA 결과·실패·재현 자료](https://github.com/{os.environ['GITHUB_REPOSITORY']}/blob/{os.environ['SOURCE_SHA']}/docs/QA/TOAST-TORTURE-REPORT.md).
+
+          AI 작업은 테스트 전용 Mock 공급자로 검증했으며 실제 AI 모델·OAuth 인증 성공을 뜻하지 않습니다. 실제 Supabase 동기화, 일반 사용자 SMTP, Windows 실기기 설치·업데이트·제거·DPAPI, 코드 서명과 운영 업데이트 검증은 남아 있습니다. 계정별 브라우징 데이터 격리는 제공하지 않으며 자동 업데이트는 비활성입니다. 자동 검사 통과는 취약점 부재를 보증하지 않습니다.
+
+          이번 다운로드의 해시는 첨부한 SHA256SUMS.txt가 기준입니다. QA 문서의 로컬 빌드 해시와 CI에서 만든 릴리스 파일의 해시는 다를 수 있습니다.
           '''.replace('\n          ', '\n'))
           PY
       - name: Upload, verify server digests, and publish the prerelease
