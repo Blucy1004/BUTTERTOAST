@@ -1,6 +1,6 @@
 {
   "name": "buttertoast",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "A security-first Chromium browser shell",
   "main": "dist/main.js",
@@ -28,7 +28,10 @@
     "test:golden": "npm run build && node scripts/test-golden.cjs",
     "benchmark:golden": "npm run build && node scripts/benchmark-golden.cjs",
     "soak:golden": "npm run build && node scripts/soak-golden.cjs",
-    "test:compatibility": "npm run build && node scripts/test-compatibility.cjs"
+    "test:compatibility": "npm run build && node scripts/test-compatibility.cjs",
+    "test:torture": "npm run build && node scripts/test-torture.cjs",
+    "benchmark:torture": "npm run build && electron --disable-gpu test/torture/ir-benchmark.cjs",
+    "benchmark:torture:long": "npm run build && node scripts/torture-long.cjs"
   },
   "devDependencies": {
     "@electron/asar": "4.3.1",

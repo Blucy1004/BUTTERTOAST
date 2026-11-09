@@ -1,0 +1,31 @@
+const fs=require('node:fs'),http=require('node:http');
+const {treeMetrics,wait}=require('../../scripts/benchmark-support.cjs');
+const durations={A:15*60_000,B:30*60_000,C:5*60_000};
+function settings(){const scenario=process.env.BT_TORTURE_SCENARIO;if(!Object.hasOwn(durations,scenario))throw Error('Unknown scenario');const duration=Number(process.env.BT_TORTURE_DURATION_MS||durations[scenario]);if(!Number.isSafeInteger(duration)||duration<1000||duration>durations[scenario])throw Error('Invalid duration');return {scenario,duration,required:durations[scenario],count:{A:10,B:20,C:50}[scenario]};}
+function stats(values){if(!values.length)return null;const s=[...values].sort((a,b)=>a-b),mean=values.reduce((n,x)=>n+x,0)/values.length;return {samples:s.length,medianMs:s[Math.floor(s.length/2)],p95Ms:s[Math.min(s.length-1,Math.ceil(s.length*.95)-1)],minMs:s[0],maxMs:s.at(-1),stddevMs:Math.sqrt(values.reduce((n,x)=>n+(x-mean)**2,0)/values.length)};}
+async function fixture(){const server=http.createServer((req,res)=>{if(!/^t\d{1,2}\.localhost:\d+$/.test(req.headers.host||'')){res.writeHead(403);res.end();return;}const route=new URL(req.url,'http://'+req.headers.host),index=Number(req.headers.host.match(/^t(\d+)/)[1]);res.setHeader('Content-Type','text/html; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(`<!doctype html><meta charset="utf-8"><title>Torture tab ${index}</title><style>body{font:16px sans-serif;margin:20px}section{padding:16px}</style><h1>Fixture ${index}: ${route.pathname==='/page/1'?'second':'first'} page</h1><a href="/page/1">Next local page</a>${index<2?'<label>Local editor <input id="editor"></label>':''}<button id="counter" onclick="this.dataset.clicks=String(1+Number(this.dataset.clicks||0))">Count</button>`+Array.from({length:90},(_,i)=>`<section><h2>Section ${i}</h2><p>${'Deterministic local browsing content. '.repeat(8)}</p></section>`).join(''));});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return {server,url:(i,page=0)=>`http://t${i}.localhost:${server.address().port}/page/${page}`};}
+async function until(fn,label,limit=15000){const start=performance.now();while(performance.now()-start<limit){if(await fn())return;await wait(30)}throw Error(label);}
+async function run(driver,config,output){const startedAt=new Date().toISOString(),setupStart=performance.now(),loads=[],switches=[],scrolls=[],recoveries=[],samples=[],events=[];let unexpectedCrashes=0,unresponsive=0,intentional=false,ticks=0,recoveryDone=false,ok=false,error=null;
+ driver.onCrash((reason)=>{events.push({elapsedMs:performance.now()-setupStart,type:'renderer-crash',reason,intentional});if(!intentional)unexpectedCrashes++;});
+ try{
+  for(let i=0;i<config.count;i++){const at=performance.now();await driver.open(i);loads.push(performance.now()-at);}
+  await driver.memorySaver(config.scenario==='B');
+  const started=performance.now(),startedWall=Date.now();let nextSample=0;const active=config.scenario==='B'?8:config.count;
+  while(performance.now()-started<config.duration){
+   const tickStart=performance.now(),i=ticks%active,at=performance.now();await driver.select(i);await driver.evaluate(i,'document.readyState');switches.push(performance.now()-at);
+   if(ticks%3===0){const before=performance.now();const y=await driver.evaluate(i,'window.scrollBy(0,320);window.scrollY');scrolls.push(performance.now()-before);if(typeof y!=='number')throw Error('Scroll result missing');}
+   if(ticks%5===0){const before=performance.now();await driver.navigate(i,Math.floor(ticks/5)%2);loads.push(performance.now()-before);}
+   if(config.scenario==='C'&&!recoveryDone&&performance.now()-started>=config.duration/2){intentional=true;const before=performance.now();await driver.crashAndRecover(i);recoveries.push({success:true,elapsedMs:performance.now()-before});recoveryDone=true;intentional=false;}
+   const state=await driver.inspect();unresponsive+=state.unresponsive;
+   if(state.unresponsive)throw Error('Unresponsive page observed');
+   if(performance.now()-started>=nextSample){samples.push({elapsedMs:performance.now()-started,wallElapsedMs:Date.now()-startedWall,...treeMetrics(driver.pid),...state});nextSample+=30_000;fs.writeFileSync(output+'.progress.json',JSON.stringify({scenario:config.scenario,engine:driver.name,startedAt,elapsedMs:performance.now()-started,requiredMs:config.required,ticks,sample:samples.at(-1)},null,2));console.log('PROGRESS',driver.name,config.scenario,Math.floor((performance.now()-started)/1000),ticks,state.suspended);}
+   ticks++;await wait(Math.max(0,2000-(performance.now()-tickStart)));
+  }
+  const elapsedMs=performance.now()-started,wallElapsedMs=Date.now()-startedWall;
+  // Exercise every logically retained tab after the timed interval; record reload/restore, not site-memory restoration.
+  const restore=[];for(let i=0;i<config.count;i++){const at=performance.now();await driver.select(i);await driver.ready(i);restore.push(performance.now()-at);}
+  ok=unexpectedCrashes===0&&unresponsive===0;
+  const report={schema:'toast-torture-long/1',engine:driver.name,version:driver.version,source:driver.source,scenario:config.scenario,tabCount:config.count,requiredMs:config.required,configuredMs:config.duration,elapsedMs,wallElapsedMs,qualifiedDuration:elapsedMs>=config.required&&wallElapsedMs>=config.required,startedAt,finishedAt:new Date().toISOString(),ok,setupMs:started-setupStart,loads:stats(loads),switches:stats(switches),scrolls:stats(scrolls),restores:stats(restore),ticks,samples,events,recoveries,unexpectedCrashes,unresponsive:driver.policy.unresponsive?null:unresponsive,cpuMeasurement:'cpuTicks sums live /proc process-tree counters; 100 ticks/sec; intervals with process exits are incomplete lower bounds',policy:driver.policy};fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');return report;
+ }catch(e){error=String(e.message||e);fs.writeFileSync(output,JSON.stringify({engine:driver.name,version:driver.version,source:driver.source,scenario:config.scenario,configuredMs:config.duration,requiredMs:config.required,startedAt,finishedAt:new Date().toISOString(),elapsedIncludingSetupMs:performance.now()-setupStart,ok:false,error,ticks,samples,events,unexpectedCrashes,unresponsive},null,2)+'\n');throw e;}
+}
+module.exports={settings,fixture,until,run,wait,stats};

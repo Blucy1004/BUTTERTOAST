@@ -130,7 +130,7 @@ export function installToastRuntime(documentId: string): void {
       if (entry.node.maxLength >= 0 && action.value.length > entry.node.maxLength) return {ok:false,reason:'field-length'};
       entry.node.value = action.value;
       // One event: a page may replace the target in its handler. Do not dispatch another event to a stale node.
-      entry.node.dispatchEvent(new Event('input', {bubbles:true})); return {ok:true, point};
+      entry.node.dispatchEvent(new InputEvent('input', {bubbles:true,composed:true,inputType:'insertText',data:action.value})); return {ok:true, point};
     }
     if (action.op === 'SELECT') {
       if (!(entry.node instanceof HTMLSelectElement) || entry.node.multiple) return {ok:false,reason:'option'};

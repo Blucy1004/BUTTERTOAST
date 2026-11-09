@@ -8,7 +8,7 @@ const WORLD = 1001;
 export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; parent: string|null; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
 export type ActionPoint = { x: number; y: number; width: number; height: number };
 export type CaptureStatistics={visited:number;elements:number;textCharacters:number;shadowRoots:number;framesSkipped:number;truncated:boolean;captureMs:number};
-export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean; point?: ActionPoint };
+export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean; point?: ActionPoint; dispatched?:boolean };
 /** Main-only experimental READ/CLICK path, permanently bound to one WebContents.
  * No page/renderer IPC exports. Caller may not substitute snapshots or tab objects.
  */
@@ -42,14 +42,20 @@ export class ToastController {
     if (this.disposed || this.contents.isDestroyed()) throw new Error('Task unavailable');
     // Only fixed app code plus JSON data crosses the boundary. The web page cannot access WORLD.
     const code = `(${installToastRuntime.toString()})(${JSON.stringify(randomUUID())}); globalThis.__toastIR.${method}(${input === undefined ? '' : JSON.stringify(input)})`;
-    return this.contents.executeJavaScriptInIsolatedWorld(WORLD, [{ code }]);
-  }
-  private async capture(includeText = false): Promise<Snapshot> {
+    // A page event handler may never return. Bound every renderer round trip,
+    // including perform/selection/statistics, and revoke authority on timeout.
+    // An already dispatched website effect cannot be undone or safely retried.
     let timer:NodeJS.Timeout|undefined;
     try {
-      const raw=await Promise.race([this.call('capture',includeText),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{this.stop();reject(new Error('Capture timeout'));},5000);timer.unref();})]);
-      const result=validateSnapshot(raw);if(!result)throw new Error('Invalid capture');return result;
+      return await Promise.race([
+        this.contents.executeJavaScriptInIsolatedWorld(WORLD, [{ code }]),
+        new Promise<never>((_,reject)=>{timer=setTimeout(()=>{this.stop();reject(new Error('Renderer operation timeout'));},5000);timer.unref();})
+      ]);
     } finally {clearTimeout(timer);}
+  }
+  private async capture(includeText = false): Promise<Snapshot> {
+    const raw=await this.call('capture',includeText);
+    const result=validateSnapshot(raw);if(!result)throw new Error('Invalid capture');return result;
   }
   private state(snapshot: Snapshot): PageState {
     return { document: snapshot.document, tab: this.contents.id, origin: snapshot.origin, version: snapshot.version,
@@ -115,8 +121,10 @@ export class ToastController {
         return epoch === this.generation && !verdict.signal.aborted ? {ok:true} : {ok:false,reason:'task-changed'};
       }
       const result = await this.call('perform', verdict.action) as Result;
-      // Never deliver data after revocation, even if the renderer operation already finished.
-      if (epoch !== this.generation || verdict.signal.aborted) return { ok: false, reason: 'task-changed' };
+      // Never deliver page data after revocation. A main-only dispatch receipt may
+      // survive navigation; it grants no scope and is not proof of site success.
+      if (epoch !== this.generation || verdict.signal.aborted) return { ok: false, reason: 'task-changed',
+        ...((action.op==='CLICK'||action.op==='NAVIGATE')&&result.ok===true?{dispatched:true}:{}) };
       return result;
     } catch { return { ok: false, reason: 'context-unavailable' }; }
     finally { if (lease) this.guard.finish(lease); this.busy = false; }

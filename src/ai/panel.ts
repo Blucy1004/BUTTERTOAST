@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { BrowserTabs } from '../browser/tabs';
 import { createAiTask } from '../browser/ai-task';
 import { ToastController } from '../toastir/controller';
+import { settleTaskAction } from '../toastir/navigation';
 import { WEB_PREFERENCES, hardenSession } from '../security/electron';
 import { osCipher } from '../security/os-cipher';
 import { KeyVault } from '../security/vault';
@@ -188,7 +189,10 @@ export class AiPanel {
           return answer.response === 1 && current();
         }) : undefined;
         if (!current() || (requiresApproval && !approval)) { this.audit(data.origin,proposal.op,'cancelled'); return false; }
-        const result = await controller.execute(action, approval ?? undefined);
+        const execute=()=>controller.execute(action,approval??undefined);
+        const result = source==='task'
+          ? await settleTaskAction(wc,data.origin,proposal,()=>this.task?.view.webContents===wc&&!this.parent.isDestroyed(),execute)
+          : await execute();
         const ok=result.ok&&result.matches!==false;
         const outcome=result.matches===false?'verification-failed':ok?'executed':'blocked';
         this.audit(data.origin,proposal.op,outcome);
