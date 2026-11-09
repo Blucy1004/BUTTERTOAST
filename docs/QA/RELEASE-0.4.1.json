@@ -1,0 +1,322 @@
+{
+  "verifiedAtUtc": "2026-11-09T08:19:54.724955+00:00",
+  "tag": "v0.4.1-dev.1",
+  "sourceCommit": "2348bde4a9cc0f34b365bdca3c8533aa7cb33f2e",
+  "releaseUrl": "https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.4.1-dev.1",
+  "publishedAtUtc": "2026-11-09T08:17:25Z",
+  "prerelease": true,
+  "draft": false,
+  "securityRun": {
+    "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42583735007",
+    "conclusion": "success",
+    "runners": [
+      "ubuntu-latest",
+      "windows-latest"
+    ]
+  },
+  "publishRun": {
+    "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42584392609",
+    "conclusion": "success"
+  },
+  "assets": [
+    {
+      "name": "BUILD-VERIFICATION.json",
+      "size": 735,
+      "digest": "sha256:68ddd534dee800bf4c953b3942a4bc681e1db699509f872c97a633701302278e",
+      "state": "uploaded",
+      "browser_download_url": "https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/BUILD-VERIFICATION.json"
+    },
+    {
+      "name": "ButterToast-0.4.1-Setup-x64.exe",
+      "size": 122454013,
+      "digest": "sha256:50724842d98cd9da2a950d9a018fc706b9d05a938bdf295d0d9a555fc84912dc",
+      "state": "uploaded",
+      "browser_download_url": "https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/ButterToast-0.4.1-Setup-x64.exe"
+    },
+    {
+      "name": "ButterToast-0.4.1-Windows-x64.zip",
+      "size": 166964669,
+      "digest": "sha256:ee69e00c218ddcbf9c9d55d4dd58625e88de341c319f5825b53d823ce497d324",
+      "state": "uploaded",
+      "browser_download_url": "https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/ButterToast-0.4.1-Windows-x64.zip"
+    },
+    {
+      "name": "SBOM.cdx.json",
+      "size": 67960,
+      "digest": "sha256:1701bd0291d1b963ed390cecc968f0e3843a8302b1a28c455676716a94e01722",
+      "state": "uploaded",
+      "browser_download_url": "https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/SBOM.cdx.json"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 198,
+      "digest": "sha256:188bbba4da010c1820b415e5ed6818c1654b8d7ce285abf65f9f6d5ef4e79600",
+      "state": "uploaded",
+      "browser_download_url": "https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/SHA256SUMS.txt"
+    }
+  ],
+  "checks": {
+    "tagPointsToSource": true,
+    "allUploadSizesAndDigestsVerifiedByPublishJob": true,
+    "downloadedMetadataMatchesServerDigest": true,
+    "executableAndZipChecksumManifestMatchesServerDigests": true,
+    "unauthenticatedInstallerAndZipHeadStatus": 200
+  },
+  "buildVerification": {
+    "appVersion": "0.4.1",
+    "electronVersion": "45.2.3",
+    "platform": "win32",
+    "arch": "x64",
+    "signed": false,
+    "windowsExecutionTested": false,
+    "payloadFiles": 96,
+    "fuses": {
+      "RunAsNode": false,
+      "EnableCookieEncryption": true,
+      "EnableNodeOptionsEnvironmentVariable": false,
+      "EnableNodeCliInspectArguments": false,
+      "EnableEmbeddedAsarIntegrityValidation": true,
+      "OnlyLoadAppFromAsar": true,
+      "GrantFileProtocolExtraPrivileges": false
+    },
+    "embeddedAsarHeaderHashVerified": true,
+    "asarSha256": "91f373b2dafae6fb7261b41aabe9c376085f5761cbf476ef501bfb6a61bc74cc",
+    "executableSha256": "8c7ae8b2ae16849ca25fe605ce5fe5d860dc2a55873fdadfc7c79ca5f904dc7c",
+    "builtAt": "2026-11-09T08:12:47.289Z"
+  },
+  "targetedRegressions": [
+    {
+      "runner": "ubuntu-latest",
+      "suite": {
+        "generatedAt": "2026-11-09T08:11:50.102Z",
+        "results": [
+          {
+            "name": "provider",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 61236.707403,
+            "log": "provider-suite.log"
+          },
+          {
+            "name": "ai-dom",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 22106.628164,
+            "log": "ai-dom-suite.log"
+          },
+          {
+            "name": "blocked-renderer",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 5276.505321000004,
+            "log": "blocked-renderer-suite.log"
+          },
+          {
+            "name": "restore",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 6947.952966000012,
+            "log": "restore-suite.log"
+          }
+        ],
+        "unverified": [
+          "Native display test: run separately under Xvfb or desktop"
+        ]
+      },
+      "aiDom": {
+        "total": 27,
+        "passed": 27
+      },
+      "blockedRenderer": {
+        "id": "IR-TIMEOUT-01",
+        "elapsedMs": 5001.42415,
+        "settled": true,
+        "result": {
+          "ok": false,
+          "reason": "context-unavailable"
+        },
+        "versions": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        }
+      }
+    },
+    {
+      "runner": "windows-latest",
+      "suite": {
+        "generatedAt": "2026-11-09T08:12:27.708Z",
+        "results": [
+          {
+            "name": "provider",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 61345.5178,
+            "log": "provider-suite.log"
+          },
+          {
+            "name": "ai-dom",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 23230.86989999999,
+            "log": "ai-dom-suite.log"
+          },
+          {
+            "name": "blocked-renderer",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 5651.333400000003,
+            "log": "blocked-renderer-suite.log"
+          },
+          {
+            "name": "native-browser",
+            "code": 0,
+            "signal": null,
+            "elapsedMs": 2062.271399999998,
+            "log": "native-browser-suite.log"
+          }
+        ],
+        "unverified": []
+      },
+      "aiDom": {
+        "total": 27,
+        "passed": 27
+      },
+      "blockedRenderer": {
+        "id": "IR-TIMEOUT-01",
+        "elapsedMs": 5003.729,
+        "settled": true,
+        "result": {
+          "ok": false,
+          "reason": "context-unavailable"
+        },
+        "versions": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        }
+      },
+      "nativeBrowser": {
+        "platform": "win32",
+        "display": "OS desktop",
+        "displayAuthConfigured": false,
+        "OSChooserInteracted": false,
+        "testCipher": true,
+        "versions": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        },
+        "results": [
+          {
+            "id": "NATIVE-01 actual page pointer reaches WebContentsView",
+            "status": "pass"
+          },
+          {
+            "id": "NATIVE-02 keyboard writes actual focused field",
+            "status": "pass"
+          },
+          {
+            "id": "NATIVE-03 real address Enter performs search navigation",
+            "status": "pass"
+          },
+          {
+            "id": "NATIVE-04 file chooser activation and real multipart selection path",
+            "status": "pass"
+          }
+        ]
+      }
+    }
+  ],
+  "limits": [
+    "Unsigned development prerelease; physical Windows installation, upgrade, removal and packaged execution are unverified.",
+    "Native input tests use development source and a test cipher; they do not verify DPAPI or interact with the OS file chooser.",
+    "No real AI model calls or OAuth login were performed.",
+    "Ubuntu CI skipped native display tests because DISPLAY was unavailable; local Xvfb evidence is in the QA report.",
+    "These release hashes identify the Windows CI build, not the earlier locally packaged artifacts recorded in BUILD-ARTIFACTS.json."
+  ]
+}

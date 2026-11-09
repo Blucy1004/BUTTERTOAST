@@ -1,11 +1,14 @@
 # ButterToast 개발 상태
 
-## 0.4.1 릴리스 진행 — 2026-11-09
+## 0.4.1 릴리스 게시 완료 — 2026-11-09
 
-- 오너가 이 채팅에서 GitHub Release 게시를 승인했다. 새 태그 `v0.4.1-dev.1`로 사전 릴리스를 준비하며 기존 태그·사용자 데이터는 보존한다.
-- Windows·Ubuntu의 같은 소스 커밋에 대한 Security regression 통과 후, 기존 배포 workflow로 Windows CI 산출물의 설치 프로그램·ZIP을 만든다. 서버 업로드 해시까지 일치할 때 공개한다.
-- Toast Torture 결함 회귀 검사를 CI에 추가했다. 이전 로컬 검사 298개와 50분 실험 결과는 아래 QA 당시 기록이며, 릴리스 파일 해시는 릴리스의 SHA256SUMS.txt로 확인해야 한다.
-- Windows 실기기 설치·제거·업데이트와 실제 AI 모델 검증은 별도 미검증 항목이다. 게시 URL과 최종 CI 결과는 완료 후 기록한다.
+- 오너의 게시 승인에 따라 [v0.4.1-dev.1](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.4.1-dev.1)을 2026-11-09 17:17 KST에 공개했다. 태그의 소스는 `2348bde4a9cc0f34b365bdca3c8533aa7cb33f2e`. 기존 태그·사용자 데이터는 보존했다.
+- [Windows·Ubuntu Security regression](https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42583735007)과 [배포 workflow](https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42584392609) 모두 성공. Windows CI 산출물에서 설치 EXE·포터블 ZIP을 만들고, 첨부 5개 모두 서버 SHA-256/크기 일치를 확인한 뒤 공개했다. 설치 EXE·ZIP의 비로그인 공개 다운로드 HTTP 200과 크기도 재확인했다.
+- Toast Torture 회귀 검사를 CI에 추가했다. 두 OS에서 Mock/AI-DOM 27개·실제 60초 공급자 timeout·멈춘 renderer 권한 회수 검사를 통과했다. Windows native 입력 4개, Linux 강제 종료 복구도 통과했다. Ubuntu CI는 display가 없어 native 화면 검사를 실행하지 않았다.
+- [게시 검증 기록](QA/RELEASE-0.4.1.json)에 파일 크기·해시·CI 결과를 보존했다. 이전 로컬 검사 298개와 50분 실험 결과는 아래 QA 당시 기록이며, CI 릴리스 파일 해시는 릴리스의 SHA256SUMS.txt가 기준이다.
+- Windows 소스 자동 검사와 패키징 성공은 실기기 설치·제거·업데이트·DPAPI 검증을 뜻하지 않는다. 실제 AI 모델·OAuth도 미검증이며 이번 빌드는 미서명 개발용 사전 릴리스다.
+
+아래 내용은 게시 전 QA 당시 기록이다. 당시의 미게시 상태와 로컬 산출물 해시를 최신 릴리스 상태로 해석하지 않는다.
 
 ## Operation Toast Torture 완료 — 2026-11-09
 
