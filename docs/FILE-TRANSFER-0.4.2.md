@@ -29,7 +29,8 @@
 | 전체 `test:security` | 단위 검사와 기존 Electron 회귀, 당시 파일 전송 12그룹 포함 통과; audit 보고 advisory 0, 지원 secret pattern 미검출 |
 | 최종 `test:files` | 새 빈 탭 파일 URL 검사를 추가한 13그룹 통과 |
 | 실제 OS 파일 선택창 | 인증된 Xvfb/X11의 GTK 선택창에서 취소·Open 버튼 선택 후 실제 HTTP multipart 전송, 2개 결과 통과 |
-| Windows·Ubuntu CI | 소스 커밋의 Security regression 결과에서 별도 확인; 검사/결과 artifact 생성 단계 추가 |
+| 실제 인터넷 다운로드 | 공개 저장소의 고정 커밋 README 13,037바이트를 실제 HTTPS로 저장하고 SHA-256 일치 확인. TLS 우회 없음 |
+| Windows·Ubuntu CI | [Security regression #42589009710](https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42589009710) 두 OS 모두 통과. 소스 `7b96ec9`의 파일 전송 각각 13/13 통과 |
 
 파일 전송 검사에는 HTTP/Blob의 실제 저장 바이트, 최종 용량, 링크·이미지 저장, 탐색 후 오래된 메뉴 거부, 실제 느린 전송의 일시정지·재개·취소, AI 세션 다운로드 거부가 포함된다. 다중 파일의 파일명·길이·SHA-256을 실제 로컬 HTTP 서버가 받은 multipart 내용과 비교했다. 드롭 업로드는 Chromium에 파일 드래그 payload를 전달해 확인했다. 임의 로컬 경로를 input 값으로 지정하는 페이지 코드와 사용자 승인 응답을 반환해도 파일 입력을 조작하려는 ToastIR 명령을 거부했다.
 
@@ -37,7 +38,7 @@
 
 초기 테스트 장치 오류도 구분한다. HTTP 페이지에 AI scope를 주려던 검사는 기존 HTTPS 제한으로 거부되어 HTTPS fixture로 옮겼다. 파일 입력의 라벨은 원래 비공개여서 `[private]`/sensitive 상태와 실제 승인·실행 거부를 검사하도록 수정했다. GTK 테스트 장치의 Enter 입력으로 선택이 완료되지 않아 표시된 Open 버튼을 실제 포인터로 누르는 경로로 바꿨다. 보안 정책이나 기대하는 파일 바이트를 낮추지 않았다.
 
-원자료: [파일 전송](QA/data/file-transfer-0.4.2.json), [실제 GTK 선택창](QA/data/native-picker-0.4.2.json). 기존 0.4.1 QA 결과는 변경하지 않았다.
+원자료: [파일 전송](QA/data/file-transfer-0.4.2.json), [실제 GTK 선택창](QA/data/native-picker-0.4.2.json), [공개 HTTPS 파일](QA/data/online-download-0.4.2.json). 기존 0.4.1 QA 결과는 변경하지 않았다.
 
 ## 재현
 
@@ -49,6 +50,12 @@ npm run test:security
 # 선택 사항: Linux X11 + xwininfo/xprop, libX11/libXtst, Python 3
 # 기존의 인증된 DISPLAY/XAUTHORITY를 상속한다.
 node_modules/.bin/electron --disable-gpu test/file-picker-native.cjs
+# 선택 사항: 인터넷 연결 시 공개 고정 파일 다운로드 (Linux headless 예시)
+node_modules/.bin/electron --ozone-platform=headless --disable-gpu test/file-download-online.cjs
 ```
 
 모든 파일은 테스트가 만든 OS 임시 폴더에만 저장한다. 네이티브 선택창 드라이버는 해당 테스트 창의 transient 창만 찾으며, 테스트/Mock/CDP/드라이버 코드는 배포 ASAR에 포함하지 않는다.
+
+## 개발 빌드
+
+0.4.2 Windows x64 설치 EXE와 포터블 ZIP을 생성했다. [파일 크기·SHA-256·빌드/CI 기록](QA/FILE-TRANSFER-BUILD-0.4.2.json). 97개 앱 payload·PE/x64·7개 fuse·내장 ASAR 해시를 확인했고, 테스트/선택창 드라이버는 패키지에서 제외했다. 미서명 Linux 패키징 결과이며 Windows 실기기 설치 성공으로 표현하지 않는다. 새 GitHub Release는 게시하지 않았고 기존 0.4.1 사전 릴리스는 그대로다.

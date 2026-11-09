@@ -1,0 +1,253 @@
+{
+  "version": "0.4.2",
+  "productionSourceCommit": "7b96ec967f5bd4e0b1f37ccc7182877d2a159193",
+  "buildHost": "Linux x64",
+  "assets": [
+    {
+      "name": "ButterToast-0.4.2-Setup-x64.exe",
+      "bytes": 122467533,
+      "sha256": "eea636b51984e6d253067faa34e2bf694171034d6f9e2ad659fbf19d2fa347ee"
+    },
+    {
+      "name": "ButterToast-0.4.2-Windows-x64.zip",
+      "bytes": 166974677,
+      "sha256": "4050b369462f1fe230afe6e2b306d450a08c3a5a421b1d67f8522b792c786c27"
+    }
+  ],
+  "buildVerification": {
+    "appVersion": "0.4.2",
+    "electronVersion": "45.2.3",
+    "platform": "win32",
+    "arch": "x64",
+    "signed": false,
+    "windowsExecutionTested": false,
+    "payloadFiles": 97,
+    "fuses": {
+      "RunAsNode": false,
+      "EnableCookieEncryption": true,
+      "EnableNodeOptionsEnvironmentVariable": false,
+      "EnableNodeCliInspectArguments": false,
+      "EnableEmbeddedAsarIntegrityValidation": true,
+      "OnlyLoadAppFromAsar": true,
+      "GrantFileProtocolExtraPrivileges": false
+    },
+    "embeddedAsarHeaderHashVerified": true,
+    "asarSha256": "93727e27618b9e8d8858cd622ca0ea37a879c564e4b0f54f4a1e6488c0414576",
+    "executableSha256": "2e0b2de6f3f8cdcc2e2abe419a0a2a5ec260ae22141f35c64b62b45b059eeaa6",
+    "builtAt": "2026-11-09T08:51:57.988Z"
+  },
+  "installerVerification": {
+    "version": "0.4.2",
+    "sha256": "eea636b51984e6d253067faa34e2bf694171034d6f9e2ad659fbf19d2fa347ee",
+    "bytes": 122467533,
+    "signed": false,
+    "windowsExecutionTested": false,
+    "scope": "current-user",
+    "removesUserProfile": false
+  },
+  "ci": {
+    "databaseId": 42589009710,
+    "headSha": "7b96ec967f5bd4e0b1f37ccc7182877d2a159193",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42589009710"
+  },
+  "ciFileTransferResults": [
+    {
+      "generatedAtUtc": "2026-11-09T08:54:08.963Z",
+      "platform": "linux",
+      "versions": {
+        "node": "24.22.2",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.9",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "150",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.11",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2026e",
+        "undici": "7.30.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.6.75.27-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "45.2.3",
+        "chrome": "156.0.8078.80"
+      },
+      "records": [
+        {
+          "name": "download icon opens the correct panel and uses bundled SVG",
+          "status": "pass"
+        },
+        {
+          "name": "native rejection and destination cancellation write no file",
+          "status": "pass"
+        },
+        {
+          "name": "HTTP download saves exact bytes, final size and a path-free UI state",
+          "status": "pass"
+        },
+        {
+          "name": "same-origin Blob export saves its actual UTF-8 payload",
+          "status": "pass"
+        },
+        {
+          "name": "native link/image menu saves inline resources and revokes a stale menu",
+          "status": "pass"
+        },
+        {
+          "name": "pause/resume completes actual slow transfer; cancellation never completes",
+          "status": "pass"
+        },
+        {
+          "name": "AI task session cannot download a generated file",
+          "status": "pass"
+        },
+        {
+          "name": "webpage cannot assign a local path and cancelled selection sends nothing",
+          "status": "pass"
+        },
+        {
+          "name": "multiple selected files upload byte-for-byte through actual HTTP multipart",
+          "status": "pass"
+        },
+        {
+          "name": "native drag payload reaches site upload handler without local-file navigation",
+          "status": "pass"
+        },
+        {
+          "name": "selected file paths and bytes are absent from ToastIR and file fields cannot be filled by AI",
+          "status": "pass"
+        },
+        {
+          "name": "file URL entered directly in a new blank human tab can be saved",
+          "status": "pass"
+        },
+        {
+          "name": "additional human window exposes the same downloads shortcut",
+          "status": "pass"
+        }
+      ],
+      "realHttp": true,
+      "nativeDownloadDialogs": "automated decisions",
+      "fileSelection": "CDP fixture selection; OS picker tested separately",
+      "externalSitesTested": false
+    },
+    {
+      "generatedAtUtc": "2026-11-09T08:54:53.012Z",
+      "platform": "win32",
+      "versions": {
+        "node": "24.22.2",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.9",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "150",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.11",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2026e",
+        "undici": "7.30.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.6.75.27-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "45.2.3",
+        "chrome": "156.0.8078.80"
+      },
+      "records": [
+        {
+          "name": "download icon opens the correct panel and uses bundled SVG",
+          "status": "pass"
+        },
+        {
+          "name": "native rejection and destination cancellation write no file",
+          "status": "pass"
+        },
+        {
+          "name": "HTTP download saves exact bytes, final size and a path-free UI state",
+          "status": "pass"
+        },
+        {
+          "name": "same-origin Blob export saves its actual UTF-8 payload",
+          "status": "pass"
+        },
+        {
+          "name": "native link/image menu saves inline resources and revokes a stale menu",
+          "status": "pass"
+        },
+        {
+          "name": "pause/resume completes actual slow transfer; cancellation never completes",
+          "status": "pass"
+        },
+        {
+          "name": "AI task session cannot download a generated file",
+          "status": "pass"
+        },
+        {
+          "name": "webpage cannot assign a local path and cancelled selection sends nothing",
+          "status": "pass"
+        },
+        {
+          "name": "multiple selected files upload byte-for-byte through actual HTTP multipart",
+          "status": "pass"
+        },
+        {
+          "name": "native drag payload reaches site upload handler without local-file navigation",
+          "status": "pass"
+        },
+        {
+          "name": "selected file paths and bytes are absent from ToastIR and file fields cannot be filled by AI",
+          "status": "pass"
+        },
+        {
+          "name": "file URL entered directly in a new blank human tab can be saved",
+          "status": "pass"
+        },
+        {
+          "name": "additional human window exposes the same downloads shortcut",
+          "status": "pass"
+        }
+      ],
+      "realHttp": true,
+      "nativeDownloadDialogs": "automated decisions",
+      "fileSelection": "CDP fixture selection; OS picker tested separately",
+      "externalSitesTested": false
+    }
+  ],
+  "publicReleasePublished": false,
+  "notes": [
+    "Windows source CI passed; Linux-built Windows installer/portable packaging is verified separately.",
+    "Windows physical installation, removal, upgrade, OS file chooser and DPAPI remain unverified.",
+    "Old 0.4.1 archives and published release are preserved."
+  ]
+}
