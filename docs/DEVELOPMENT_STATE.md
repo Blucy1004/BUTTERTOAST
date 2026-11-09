@@ -1,13 +1,15 @@
 # ButterToast 개발 상태
 
-## 0.5.0 Golden Crust 개발·로컬 QA 완료 — 2026-11-09
+## 0.5.0 Golden Crust 개발 빌드 완료 — 2026-11-09
 
 - 기준 d332ebf, 변경 전 보안 전체 검사 통과(단위 123 / Electron 146). [감사](audit/GOLDEN-CRUST-BASELINE.md).
 - 커맨드바·새 탭·그룹·Split View·같은 WebContents를 보존하는 창 이동·Drag to Toast·암호화 작업 메타데이터와 안전한 재시도 구현. [기능/사용법](GOLDEN-CRUST-0.5.md), [변경 내역](CHANGELOG-0.5.0.md).
 - 전체 로컬 보안 체인 단위 130 / Electron 157 통과 후 마지막 변경의 단위 130·AI 16·Crust 10+프로세스 복구 2 재통과. 최종 Electron 매트릭스는 158그룹이며 이전 전체 실행 수와 구별한다. Torture 5개 suite·미디어/업로드·4개 창 크기 검사도 통과했다. npm audit 0 보고/지원 secret pattern 미검출. [검증·결함 보고서](QA/GOLDEN-CRUST-REPORT.md).
 - 분리 창 복구, 정리 훅 오류, 좁은 분할, 빈 분할 탐색, 이전 주소 표시, 빠른 Enter 선택을 수정했다. 페이지 선택 텍스트는 사용자 지시와 분리된 비신뢰 첨부로 전송한다. 기존 저장 결과 검증은 유지하고 UI 준비 상태를 기다리도록 테스트를 수정했다.
 - 0.4.2/0.5.0 동일 로컬 10탭 20초씩 각 2회 측정: 전환 중앙값 약 1.3~1.4ms, 비의도 충돌/응답 없음 관찰 0. 장시간/실사이트/Chrome 우열 주장이 아니다. ToastIR·CDP 7작업×3회씩 42회 성공, 원본 수치 보존.
-- 다음: 소스 커밋/Windows·Ubuntu CI 및 Windows 설치/포터블·소스 ZIP 전달 기록. 공개 릴리스는 게시하지 않는다. Windows 0.4.1 실기기 확인을 이번 버전의 증거로 사용하지 않으며 실제 AI 키는 미등록.
+- 기능 소스 `15d0d6b`의 [Windows·Ubuntu CI](https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42624835001) 모두 성공: OS별 단위 130 / Electron 158 및 compatibility·Torture 통과. Windows native 입력 4개, Linux SIGKILL 복구를 구분하며 Ubuntu CI의 native display 생략은 로컬 Xvfb에서 별도 검증했다.
+- Windows 0.5.0 설치 EXE(123,463,764바이트)·포터블 ZIP(168,921,018바이트)·소스 ZIP(8,062,480바이트) 생성 완료. 앱 payload 102개, PE·fuse·ASAR·ZIP CRC/해시 검증. 소스 ZIP은 안내 문서만 추가한 `24c300e`이며 모든 실행 코드는 검사 커밋과 같다. [빌드·SHA-256 기록](QA/GOLDEN-CRUST-BUILD-0.5.0.json).
+- GitHub main에 반영했으며 공개 Release/유료 기능은 만들지 않았다. 기존 파일/릴리스와 사용자 데이터는 보존했다. 미서명 개발 빌드이며 Windows 0.5 실기기 설치·업데이트·DPAPI 및 실제 AI는 미검증이다. Windows 0.4.1의 오너 확인을 이번 버전 증거로 사용하지 않는다.
 
 ## 0.4.2 파일 전송 완료 — 2026-11-09
 

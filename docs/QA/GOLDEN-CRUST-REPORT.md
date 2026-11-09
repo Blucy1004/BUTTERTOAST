@@ -20,6 +20,22 @@ The five targeted Torture suites also passed: 9 mock-provider tests including an
 
 New automated coverage includes native Ctrl+K/list execution, new-tab search/favorites, opaque command expiry/replay/schema, group lifecycle and v1/v2/v3 persistence, split focus/ratio/narrow layout/live input, same-WebContents window transfer/return, native text drop, cancelled/stale source rejection, real mock-driven DOM click with fresh ToastIR confirmation, fixed provider failure causes, metadata encryption/no-secret persistence, inert retry, blank split navigation, edited omnibox switching, and fresh-process group/split/detached-window/history recovery.
 
+## Exact-source CI and development artifacts
+
+Functional source **`15d0d6b54e635247a0b1db0de9c883e2470dd220`** passed [Windows and Ubuntu CI](https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42624835001). Each OS passed **130 unit tests, 158 Electron security groups and the local media/upload compatibility group**. Crust contributed 10 live-application groups and two fresh-process groups on each OS. No executed CI test failed. [CI steps, counts and PASS labels](data/crust-ci-validation.json).
+
+Each CI OS also passed the 9 mock-provider tests, 27 AI/DOM checks and blocked-renderer cancellation. Windows ran four native-input checks; Ubuntu ran the SIGKILL restoration check and explicitly skipped Torture native-display tests. Local Xvfb covered the latter. Platform omissions are not counted as passes. None of these tests used live model keys.
+
+Windows packaging verified 102 application payload files, x64 PE, seven hardening fuses and embedded ASAR integrity. Final NSIS installer generation exited 0. The first compression attempt was deliberately stopped to update an obsolete distribution guide; its partial file was replaced. Portable ZIP CRC and its EXE/ASAR hashes match the verified folder. The source ZIP is `git archive` of **`24c300e9422eb405838254b4956167429e6ad5e1`**, whose only changes after the tested commit are the QA/Windows guides. No executable or test behavior changed. The receipt contains full SHA-256 values and byte sizes.
+
+| Artifact | Bytes | Purpose |
+|---|---:|---|
+| `ButterToast-0.5.0-Setup-x64.exe` | 123,463,764 | Unsigned current-user Windows installer |
+| `ButterToast-0.5.0-Windows-x64.zip` | 168,921,018 | Full portable runtime; extract and run ButterToast-0.5.0/ButterToast.exe |
+| `ButterToast-0.5.0-source.zip` | 8,062,480 | Buildable source; no executable |
+
+[Build and artifact receipt](GOLDEN-CRUST-BUILD-0.5.0.json). Hash manifest: `artifacts/ButterToast-0.5.0-SHA256SUMS.txt`. No public Release was created. CI executes source on a Windows runner; it does not validate installing the Linux-built NSIS package on the owner’s Windows device.
+
 ## Performance
 
 Two sequential 20-second runs per version, order 0.4.2 / 0.5.0 / 0.5.0 / 0.4.2. Same Electron/Chromium, 10 pages, local deterministic 120-section fixture, 1050×720 viewport, fresh profile per run, memory saver off, 100ms switching/scrolling schedule. No other test or build workload ran concurrently. Baseline compiled code was copied before editing. Reproduction: `test/crust-benchmark.cjs` with `BT_CRUST_CORE`, `BT_CRUST_LABEL`, `BT_CRUST_BENCH_OUTPUT`; raw JSON is retained in `QA/data/crust-core-*.json`.
@@ -71,10 +87,12 @@ Initial failed runs were not counted as passes. Their causes and reruns are reta
 
 ## Remaining validation and release readiness
 
-No known failing implemented-feature regression remains in the executed local matrix. This is an unsigned development build, suitable for further owner testing rather than a claim of production-grade security.
+No known failing implemented-feature regression remains in the executed local and two-OS CI matrices. This is an unsigned development build, suitable for further owner testing rather than a claim of production-grade security.
 
 Unverified categories for this version: (1) physical Windows installation/update/uninstall and DPAPI, (2) real AI inference/accuracy/billing, (3) live Google/ChatGPT/Supabase login flows, (4) long-duration real-site browsing and third-party extensions, (5) code signing and production update feed, (6) closed Shadow DOM/iframe extraction beyond the existing scope. These are six validation categories, not six executed test failures.
 
 Restart restores URLs and metadata, not unsaved DOM/form state. Job retries create fresh drafts and consent; they cannot undo already-dispatched server effects. Split and transfer preserve live state only while the process survives. Separate windows use a minimal toolbar and main-window AI. OS crypto absence disables persistence with a visible notice; corrupted task history is preserved for recovery. Account switching does not isolate the OS browser profile.
+
+Physical Windows follow-up should check: upgrading with the old app closed while keeping bookmarks/history/settings; Ctrl+K and split focus at the device DPI; group/detached-window recovery after exit; native file pickers/download save dialogs; and OS-protected key persistence across restart/logout. These checks are pending, not passed by CI.
 
 Next priorities: physical Windows 0.5 installation and daily browsing, owner-supplied BYOK/local-model evaluation against complex sites, longer repeatable UI/idle soaks, and signing/update infrastructure. No public Release or paid feature was activated by this operation.

@@ -1,0 +1,2233 @@
+{
+  "run": {
+    "conclusion": "success",
+    "createdAt": "2026-11-09T13:22:02Z",
+    "databaseId": 42624835001,
+    "headSha": "15d0d6b54e635247a0b1db0de9c883e2470dd220",
+    "jobs": [
+      {
+        "completedAt": "2026-11-09T13:28:03Z",
+        "conclusion": "success",
+        "databaseId": 129185819429,
+        "name": "security (windows-latest)",
+        "startedAt": "2026-11-09T13:22:06Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "number": 2,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+            "number": 3,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "number": 4,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run node scripts/install-electron.cjs",
+            "number": 5,
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Provide the Linux Chromium sandbox helper",
+            "number": 6,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Provide OpenSSL for local certificate fixture on Windows",
+            "number": 7,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm test",
+            "number": 8,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:electron",
+            "number": 9,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:toastir",
+            "number": 10,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:browser",
+            "number": 11,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:extended",
+            "number": 12,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:account",
+            "number": 13,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:ai",
+            "number": 14,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:manager",
+            "number": 15,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:workspace",
+            "number": 16,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:upgrade",
+            "number": 17,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:golden",
+            "number": 18,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:compatibility",
+            "number": 19,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:profile",
+            "number": 20,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:crust",
+            "number": 21,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:files",
+            "number": 22,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Preserve file transfer results",
+            "number": 23,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run Mock AI and ToastIR defect regressions",
+            "number": 24,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Preserve targeted regression results",
+            "number": 25,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run audit:deps",
+            "number": 26,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run scan:secrets",
+            "number": 27,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run sbom",
+            "number": 28,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Build verified Windows portable app",
+            "number": 29,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "number": 30,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "number": 31,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+            "number": 61,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "number": 62,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 63,
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42624835001/job/129185819429"
+      },
+      {
+        "completedAt": "2026-11-09T13:26:21Z",
+        "conclusion": "success",
+        "databaseId": 129185819899,
+        "name": "security (ubuntu-latest)",
+        "startedAt": "2026-11-09T13:22:06Z",
+        "status": "completed",
+        "steps": [
+          {
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "number": 2,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+            "number": 3,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "number": 4,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run node scripts/install-electron.cjs",
+            "number": 5,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Provide the Linux Chromium sandbox helper",
+            "number": 6,
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Provide OpenSSL for local certificate fixture on Windows",
+            "number": 7,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm test",
+            "number": 8,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:electron",
+            "number": 9,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:toastir",
+            "number": 10,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:browser",
+            "number": 11,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:extended",
+            "number": 12,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:account",
+            "number": 13,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:ai",
+            "number": 14,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:manager",
+            "number": 15,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:workspace",
+            "number": 16,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:upgrade",
+            "number": 17,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:golden",
+            "number": 18,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:compatibility",
+            "number": 19,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:profile",
+            "number": 20,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:crust",
+            "number": 21,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run test:files",
+            "number": 22,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Preserve file transfer results",
+            "number": 23,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run Mock AI and ToastIR defect regressions",
+            "number": 24,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Preserve targeted regression results",
+            "number": 25,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run audit:deps",
+            "number": 26,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run scan:secrets",
+            "number": 27,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run npm run sbom",
+            "number": 28,
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Build verified Windows portable app",
+            "number": 29,
+            "status": "completed"
+          },
+          {
+            "conclusion": "skipped",
+            "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "number": 30,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "number": 31,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+            "number": 61,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "number": 62,
+            "status": "completed"
+          },
+          {
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 63,
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42624835001/job/129185819899"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-11-09T13:28:04Z",
+    "url": "https://github.com/Blucy1004/BUTTERTOAST/actions/runs/42624835001"
+  },
+  "logSha256": "1c3f2ad2783adadc48478a10e0cc5e81716e7b8f3867876f684d110cb6a58568",
+  "counts": [
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "groups": 16
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "groups": 29
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "groups": 11
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "groups": 12
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "groups": 8
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "groups": 16
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "groups": 8
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "groups": 8
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "groups": 9
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "groups": 7
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:compatibility",
+      "groups": 1
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "groups": 9
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "groups": 12
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "groups": 13
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "groups": 4
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "groups": 16
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "groups": 29
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "groups": 11
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "groups": 12
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "groups": 8
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "groups": 16
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "groups": 8
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "groups": 8
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "groups": 9
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "groups": 7
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:compatibility",
+      "groups": 1
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "groups": 9
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "groups": 12
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "groups": 13
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "groups": 4
+    }
+  ],
+  "passedGroups": [
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "sandbox and isolation preferences"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "hostile page has no Node/bridge; popup denied"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "local file navigation and title HTML injection blocked"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "site permissions denied"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "malicious attachment download canceled"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "cross-site iframe runs in a different renderer process"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "malformed privileged IPC rejected"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "same-URL foreign renderer cannot impersonate shell IPC"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "UI asset allowlist and outbound network restriction"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "renderer crash reported; navigation recovers with isolation intact"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "invalid TLS certificate rejected before document request"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "actual OS encryption round trip and key deletion"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "legitimate tab creation after rejected attacks"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "native tab shortcuts work from page focus and UI focus"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "trusted temporary UI suspends, resumes and restarts a tab"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:electron",
+      "result": "site exception is derived in main; caller-supplied origin rejected"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "page context is unavailable before explicit read scope"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "isolated mapping cannot be forged by page globals; form values omitted"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "hidden labels and nested form values do not enter the snapshot"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "missing/forged/injected approvals denied; exact approval dispatches once"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "same DOM id/name/markup replacement invalidates old element and approval"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "remove/reinsert ABA invalidates references even for original Node"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "DOM change while approval dialog is pending cannot approve new action"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "same-origin navigation and regenerated IDs cannot reuse old approval"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "stop while capture is pending prevents queued click"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "last-moment DOM swap is caught by synchronous mutation drain"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "overlay cannot redirect an approved click"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "human cookies/storage and same-origin AI task storage stay separate"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "BroadcastChannel reaches human peer but not isolated AI tasks"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "IndexedDB human-profile positive control and AI-task isolation"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "CacheStorage never crosses human/AI or AI-task partitions"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "foreign tab and foreign document IDs never retrieve another tab data"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "approval token cannot be spent by a different task"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "model string payload cannot escape fixed executor code"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "FILL requires exact approval and does not expose current field values"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "field switched to password after approval cannot be filled"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "SELECT dispatches only an approved existing option"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "WAIT is promptly cancellable and HANDOFF revokes read/control scope"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "real DOM snapshots encode to bounded binary IR and produce versioned deltas"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "open Shadow DOM is mapped and clickable without exporting private descendants"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "Shadow DOM remove/reinsert invalidates document-bound approval"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "private or hidden shadow hosts cannot bypass composed ancestor checks"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "property-only checkbox changes and disabled option groups cannot bypass approval"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "large pages are bounded and report clipping without claiming complete coverage"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "closed AI task clears cookies, localStorage, IndexedDB and CacheStorage"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "URL-only session restore stays dormant until selected; one tab loads with GET"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "tab ordering, close and recently closed URL reopen"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "manual memory release destroys contents; explicit resume creates an isolated fresh page"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "slow network load signaled and stopped"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "crashed tab recreated with same logical ID; other-site tab remains responsive"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "real infinite-loop renderer detected and replaced without stopping other-site tab"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "restart stores URLs only and does not replay POST or form data"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "overlong page-controlled URL updates address display but is excluded from restore"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "eight tabs release all contents; one selection recreates only one; 64-tab limit holds"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "real third-party requests blocked; exact-origin exception works; GPC/DNT and reduced Referrer observed at server"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:browser",
+      "result": "direct navigation and first-party resources remain usable; duplicate privacy handlers refused"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "runtime renderer security configuration and no remote preload"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "UI path/encoding/host/credentials/method attacks rejected; canonical alias stays in asset allowlist"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "actual UI inline/external script, iframe, form and fetch injection blocked"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "remote content cannot read UI assets, create popups or instantiate privileged webviews"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "page-driven local/custom/internal/data/blob navigation cannot escape allowed web URLs"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "untrusted dedicated worker has no Node or privileged bridge"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "cross-origin frame and CORS reads denied with same-origin positive control"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "camera/microphone/geolocation/notification and display capture remain denied"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "HTTPS page and redirect downgrade rejected before insecure fixture request"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "malformed IPC burst is bounded and normal user command recovers"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "page synthetic shortcuts and postMessage cannot invoke privileged commands"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:extended",
+      "result": "alternate unsafe launch switches rejected without disabling real sandbox"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "account window remains sandboxed; renderer network denied; network/human/UI sessions separated"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "web tabs, forged same-URL renderer and browser UI cannot invoke account IPC"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "actual signup form enforces minimum/confirmation, clears passwords, sends only PKCE challenge"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "injected code rejected; valid PKCE signs in; no access/refresh tokens in renderer state/storage/DOM"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "logout clears local account immediately and requests only local server session revocation"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "password login succeeds and server error body is never displayed"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "account component can close/reopen without persisting credentials"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:account",
+      "result": "cancel/logout invalidates delayed password response in the production app"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "AI panel, model network and human page are isolated; no remote bridge or renderer network"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "same-URL forged AI renderer cannot configure credentials or approve actions"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "actual form connects OpenAI, clears key, renders model text safely and sends no implicit page data"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "explicit human sharing omits private inputs/hidden content and never offers a human-tab click"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "switching the human tab revokes attached page context"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "separate AI task has no human session; model click proposal waits for native approval and cancellation prevents click"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "element swap while native approval is pending blocks the real click"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "exact approved click executes once through production ToastController and ToastGuard"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "same UI uses Claude messages protocol with separate auth header and cleared conversation"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "stop aborts in-flight vendor call and rejects its delayed response"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "model FILL travels through production UI, exact native approval and isolated executor"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "approved bounded workflow recaptures page and completes without replaying the approved step"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "real loopback OpenAI-compatible HTTP server works without a key or forwarded vendor credential"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "human control requires native consent and real keyboard input immediately revokes the shared scope"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "independent AI slots do not share credentials, conversation or network session; hidden panel IPC is rejected"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:ai",
+      "result": "task close destroys isolated contents; forgetting connection clears active key state"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "production manager records history/bookmarks, safely renders titles, web page has no management bridge"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "forged same-URL sender, extra authority fields and manager outbound requests are rejected"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "actual Google-origin fixture is themed, lookalike host excluded, disabling removes CSS"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "HTTPS permission request needs native approval; owner can revoke the stored origin rule"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "cancelled download writes nothing; native approved destination receives exact bytes and manager reports completion"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "owner can delete bookmarks and browsing history through production IPC"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "site-data deletion closes live writers and reopened page has no previous cookies or storage"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:manager",
+      "result": "clearing site data cancels existing transfers but permits a later explicitly approved download"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "owner three-panel shell fits desktop and compact widths without overlap or horizontal overflow"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "delegation requires native consent, strips URL secrets and preserves the original tab without session copying"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "status/page switches preserve the same task and form state while central browsing continues independently"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "resize/collapse preserves task identity and hidden-panel or malformed IPC cannot close or resize tasks"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "explicit selected-text preview excludes form values and does not automatically send to a model"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "virtual cursor corresponds to an approved real action; slow replay cannot repeat actions or model calls"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "viewport resize cancels cursor playback and historical coordinates cannot drift over a new layout"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "bringing a result to the center opens a human tab without copying AI cookies or destroying its task"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "bundled Pretendard loads offline through a fixed route; removed tagline stays absent and external fonts stay blocked"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "production tab menu pins/mutes/duplicates without copying forms; pinned ordering and title/site search work"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "native find and zoom target only the active human page; viewport matches UI and tab switch drops old find results"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "bulk close requires native consent and preserves pinned tabs; reopening retains mute state"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "same-URL navigation during a download destination prompt revokes consent before any save path is assigned"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "global stop bypasses exhausted normal quotas, revokes hidden and visible slots, and discards both late model responses"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "native emergency shortcut invalidates a pending delegation so a late confirmation cannot start another task"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "panel stop remains available under IPC flooding; approving a previously open native dialog cannot execute after revocation"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "crashed AI task requires recovery consent, uses a fresh isolated session, and replays no model request, action, cookie or form"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "production reorder uses existing logical tab IDs and preserves unrelated tabs"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "native pointer drag reorders rendered tabs without activating the dragged tab or delegating it"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "real address UI receives local bookmark/history suggestions"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "new browsing window owns its toolbar and sandboxed page without changing the primary tab"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "blocked popups open only after native approval, without an opener connection"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "navigation invalidates pending popup consent even when the same URL is restored"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:golden",
+      "result": "opt-in idle release destroys only eligible background pages and preserves active tabs and form contents"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:compatibility",
+      "result": "local VP9 playback and multipart fixture upload"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "guest light theme renders a local dawn sky without account traffic, external assets or geometry changes"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "confirmed account profile replaces guest settings in every trusted window without exposing credentials or metadata roles"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "profile form saves nickname, bio, avatar and seven appearance choices; preview is local until server acknowledgement"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "unsaved edits survive concurrent theme changes; stale revisions are rejected and explicit reload gets current server data"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "foreign same-URL windows, web pages and injected identities, CSS or avatar URLs cannot read or modify profile settings"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "untrusted profile text stays literal in account and browser headers without HTML execution"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "logout survives IPC flooding, clears editable account data, restores guest appearance and discards a late profile response"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "signing into a different account isolates profile settings and signing back restores only the original server profile"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:profile",
+      "result": "system mode follows native theme changes in all app views and custom text still fits the narrow browser layout"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "production new tab search/favorites and native Ctrl+K keyboard execution restore real page visibility"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "AI command creates an inert visible draft; disconnected model cannot start and opaque selection cannot replay"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "group create/rename/collapse/reorder changes metadata without destroying live tabs; invalid styling rejected"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "Split View preserves live form state across resize/exit/reentry and narrow layouts; pane focus changes active scope"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "tab detaches and returns with the same WebContents, live input and group; window-specific listeners are rebound"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "native text drop remains a draft; stale/cancelled context never reaches model; approved mock runs real ToastIR and checks completion"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "link drafts strip copied URL secrets, reject local files and ignore synthetic drop events without making requests"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "persistent task metadata records actual dispatch/completion and fixed error cause; retry is a fresh inert draft without persisted goals or keys"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "switching tabs replaces an inactive omnibox edit with the selected page URL"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "blank split pane has a reachable header and correctly bounded new-tab search without affecting AI history"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "prepared encrypted grouped split tabs, detached window and draft using production main"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:crust",
+      "result": "fresh process restores group/split/detached URLs and interrupts history without reviving any AI view or authority"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "download icon opens the correct panel and uses bundled SVG"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "native rejection and destination cancellation write no file"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "HTTP download saves exact bytes, final size and a path-free UI state"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "same-origin Blob export saves its actual UTF-8 payload"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "native link/image menu saves inline resources and revokes a stale menu"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "pause/resume completes actual slow transfer; cancellation never completes"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "AI task session cannot download a generated file"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "webpage cannot assign a local path and cancelled selection sends nothing"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "multiple selected files upload byte-for-byte through actual HTTP multipart"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "native drag payload reaches site upload handler without local-file navigation"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "selected file paths and bytes are absent from ToastIR and file fields cannot be filled by AI"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "file URL entered directly in a new blank human tab can be saved"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run npm run test:files",
+      "result": "additional human window exposes the same downloads shortcut"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "provider 61347ms"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "ai-dom 23514ms"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "blocked-renderer 5465ms"
+    },
+    {
+      "job": "security (windows-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "native-browser 2358ms"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "sandbox and isolation preferences"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "hostile page has no Node/bridge; popup denied"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "local file navigation and title HTML injection blocked"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "site permissions denied"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "malicious attachment download canceled"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "cross-site iframe runs in a different renderer process"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "malformed privileged IPC rejected"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "same-URL foreign renderer cannot impersonate shell IPC"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "UI asset allowlist and outbound network restriction"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "renderer crash reported; navigation recovers with isolation intact"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "invalid TLS certificate rejected before document request"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "unavailable OS storage rejected (OS encryption round trip NOT RUN)"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "legitimate tab creation after rejected attacks"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "native tab shortcuts work from page focus and UI focus"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "trusted temporary UI suspends, resumes and restarts a tab"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:electron",
+      "result": "site exception is derived in main; caller-supplied origin rejected"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "page context is unavailable before explicit read scope"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "isolated mapping cannot be forged by page globals; form values omitted"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "hidden labels and nested form values do not enter the snapshot"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "missing/forged/injected approvals denied; exact approval dispatches once"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "same DOM id/name/markup replacement invalidates old element and approval"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "remove/reinsert ABA invalidates references even for original Node"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "DOM change while approval dialog is pending cannot approve new action"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "same-origin navigation and regenerated IDs cannot reuse old approval"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "stop while capture is pending prevents queued click"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "last-moment DOM swap is caught by synchronous mutation drain"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "overlay cannot redirect an approved click"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "human cookies/storage and same-origin AI task storage stay separate"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "BroadcastChannel reaches human peer but not isolated AI tasks"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "IndexedDB human-profile positive control and AI-task isolation"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "CacheStorage never crosses human/AI or AI-task partitions"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "foreign tab and foreign document IDs never retrieve another tab data"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "approval token cannot be spent by a different task"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "model string payload cannot escape fixed executor code"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "FILL requires exact approval and does not expose current field values"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "field switched to password after approval cannot be filled"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "SELECT dispatches only an approved existing option"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "WAIT is promptly cancellable and HANDOFF revokes read/control scope"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "real DOM snapshots encode to bounded binary IR and produce versioned deltas"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "open Shadow DOM is mapped and clickable without exporting private descendants"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "Shadow DOM remove/reinsert invalidates document-bound approval"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "private or hidden shadow hosts cannot bypass composed ancestor checks"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "property-only checkbox changes and disabled option groups cannot bypass approval"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "large pages are bounded and report clipping without claiming complete coverage"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:toastir",
+      "result": "closed AI task clears cookies, localStorage, IndexedDB and CacheStorage"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "URL-only session restore stays dormant until selected; one tab loads with GET"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "tab ordering, close and recently closed URL reopen"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "manual memory release destroys contents; explicit resume creates an isolated fresh page"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "slow network load signaled and stopped"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "crashed tab recreated with same logical ID; other-site tab remains responsive"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "real infinite-loop renderer detected and replaced without stopping other-site tab"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "restart stores URLs only and does not replay POST or form data"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "overlong page-controlled URL updates address display but is excluded from restore"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "eight tabs release all contents; one selection recreates only one; 64-tab limit holds"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "real third-party requests blocked; exact-origin exception works; GPC/DNT and reduced Referrer observed at server"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:browser",
+      "result": "direct navigation and first-party resources remain usable; duplicate privacy handlers refused"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "runtime renderer security configuration and no remote preload"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "UI path/encoding/host/credentials/method attacks rejected; canonical alias stays in asset allowlist"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "actual UI inline/external script, iframe, form and fetch injection blocked"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "remote content cannot read UI assets, create popups or instantiate privileged webviews"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "page-driven local/custom/internal/data/blob navigation cannot escape allowed web URLs"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "untrusted dedicated worker has no Node or privileged bridge"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "cross-origin frame and CORS reads denied with same-origin positive control"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "camera/microphone/geolocation/notification and display capture remain denied"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "HTTPS page and redirect downgrade rejected before insecure fixture request"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "malformed IPC burst is bounded and normal user command recovers"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "page synthetic shortcuts and postMessage cannot invoke privileged commands"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:extended",
+      "result": "alternate unsafe launch switches rejected without disabling real sandbox"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "account window remains sandboxed; renderer network denied; network/human/UI sessions separated"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "web tabs, forged same-URL renderer and browser UI cannot invoke account IPC"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "actual signup form enforces minimum/confirmation, clears passwords, sends only PKCE challenge"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "injected code rejected; valid PKCE signs in; no access/refresh tokens in renderer state/storage/DOM"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "logout clears local account immediately and requests only local server session revocation"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "password login succeeds and server error body is never displayed"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "account component can close/reopen without persisting credentials"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:account",
+      "result": "cancel/logout invalidates delayed password response in the production app"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "AI panel, model network and human page are isolated; no remote bridge or renderer network"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "same-URL forged AI renderer cannot configure credentials or approve actions"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "actual form connects OpenAI, clears key, renders model text safely and sends no implicit page data"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "explicit human sharing omits private inputs/hidden content and never offers a human-tab click"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "switching the human tab revokes attached page context"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "separate AI task has no human session; model click proposal waits for native approval and cancellation prevents click"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "element swap while native approval is pending blocks the real click"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "exact approved click executes once through production ToastController and ToastGuard"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "same UI uses Claude messages protocol with separate auth header and cleared conversation"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "stop aborts in-flight vendor call and rejects its delayed response"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "model FILL travels through production UI, exact native approval and isolated executor"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "approved bounded workflow recaptures page and completes without replaying the approved step"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "real loopback OpenAI-compatible HTTP server works without a key or forwarded vendor credential"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "human control requires native consent and real keyboard input immediately revokes the shared scope"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "independent AI slots do not share credentials, conversation or network session; hidden panel IPC is rejected"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:ai",
+      "result": "task close destroys isolated contents; forgetting connection clears active key state"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "production manager records history/bookmarks, safely renders titles, web page has no management bridge"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "forged same-URL sender, extra authority fields and manager outbound requests are rejected"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "actual Google-origin fixture is themed, lookalike host excluded, disabling removes CSS"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "HTTPS permission request needs native approval; owner can revoke the stored origin rule"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "cancelled download writes nothing; native approved destination receives exact bytes and manager reports completion"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "owner can delete bookmarks and browsing history through production IPC"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "site-data deletion closes live writers and reopened page has no previous cookies or storage"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:manager",
+      "result": "clearing site data cancels existing transfers but permits a later explicitly approved download"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "owner three-panel shell fits desktop and compact widths without overlap or horizontal overflow"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "delegation requires native consent, strips URL secrets and preserves the original tab without session copying"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "status/page switches preserve the same task and form state while central browsing continues independently"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "resize/collapse preserves task identity and hidden-panel or malformed IPC cannot close or resize tasks"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "explicit selected-text preview excludes form values and does not automatically send to a model"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "virtual cursor corresponds to an approved real action; slow replay cannot repeat actions or model calls"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "viewport resize cancels cursor playback and historical coordinates cannot drift over a new layout"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:workspace",
+      "result": "bringing a result to the center opens a human tab without copying AI cookies or destroying its task"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "bundled Pretendard loads offline through a fixed route; removed tagline stays absent and external fonts stay blocked"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "production tab menu pins/mutes/duplicates without copying forms; pinned ordering and title/site search work"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "native find and zoom target only the active human page; viewport matches UI and tab switch drops old find results"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "bulk close requires native consent and preserves pinned tabs; reopening retains mute state"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "same-URL navigation during a download destination prompt revokes consent before any save path is assigned"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "global stop bypasses exhausted normal quotas, revokes hidden and visible slots, and discards both late model responses"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "native emergency shortcut invalidates a pending delegation so a late confirmation cannot start another task"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "panel stop remains available under IPC flooding; approving a previously open native dialog cannot execute after revocation"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:upgrade",
+      "result": "crashed AI task requires recovery consent, uses a fresh isolated session, and replays no model request, action, cookie or form"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "production reorder uses existing logical tab IDs and preserves unrelated tabs"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "native pointer drag reorders rendered tabs without activating the dragged tab or delegating it"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "real address UI receives local bookmark/history suggestions"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "new browsing window owns its toolbar and sandboxed page without changing the primary tab"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "blocked popups open only after native approval, without an opener connection"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "navigation invalidates pending popup consent even when the same URL is restored"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:golden",
+      "result": "opt-in idle release destroys only eligible background pages and preserves active tabs and form contents"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:compatibility",
+      "result": "local VP9 playback and multipart fixture upload"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "guest light theme renders a local dawn sky without account traffic, external assets or geometry changes"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "confirmed account profile replaces guest settings in every trusted window without exposing credentials or metadata roles"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "profile form saves nickname, bio, avatar and seven appearance choices; preview is local until server acknowledgement"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "unsaved edits survive concurrent theme changes; stale revisions are rejected and explicit reload gets current server data"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "foreign same-URL windows, web pages and injected identities, CSS or avatar URLs cannot read or modify profile settings"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "untrusted profile text stays literal in account and browser headers without HTML execution"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "logout survives IPC flooding, clears editable account data, restores guest appearance and discards a late profile response"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "signing into a different account isolates profile settings and signing back restores only the original server profile"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:profile",
+      "result": "system mode follows native theme changes in all app views and custom text still fits the narrow browser layout"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "production new tab search/favorites and native Ctrl+K keyboard execution restore real page visibility"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "AI command creates an inert visible draft; disconnected model cannot start and opaque selection cannot replay"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "group create/rename/collapse/reorder changes metadata without destroying live tabs; invalid styling rejected"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "Split View preserves live form state across resize/exit/reentry and narrow layouts; pane focus changes active scope"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "tab detaches and returns with the same WebContents, live input and group; window-specific listeners are rebound"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "native text drop remains a draft; stale/cancelled context never reaches model; approved mock runs real ToastIR and checks completion"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "link drafts strip copied URL secrets, reject local files and ignore synthetic drop events without making requests"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "persistent task metadata records actual dispatch/completion and fixed error cause; retry is a fresh inert draft without persisted goals or keys"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "switching tabs replaces an inactive omnibox edit with the selected page URL"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "blank split pane has a reachable header and correctly bounded new-tab search without affecting AI history"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "prepared encrypted grouped split tabs, detached window and draft using production main"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:crust",
+      "result": "fresh process restores group/split/detached URLs and interrupts history without reviving any AI view or authority"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "download icon opens the correct panel and uses bundled SVG"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "native rejection and destination cancellation write no file"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "HTTP download saves exact bytes, final size and a path-free UI state"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "same-origin Blob export saves its actual UTF-8 payload"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "native link/image menu saves inline resources and revokes a stale menu"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "pause/resume completes actual slow transfer; cancellation never completes"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "AI task session cannot download a generated file"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "webpage cannot assign a local path and cancelled selection sends nothing"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "multiple selected files upload byte-for-byte through actual HTTP multipart"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "native drag payload reaches site upload handler without local-file navigation"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "selected file paths and bytes are absent from ToastIR and file fields cannot be filled by AI"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "file URL entered directly in a new blank human tab can be saved"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run npm run test:files",
+      "result": "additional human window exposes the same downloads shortcut"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "provider 61210ms"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "ai-dom 21602ms"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "blocked-renderer 5261ms"
+    },
+    {
+      "job": "security (ubuntu-latest)",
+      "step": "Run Mock AI and ToastIR defect regressions",
+      "result": "restore 6858ms"
+    }
+  ],
+  "limits": [
+    "Windows source CI is not physical-machine installation or DPAPI validation.",
+    "Ubuntu CI skips Torture native-display tests; they passed separately under local Xvfb.",
+    "Torture SIGKILL restoration runs on Linux, not Windows; Crust fresh-process restoration passed on both."
+  ]
+}

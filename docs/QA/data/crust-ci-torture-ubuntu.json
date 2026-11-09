@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-11-09T13:26:14.627Z",
+  "results": [
+    {
+      "name": "provider",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 61210.419607,
+      "log": "provider-suite.log"
+    },
+    {
+      "name": "ai-dom",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 21602.432800999995,
+      "log": "ai-dom-suite.log"
+    },
+    {
+      "name": "blocked-renderer",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 5260.734811000002,
+      "log": "blocked-renderer-suite.log"
+    },
+    {
+      "name": "restore",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 6858.260683,
+      "log": "restore-suite.log"
+    }
+  ],
+  "unverified": [
+    "Native display test: run separately under Xvfb or desktop"
+  ]
+}
