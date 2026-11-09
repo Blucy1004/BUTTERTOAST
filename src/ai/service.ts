@@ -1,3 +1,4 @@
+import type {TaskEvent} from './task-journal';
 import {requireFeature} from '../product/access';
 import { ModelAdapter, AiFailure } from './adapter';
 import { AiCommand, ChatMessage, Connection, Provider, Usage, Proposal, parseProposal, parseConnection, safeText } from './protocol';
@@ -6,12 +7,12 @@ import { record } from '../security/ipc';
 import {defaultOptions,ModelOptions,estimatedCost} from './options';
 import { performance } from 'node:perf_hooks';
 import {modelSnapshot,chooseModelFrame,ModelSnapshot} from '../toastir/model';
-export type PageContext = { source: 'human' | 'task' | 'controlled'; origin: string; document?:string;version?:number;captureMs?:number;truncated?:boolean;text: string; elements: { id: string; role: string; name: string; actions?: string[] }[] };
+export type PageContext = { source: 'human' | 'task' | 'controlled'; origin: string; tab?:number; document?:string;version?:number;captureMs?:number;truncated?:boolean;text: string; elements: { id: string; role: string; name: string; actions?: string[] }[] };
 export type ActionObservation={ok:boolean;reason?:string;text?:string;matches?:boolean};
 export interface Attachment { data: PageContext; check(): Promise<boolean>; valid(): boolean; click(target: string): Promise<boolean>; act?(proposal: Proposal): Promise<boolean|ActionObservation>; dispose(): void }
-export interface AiHost { capture(source: 'human' | 'task' | 'controlled', selectionOnly?:boolean): Promise<Attachment>; openTask(url: string): Promise<void>; closeTask(): void; stopTask?(): void; hide(): void; confirmWorkflow?(origin:string):Promise<boolean>; handoff?(source?:PageContext['source']):void; completed?():void;
+export interface AiHost { taskEvent?(event:TaskEvent):void; capture(source: 'human' | 'task' | 'controlled', selectionOnly?:boolean): Promise<Attachment>; openTask(url: string): Promise<void>; closeTask(): void; stopTask?(): void; hide(): void; confirmWorkflow?(origin:string):Promise<boolean>; handoff?(source?:PageContext['source']):void; completed?():void;
   saveChat?(messages:ChatMessage[]):Promise<void>;loadChat?():Promise<ChatMessage[]>;deleteChat?():Promise<void> }
-type Workflow={goal:string;origin:string;step:number;limit:number;status:'running'|'paused'|'completed';model:string;lastOutcome?:{operation:string;outcome:'dispatched'|'observed'|'blocked-or-unconfirmed';text?:string;matches?:boolean;reason?:string}};
+type Workflow={reference?:string;source:'task'|'controlled';tab?:number;goal:string;origin:string;step:number;limit:number;status:'running'|'paused'|'completed';model:string;lastOutcome?:{operation:string;outcome:'dispatched'|'observed'|'blocked-or-unconfirmed';text?:string;matches?:boolean;reason?:string}};
 export type AiState = { connected: boolean; provider: Provider; endpoint: string; model: string; models: string[]; busy: boolean; message: string;
   metrics:{captureMs:number;modelMs:number;contextBytes:number;fullContextBytes:number;frame:'none'|'snapshot'|'delta';actions:number;failures:number;interventions:number};
   options: ModelOptions; estimatedCost: number; contextRemaining: number | null;
@@ -29,7 +30,7 @@ export class AiService {
   private nextRequest = 0;
   private wireHistory:ChatMessage[]=[];
   private previousPage:ModelSnapshot|null=null;
-  private disposed = false;
+  private disposed = false;private workflowStartEpoch:number|undefined;
   private executing = false;
   private state: AiState = { connected: false, provider: 'openai', endpoint: '', model: '', models: [], busy: false, message: '연결 설정에서 API를 연결해 주세요.', storageAvailable: false,
     metrics:{captureMs:0,modelMs:0,contextBytes:0,fullContextBytes:0,frame:'none',actions:0,failures:0,interventions:0},
@@ -48,7 +49,7 @@ export class AiService {
     if (!this.attachment) return;
     if(this.executing){this.dropContext();return;}
     this.resetWire();
-    if(this.state.workflow?.status==='running')this.state.workflow.status='paused';
+    if(this.state.workflow?.status==='running'){this.state.workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'page-changed'});}
     this.invalidate(); this.dropContext(); this.emit({ busy: false, message: '페이지나 탭이 바뀌어 공유와 실행 제안을 해제했습니다.' });
   }
   observe(): void { if (this.attachment && !this.attachment.valid()) this.revokeContext(); }
@@ -106,7 +107,7 @@ export class AiService {
       case 'approve': await this.approve(); break;
     }
   }
-  private stop(): void { this.resetWire();if(this.state.workflow?.status==='running')this.state.workflow.status='paused';this.host.stopTask?.(); this.invalidate(); this.dropContext(); this.emit({ busy: false, message: '중단했습니다. 이미 서버에 보낸 요청은 사용량이 발생했을 수 있습니다.' }); }
+  private stop(): void { if(this.workflowStartEpoch!==undefined){this.workflowStartEpoch=undefined;this.host.taskEvent?.({type:'interrupted',reason:'stopped'});}this.resetWire();if(this.state.workflow?.status==='running'){this.state.workflow.status='paused';this.host.taskEvent?.({type:'interrupted',reason:'stopped'});}this.host.stopTask?.(); this.invalidate(); this.dropContext(); this.emit({ busy: false, message: '중단했습니다. 이미 서버에 보낸 요청은 사용량이 발생했을 수 있습니다.' }); }
   private async connect(config: Connection, remember: boolean): Promise<void> {
     this.state.workflow=null;
     const epoch = this.invalidate(); this.dropContext();this.resetWire();this.nextRequest=0; this.config = undefined; this.history = []; this.conversationRequests = 0;
@@ -146,7 +147,7 @@ export class AiService {
     if(!continuous||this.wireHistory.length>16||JSON.stringify(this.wireHistory).length>30000||snapshot&&this.previousPage&&(snapshot.document!==this.previousPage.document||snapshot.origin!==this.previousPage.origin||snapshot.source!==this.previousPage.source))this.resetWire();
     const history=continuous&&this.wireHistory.length?this.wireHistory:this.history;
     const frame=snapshot?chooseModelFrame(snapshot,continuous?this.previousPage:null):this.attachment?.data??null;
-    const inputEstimate=Buffer.byteLength(JSON.stringify({history,text,context:frame}),'utf8')+20000;
+    const inputEstimate=Buffer.byteLength(JSON.stringify({history,text,context:frame,untrusted_selection:this.state.workflow?.reference??''}),'utf8')+20000;
     const reserve=estimatedCost({input:inputEstimate,output:options.maxOutput,cached:0},options);
     if(options.budget>0&&(options.inputPrice<=0||options.outputPrice<=0||this.state.estimatedCost+reserve>options.budget)) {this.emit({message:'설정한 추정 예산을 초과하거나 단가가 없어 요청을 중단했습니다. 단가와 예산을 확인하세요.'});return;}
     if(options.contextLimit>0&&inputEstimate+options.maxOutput>options.contextLimit){this.emit({message:'보수적으로 추정한 컨텍스트 길이가 설정 한도를 넘었습니다. 새 대화를 시작하거나 페이지 공유를 줄이세요.'});return;}
@@ -159,13 +160,13 @@ export class AiService {
       this.emit({ messages: [...this.history, { role: 'user', content: safeText(text, 12000) }] });
       this.state.estimatedCost+=reserve;
       const started=this.now();
-      const reply = await this.adapter.chat(config, this.state.model, history, text, frame, this.signal(), options,continuous?this.state.workflow?.lastOutcome??null:null);
+      const reply = await this.adapter.chat(config, this.state.model, history, text, frame, this.signal(), options,continuous?this.state.workflow?.lastOutcome??null:null,continuous?this.state.workflow?.reference??'':'');
       this.state.estimatedCost=Math.max(0,this.state.estimatedCost-reserve)+estimatedCost(reply.usage,options);
       if (epoch !== this.epoch) return;
       this.state.metrics={...this.state.metrics,captureMs:attachment?.data.captureMs??0,modelMs:Math.max(0,this.now()-started),contextBytes:frame?Buffer.byteLength(JSON.stringify(frame)):0,fullContextBytes:snapshot?Buffer.byteLength(JSON.stringify(snapshot)):0,frame:snapshot?(frame as {format:'snapshot'|'delta'}).format:'none'};
       if (attachment && !await attachment.check()) { this.revokeContext(); return; }
       if (epoch !== this.epoch) return;
-      if(continuous&&snapshot){this.wireHistory=[...history,{role:'user',content:JSON.stringify({request:text,untrusted_page_context:frame,untrusted_execution_result:this.state.workflow?.lastOutcome??null})},{role:'assistant',content:reply.text}];this.previousPage=snapshot;}
+      if(continuous&&snapshot){this.wireHistory=[...history,{role:'user',content:JSON.stringify({request:text,untrusted_page_context:frame,untrusted_selection:this.state.workflow?.reference??'',untrusted_execution_result:this.state.workflow?.lastOutcome??null})},{role:'assistant',content:reply.text}];this.previousPage=snapshot;}
       this.history.push({ role: 'user', content: safeText(text, 12000) }, { role: 'assistant', content: reply.text });
       while (this.history.length > 20 || this.history.reduce((n, m) => n + m.content.length, 0) > 45000) this.history.splice(0, 2);
       const action = attachment && attachment.data.source !== 'human' ? parseProposal(reply.action ?? (reply.click ? {op:'CLICK',target:reply.click,value:''} : null), attachment.data.origin) : null;
@@ -175,8 +176,9 @@ export class AiService {
         contextRemaining:options.contextLimit>0?Math.max(0,options.contextLimit-reply.usage.input-reply.usage.output):null,
         context: null, proposal: validProposal ? { target: action.target, name: target?.name || action.op, origin: attachment!.data.origin, action } : null,
         message: validProposal ? 'AI가 동작을 제안했습니다. 실행 전 대상과 사이트를 확인하세요.' : '응답을 받았습니다.' });
-      if (!validProposal) { this.dropContext();this.resetWire(); if(this.state.workflow?.status==='running'){this.state.workflow.status=reply.completed===true?'completed':'paused';if(reply.completed===true)this.host.completed?.();else this.state.message='모델이 다음 동작을 제안하지 않아 작업을 일시정지했습니다. 응답과 페이지 결과를 확인하세요.';}this.changed(); }
-    } catch (error) { if (epoch === this.epoch) { if(error instanceof AiFailure&&error.code==='limit')this.nextRequest=this.now()+error.retryAfterMs;this.dropContext();this.resetWire();if(this.state.workflow)this.state.workflow.status='paused'; this.emit({ busy: false, message: this.failure(error) }); } }
+      if(validProposal&&this.state.workflow)this.host.taskEvent?.({type:'awaiting-approval'});
+      if (!validProposal) { this.dropContext();this.resetWire(); if(this.state.workflow?.status==='running'){this.state.workflow.status=reply.completed===true?'completed':'paused';if(reply.completed===true){this.host.taskEvent?.({type:'completed'});this.host.completed?.();}else {this.host.taskEvent?.({type:'failed',reason:'model-no-action'});this.state.message='모델이 다음 동작을 제안하지 않아 작업을 일시정지했습니다. 응답과 페이지 결과를 확인하세요.';}}this.changed(); }
+    } catch (error) { if (epoch === this.epoch) { if(error instanceof AiFailure&&error.code==='limit')this.nextRequest=this.now()+error.retryAfterMs;this.dropContext();this.resetWire();if(this.state.workflow){this.state.workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:error instanceof AiFailure?error.code:'network'});} this.emit({ busy: false, message: this.failure(error) }); } }
   }
   private async approve(): Promise<void> {
     const attachment = this.attachment, proposal = this.state.proposal;
@@ -190,30 +192,36 @@ export class AiService {
       const ok=typeof result==='boolean'?result:result.ok&&result.matches!==false;
       this.state.metrics.actions++;if(!ok)this.state.metrics.failures++;
       if(this.state.workflow)this.state.workflow.lastOutcome={operation:proposal.action?.op||'CLICK',outcome:ok?(['READ','EXTRACT','VERIFY'].includes(proposal.action?.op||'')?'observed':'dispatched'):'blocked-or-unconfirmed',...(typeof result==='object'?{text:result.text?.slice(0,4096),matches:result.matches,reason:result.reason?.slice(0,80)}:{})};
+      if(this.state.workflow){this.host.taskEvent?.({type:'step',operation:proposal.action?.op||'CLICK',outcome:ok?(['READ','EXTRACT','VERIFY'].includes(proposal.action?.op||'')?'observed':'dispatched'):'unconfirmed',step:this.state.workflow.step});if(!ok)this.host.taskEvent?.({type:'failed',reason:'execution-unconfirmed'});}
       this.dropContext(); this.emit({ busy: false, message: ok ? '승인한 동작을 실행했습니다.' : '승인 취소 또는 페이지 변경으로 완료를 확인하지 못했습니다. 페이지를 확인한 뒤 계속하세요.' });
       this.executing=false;
       if(proposal.action?.op==='HANDOFF'){this.stop();this.host.handoff?.(attachment.data.source);return;}
       if(this.state.workflow?.status==='running') {if(ok)await this.advance();else {this.state.workflow.status='paused';this.changed();}}
-    } catch { if (epoch === this.epoch) { this.dropContext();if(this.state.workflow)this.state.workflow.status='paused'; this.emit({ busy: false, message: '페이지 상태가 달라 실행하지 않았습니다.' }); } }
+    } catch { if (epoch === this.epoch) { this.dropContext();if(this.state.workflow){this.state.workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'execution-unconfirmed'});} this.emit({ busy: false, message: '페이지 상태가 달라 실행하지 않았습니다.' }); } }
     finally {this.executing=false;}
   }
-  private async startWorkflow(goal:string,limit:number):Promise<void> {
+  async runDraft(goal:string,limit:number,source:'task'|'controlled',current:()=>boolean,reference=''):Promise<void>{if(!this.state.busy&&current())await this.startWorkflow(goal,limit,source,current,reference.slice(0,8000));}
+  private async startWorkflow(goal:string,limit:number,source:'task'|'controlled'='task',current:()=>boolean=()=>true,reference=''):Promise<void> {
     if(!this.config||!this.state.model)return;
-    this.stop();this.state.workflow=null;const epoch=this.epoch;this.emit({busy:true,message:'여러 단계 작업의 페이지 공유 승인을 기다립니다.'});
+    this.stop();this.state.workflow=null;this.host.taskEvent?.({type:'created'});const epoch=this.epoch;this.workflowStartEpoch=epoch;this.emit({busy:true,message:'여러 단계 작업의 페이지 공유 승인을 기다립니다.'});
     let attachment:Attachment|undefined;
     try {
-      attachment=await this.host.capture('task');
-      if(epoch!==this.epoch||!await this.host.confirmWorkflow?.(attachment.data.origin)||!await attachment.check())return;
+      attachment=await this.host.capture(source);
       if(epoch!==this.epoch)return;
-      this.state.workflow={goal,limit,step:0,origin:attachment.data.origin,model:this.state.model,status:'running'};
-    }catch{this.emit({message:'AI 작업 페이지를 먼저 열고 페이지 로딩을 완료하세요.'});}
-    finally{attachment?.dispose();if(epoch===this.epoch)this.emit({busy:false});}
+      if(!current()){this.host.taskEvent?.({type:'failed',reason:'page-changed'});return;}
+      const approved=await this.host.confirmWorkflow?.(attachment.data.origin);if(epoch!==this.epoch)return;
+      if(!approved){this.host.taskEvent?.({type:'failed',reason:'approval-denied'});return;}
+      if(!await attachment.check()||!current()){if(epoch===this.epoch)this.host.taskEvent?.({type:'failed',reason:'page-changed'});return;}
+      if(epoch!==this.epoch)return;
+      this.state.workflow={reference,source,tab:attachment.data.tab,goal,limit,step:0,origin:attachment.data.origin,model:this.state.model,status:'running'};this.host.taskEvent?.({type:'running',origin:attachment.data.origin,step:0});
+    }catch{if(epoch===this.epoch)this.host.taskEvent?.({type:'failed',reason:'page-changed'});this.emit({message:'AI 작업 페이지를 먼저 열고 페이지 로딩을 완료하세요.'});}
+    finally{attachment?.dispose();if(this.workflowStartEpoch===epoch)this.workflowStartEpoch=undefined;if(epoch===this.epoch)this.emit({busy:false});}
     if(epoch===this.epoch&&this.state.workflow)await this.advance();
   }
   private async advance():Promise<void> {
     const workflow=this.state.workflow;if(!workflow||!this.config)return;
-    if(workflow.step>=workflow.limit){workflow.status='paused';this.emit({message:'설정한 단계 수에 도달했습니다. 결과를 확인하세요.'});return;}
-    if(workflow.model!==this.state.model){workflow.status='paused';this.emit({message:'모델이 바뀌었습니다. 새 작업으로 시작하세요.'});return;}
+    if(workflow.step>=workflow.limit){workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'step-limit'});this.emit({message:'설정한 단계 수에 도달했습니다. 결과를 확인하세요.'});return;}
+    if(workflow.model!==this.state.model){workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'model'});this.emit({message:'모델이 바뀌었습니다. 새 작업으로 시작하세요.'});return;}
     const epoch=this.invalidate();workflow.status='running';this.emit({busy:true,message:'다음 단계의 페이지를 확인합니다.'});
     let attachment:Attachment|undefined;
     try {
@@ -224,13 +232,13 @@ export class AiService {
         if(epoch!==this.epoch)return;
       }
       if(epoch!==this.epoch)return;
-      attachment=await this.host.capture('task');
-      if(epoch!==this.epoch||attachment.data.origin!==workflow.origin||!await attachment.check()){attachment.dispose();if(epoch===this.epoch){workflow.status='paused';this.emit({busy:false,message:'사이트가 바뀌었습니다. 새 작업으로 시작해 공유 범위를 다시 승인하세요.'});}return;}
+      attachment=await this.host.capture(workflow.source);
+      if(epoch!==this.epoch||attachment.data.origin!==workflow.origin||(workflow.source==='controlled'&&attachment.data.tab!==workflow.tab)||!await attachment.check()){attachment.dispose();if(epoch===this.epoch){workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'page-changed'});this.emit({busy:false,message:'사이트가 바뀌었습니다. 새 작업으로 시작해 공유 범위를 다시 승인하세요.'});}return;}
       if(epoch!==this.epoch){attachment.dispose();return;}
-      this.dropContext();this.attachment=attachment;this.state.context=attachment.data;workflow.step++;
+      this.dropContext();this.attachment=attachment;this.state.context=attachment.data;workflow.step++;this.host.taskEvent?.({type:'running',origin:workflow.origin,step:workflow.step});
       await this.send(`${workflow.goal}\n작업 단계 ${workflow.step}/${workflow.limit}. 이전 실행기 결과: ${JSON.stringify(workflow.lastOutcome?{operation:workflow.lastOutcome.operation,outcome:workflow.lastOutcome.outcome}:null)}. dispatched는 DOM 동작 전달이며 사이트의 처리 성공이 아닙니다. 현재 페이지를 확인하고 다음 동작 하나를 제안하세요. 이전 동작이 성공했다고 추측하거나 같은 제출을 반복하지 마세요. 완료 근거가 있다면 action:null, done:true로 결과를 설명하세요. 불확실하면 done:false로 설명하고 멈추세요.`.slice(0,12000));
-      if(epoch===this.epoch&&this.state.busy){workflow.status='paused';this.emit({busy:false});}
-    }catch{attachment?.dispose();if(epoch===this.epoch){workflow.status='paused';this.emit({busy:false,message:'페이지 확인이 실패했습니다. 상태를 확인하고 계속하세요.'});}}
+      if(epoch===this.epoch&&this.state.busy){workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'limit'});this.emit({busy:false});}
+    }catch{attachment?.dispose();if(epoch===this.epoch){workflow.status='paused';this.host.taskEvent?.({type:'failed',reason:'page-changed'});this.emit({busy:false,message:'페이지 확인이 실패했습니다. 상태를 확인하고 계속하세요.'});}}
   }
   dispose(): void { this.invalidate(); this.dropContext();this.resetWire(); this.config = undefined; this.history = []; this.disposed = true; }
 }

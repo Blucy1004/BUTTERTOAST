@@ -59,7 +59,7 @@ window.browser.onState(state => {
   document.getElementById('ai-toggle').textContent = `Toast ${state.aiSlot}`;
   document.getElementById('delegate').disabled = !state.initialized || !state.url.startsWith('https:');
   current = state; renderWorkspace(state);
-  const signature=JSON.stringify([state.tabs,state.active,state.layout?.compact]);
+  const signature=JSON.stringify([state.tabs,state.groups,state.active,state.layout?.compact]);
   if(signature!==tabsSignature){tabsSignature=signature;window.renderTabs(state, send,tabSearch.value.trim());} renderToolbar(state);
   document.getElementById('new').disabled = !state.initialized || state.tabs.length >= (state.tabLimit||30);
   document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= (state.tabLimit||30);

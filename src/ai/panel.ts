@@ -12,6 +12,7 @@ import { RateGate, record, exactKeys } from '../security/ipc';
 import { ModelAdapter } from './adapter';
 import { AiService, Attachment, PageContext } from './service';
 import { parseAiCommand, safeText, Proposal } from './protocol';
+import {TaskJournal,TaskEvent} from './task-journal';
 import {ConversationArchive} from './archive';
 import { Bounds } from '../browser/workspace';
 import { CursorVisualizer, VisualEvent } from './visualizer';
@@ -24,6 +25,37 @@ async function bounded<T>(operation: Promise<T>, milliseconds = 5000): Promise<T
   finally { clearTimeout(timer); }
 }
 export class AiPanel {
+  private pendingDraft?:{id:string;text:string;kind:'text'|'link'|'selection';reference:string;origin:string;url:string;valid:()=>boolean;dispose:()=>void};
+  private startingDraft=false;private activeTaskId='';private nextTaskId='';private nextGoal='';private selectedHistory='';private goals=new Map<string,string>();
+  historyChanged():void{this.emit();}
+  showHistory(id:string):void{this.selectedHistory=id;this.mode='controls';this.show();this.emit();}
+  private taskEvent(event:TaskEvent):void{if(!this.journal)return;if(event.type==='created'){this.activeTaskId=this.nextTaskId||this.journal.create(this.slot,'workflow');this.nextTaskId='';if(this.nextGoal){this.goals.set(this.activeTaskId,this.nextGoal);this.nextGoal='';if(this.goals.size>100)this.goals.delete(this.goals.keys().next().value!);}}else if(this.activeTaskId)this.journal.apply(this.activeTaskId,event);}
+  private retry(id:string):void{const record=this.journal?.snapshot().find(r=>r.id===id&&r.slot===this.slot);if(!record||['running','awaiting-approval'].includes(record.status)||this.service.publicState().busy)return;this.draft(this.goals.get(id)??'','text',true);}
+  draft(text:string,kind:'text'|'link'|'selection'='text',allowEmpty=false,goalOverride?:string):void {
+    if(!text.trim()&&!allowEmpty||text.length>12000)return;
+    let link='';if(kind==='link'){try{const u=new URL(text);if(u.protocol!=='https:'||u.username||u.password||text.length>4096)return;u.search='';u.hash='';link=u.href;}catch{return;}}
+    if(this.pendingDraft)this.journal?.cancelDraft(this.pendingDraft.id);this.pendingDraft?.dispose();const wc=this.tabs.activeContents();let live=!!wc&&!wc.isDestroyed()&&/^https:/.test(wc.getURL());
+    const source=live?wc:undefined,original=source?.getURL()??'',frame=source?.mainFrame;
+    const changed=()=>{live=false;this.emit();};const navigation=(e:{isMainFrame:boolean})=>{if(e.isMainFrame)changed();};
+    source?.on('did-start-navigation',navigation);source?.on('destroyed',changed);source?.on('render-process-gone',changed);
+    const dispose=()=>{source?.removeListener('did-start-navigation',navigation);source?.removeListener('destroyed',changed);source?.removeListener('render-process-gone',changed);};
+    this.pendingDraft={id:this.journal?.create(this.slot,'draft')??randomUUID(),text:goalOverride??(kind==='selection'?'선택한 텍스트를 요약하고 현재 페이지에서 근거를 확인해 줘.':kind==='link'?link:safeText(text,12000)),reference:kind==='selection'?safeText(text,8000):'',kind,url:link,origin:source?new URL(original).origin:'',valid:()=>source?live&&!source.isDestroyed()&&this.tabs.activeContents()===source&&source.mainFrame===frame&&source.getURL()===original:kind==='link',dispose};
+    this.mode='controls';this.show();this.emit();
+  }
+  private async startDraft(id:string,goal:string,steps:number):Promise<void>{
+    const draft=this.pendingDraft,state=this.service.publicState();if(!draft||draft.id!==id||!draft.valid()||this.startingDraft||state.busy||!state.connected||!state.model)return;
+    this.startingDraft=true;const intent=this.intent,current=()=>this.pendingDraft===draft&&draft.valid()&&intent===this.intent;
+    try{
+      if(draft.kind==='link'){
+        const answer=await dialog.showMessageBox(this.parent,{type:'question',title:'링크 작업 시작',message:'이 링크를 별도 AI 세션에서 열까요?',detail:`${draft.url}\n출처: ${draft.origin||'사용자가 놓은 링크'}\n주소의 검색 인자·쿠키는 복사하지 않습니다. 페이지 공유와 실제 동작은 추가로 승인합니다.`,buttons:['취소','열고 작업 준비'],defaultId:0,cancelId:0,noLink:true});
+        if(answer.response!==1||!current())return;
+        await this.service.command({type:'task-open',url:draft.url});if(!current())return;
+      }
+      this.nextGoal=goal;this.nextTaskId=draft.id;this.goals.set(draft.id,goal);if(this.goals.size>100)this.goals.delete(this.goals.keys().next().value!);
+      await this.service.runDraft(goal,steps,draft.kind==='link'?'task':'controlled',current,draft.reference);
+      if(current()&&this.service.publicState().workflow){draft.dispose();this.pendingDraft=undefined;}
+    }finally{this.startingDraft=false;this.emit();}
+  }
   private view?: WebContentsView;
   private visible = false;
   private gate = new RateGate();
@@ -43,7 +75,7 @@ export class AiPanel {
   private taskStatus:'none'|'loading'|'ready'|'failed'|'crashed'='none';
   private handler: (event: Electron.IpcMainEvent, value: unknown) => void;
   private archive:ConversationArchive;
-  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private audit: (origin: string, operation: string, outcome: string) => void = () => {},private slot=1, private visibility: (visible:boolean)=>void = () => {},private appearance?:UiAppearance) {
+  constructor(private parent: BrowserWindow, private tabs: BrowserTabs, private audit: (origin: string, operation: string, outcome: string) => void = () => {},private slot=1, private visibility: (visible:boolean)=>void = () => {},private appearance?:UiAppearance,private journal?:TaskJournal) {
     this.cursor = new CursorVisualizer(parent,()=>{void this.service.command({type:'handoff'});});
     const suffix=slot===1?'':`-${slot}`;
     this.archive=new ConversationArchive(path.join(app.getPath('userData'),`conversation${suffix}.enc`),osCipher);
@@ -51,6 +83,7 @@ export class AiPanel {
     network.webRequest.onBeforeRequest((details, callback) => callback({ cancel: details.url !== expected || !['POST', 'GET'].includes(details.method) }));
     const adapter = new ModelAdapter(async (url, options) => { expected = url; return network.fetch(url, options); });
     this.service = new AiService(adapter, new KeyVault(path.join(app.getPath('userData'), `ai-keys${suffix}`), osCipher), {
+      taskEvent:event=>this.taskEvent(event),
       capture: (source,selected) => this.capture(source,selected), openTask: url => this.openTask(url), closeTask: () => this.closeTask(), stopTask: () => { const wc = this.task?.view.webContents; if (wc && !wc.isDestroyed()) wc.stop(); }, hide: () => this.hide(),
       confirmWorkflow: async origin => (await dialog.showMessageBox(this.parent,{type:'question',title:'AI 여러 단계 작업',message:'이 사이트의 페이지를 단계마다 AI에 공유할까요?',detail:`${origin}\n최대 10단계입니다. 화면의 개인정보가 포함될 수 있습니다. 입력·클릭·이동 등은 매번 별도로 승인하며 사이트가 바뀌면 중단합니다.`,buttons:['취소','공유하고 시작'],defaultId:0,cancelId:0,noLink:true})).response===1,
       handoff: source => { if(source==='controlled'){this.parent.focus();this.tabs.activeContents()?.focus();}else {this.mode='page';this.show();this.layout();this.task?.view.webContents.focus();} }, completed: () => { if(!this.parent.isDestroyed()&&!this.parent.isFocused())this.parent.flashFrame(true); },
@@ -65,6 +98,13 @@ export class AiPanel {
       if(!this.gate.allow())return;
       const command = parseAiCommand(value);
       if (!command) { this.service.invalidInput(); return; }
+      if(command.type==='history-retry'){this.retry(command.id);return;}
+      if(command.type==='history-select'){this.showHistory(command.id);return;}
+      if(command.type==='run-task'){this.nextTaskId='';this.nextGoal=command.goal;}
+      if(command.type==='draft-create'){this.draft(command.text,command.kind);return;}
+      if(command.type==='draft-refresh'){if(this.pendingDraft)this.draft(this.pendingDraft.kind==='selection'?this.pendingDraft.reference:this.pendingDraft.text,this.pendingDraft.kind,false,command.goal);return;}
+      if(command.type==='draft-dismiss'){if(this.pendingDraft)this.journal?.cancelDraft(this.pendingDraft.id);this.pendingDraft?.dispose();this.pendingDraft=undefined;this.emit();return;}
+      if(command.type==='draft-start'){void this.startDraft(command.id,command.goal,command.steps).catch(()=>{});return;}
       if (command.type==='task-display') { this.mode=command.mode;this.layout();this.emit();return; }
       if (command.type==='visual-options') {this.visual={speed:command.speed,motion:command.motion};this.cursor.clear();this.emit();return;}
       if (command.type==='replay') {const e=this.events.find(e=>e.id===command.id);if(e&&e.document===this.taskDocument&&this.mode==='page'&&e.outcome==='executed')this.cursor.show(e,this.taskBounds(),this.visual.speed,this.visual.motion);return;}
@@ -75,8 +115,8 @@ export class AiPanel {
     };
     ipcMain.on('ai:command', this.handler);
   }
-  private emit(): void { const wc = this.view?.webContents; if (wc && !wc.isDestroyed() && wc.getURL() === AI_URL) wc.send('ai:state', {...this.service.publicState(), display:{mode:this.mode,slot:this.slot,url:this.task?.view.webContents.getURL()??'',status:this.taskStatus,events:this.events,visual:this.visual,hasTask:!!this.task}}); }
-  observe(): void { this.service.observe(); }
+  private emit(): void { const wc = this.view?.webContents; if (wc && !wc.isDestroyed() && wc.getURL() === AI_URL) wc.send('ai:state', {...this.service.publicState(),taskHistory:{status:this.journal?.status??'unavailable',selected:this.selectedHistory,records:this.journal?.snapshot().filter(r=>r.slot===this.slot)??[]},draft:this.pendingDraft?{id:this.pendingDraft.id,text:this.pendingDraft.text,reference:this.pendingDraft.reference,kind:this.pendingDraft.kind,origin:this.pendingDraft.origin,url:this.pendingDraft.url,stale:!this.pendingDraft.valid()}:null, display:{mode:this.mode,slot:this.slot,url:this.task?.view.webContents.getURL()??'',status:this.taskStatus,events:this.events,visual:this.visual,hasTask:!!this.task}}); }
+  observe(): void { this.service.observe();if(this.pendingDraft)this.emit(); }
   emergencyStop():void {this.intent++;this.cursor.clear();void this.service.command({type:'stop'});}
   toggle(): void { if (this.visible) { void this.service.command({ type: 'hide' }); return; } this.show(); }
   open():void {this.show();}
@@ -174,7 +214,7 @@ export class AiPanel {
       const statistics=await bounded(controller.statistics());if(!current())throw new Error('Page changed');
       if(source==='task')this.taskDocument=snapshot.document;
       if(selectionOnly){snapshot.text=await bounded(controller.selectedText());snapshot.elements=[];if(!snapshot.text||!current())throw new Error('Selection unavailable');}
-      const data: PageContext = { source, origin: snapshot.origin, document:snapshot.document,version:snapshot.version,captureMs:statistics.captureMs,truncated:statistics.truncated,text: safeText(snapshot.text, 12000), elements: snapshot.elements.filter(e => e.visible && e.enabled && !e.sensitive)
+      const data: PageContext = { source, tab:wc.id, origin: snapshot.origin, document:snapshot.document,version:snapshot.version,captureMs:statistics.captureMs,truncated:statistics.truncated,text: safeText(snapshot.text, 12000), elements: snapshot.elements.filter(e => e.visible && e.enabled && !e.sensitive)
         .sort((a,b) => Number(b.actions.includes('CLICK'))-Number(a.actions.includes('CLICK'))).slice(0, 100).map(e => ({ id: e.id, role: e.role, name: safeText(e.name, 160), actions: e.actions })) };
       const check = async () => { if (!current()) return false; try { const latest = await bounded(controller.snapshot()); return current() && latest.document === snapshot.document && latest.version === snapshot.version; } catch { return false; } };
       const act = async (proposal: Proposal): Promise<boolean|{ok:boolean;text?:string;matches?:boolean;reason?:string}> => {
@@ -207,6 +247,6 @@ export class AiPanel {
       return { data, valid: current, check, dispose, act, click: async target => {const result=await act({op:'CLICK',target,value:''});return typeof result==='boolean'?result:result.ok;} };
     } catch { dispose(); throw new Error('Page unavailable'); }
   }
-  dispose(): void { ipcMain.removeListener('ai:command', this.handler); this.service.dispose(); this.closeTask();this.cursor.dispose(); if (this.view && !this.view.webContents.isDestroyed()) this.view.webContents.close({ waitForBeforeUnload: false }); this.view = undefined; }
+  dispose(): void {this.pendingDraft?.dispose();this.pendingDraft=undefined; ipcMain.removeListener('ai:command', this.handler); this.service.dispose(); this.closeTask();this.cursor.dispose(); if (this.view && !this.view.webContents.isDestroyed()) this.view.webContents.close({ waitForBeforeUnload: false }); this.view = undefined; }
   flush():Promise<void>{return this.archive.flush();}
 }

@@ -1,3 +1,4 @@
+process.on('unhandledRejection',error=>{console.error('FAIL unhandled lifecycle rejection',error);require('electron').app.exit(1);});
 // Local fixtures only. Runs the production tab manager and privacy handlers in sandboxed Electron.
 const { app, BrowserWindow, WebContentsView, webContents, session } = require('electron');
 const assert = require('node:assert/strict');

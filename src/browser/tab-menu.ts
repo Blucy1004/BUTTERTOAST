@@ -4,13 +4,16 @@ import { BrowserTabs } from './tabs';
 /** Menu items resolve existing main-owned tab IDs; UI cannot submit scripts or URLs. */
 export class TabMenu {
   private confirming = false;
-  constructor(private window:BrowserWindow,private tabs:BrowserTabs,private delegate:(id:number)=>void){}
+  constructor(private window:BrowserWindow,private tabs:BrowserTabs,private delegate:(id:number)=>void,private detach:(id:number)=>void=()=>{}){}
   open(id:number):void {
     const tab=this.tabs.state().tabs.find(t=>t.id===id);if(!tab)return;
     Menu.buildFromTemplate([
       {label:tab.pinned?'탭 고정 해제':'탭 고정',click:()=>this.tabs.pin(id)},
       {label:tab.muted?'소리 켜기':'탭 음소거',click:()=>this.tabs.mute(id)},
       {label:'탭 복제 (주소만)',click:()=>this.tabs.duplicate(id)},
+      {label:'탭 그룹',submenu:[{label:'새 그룹 만들기',click:()=>this.tabs.createGroup(id)},...this.tabs.state().groups.map(g=>({label:g.name,type:'checkbox' as const,checked:tab.group===g.id,click:()=>this.tabs.assignGroup(id,g.id)})),{label:'그룹에서 꺼내기',enabled:!!tab.group,click:()=>this.tabs.assignGroup(id,'')}]},
+      {label:'분할 왼쪽에 표시',click:()=>this.tabs.splitTab(id,'left')},{label:'분할 오른쪽에 표시',click:()=>this.tabs.splitTab(id,'right')},{label:'분할 해제',enabled:!!this.tabs.state().split,click:()=>this.tabs.closeSplit()},
+      {label:'새 창으로 탭 이동',click:()=>this.detach(id)},
       {label:'Toast에 보내기',click:()=>this.delegate(id)},
       {type:'separator'},
       {label:'다른 탭 닫기 (고정 탭 유지)',enabled:this.tabs.closableOthers(id).length>0,click:()=>{void this.closeOthers(id);}},

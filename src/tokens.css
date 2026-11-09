@@ -7,7 +7,7 @@
   color-scheme: dark;
   --surface: #080f26; --chrome: #0d1732; --hover: #1b2b50; --text: #eef3ff;
   --muted: #a4b2ce; --border: #293955; --error: #ffb7aa; --accent: #4a91ff;
-  --radius: 8px; --panel-radius: 18px; --spacing: 8px; --small-font: 12px;
+  --radius: 8px; --panel-radius: 18px; --spacing: 8px; --group-blue:var(--accent);--group-violet:#9876d0;--group-rose:#c16b96;--group-teal:#3b9c8f;--group-amber:#ba8c43; --small-font: 12px;
   --toolbar-icon: 19px; --heading-font: 22px; --field-height: 40px;
   --font-family: 'Pretendard', 'Segoe UI', sans-serif;
   --display-family: var(--font-family);

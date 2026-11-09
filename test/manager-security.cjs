@@ -11,6 +11,8 @@ app.whenReady().then(async()=>{
  let human=webContents.getAllWebContents().find(w=>w.id!==ui.id);
  human.session.protocol.handle('https',()=>new Response('<html><head><title>&lt;img src=x&gt;</title></head><body><h1>Local search fixture</h1><input></body></html>',{headers:{'Content-Type':'text/html'}}));
  await human.loadURL('https://www.google.com/search?q=fixture');
+ // loadURL completion and the toolbar's IPC paint are independent queues.
+ await until(()=>ui.executeJavaScript('!document.getElementById("bookmark").disabled&&document.getElementById("address").value==="https://www.google.com/search?q=fixture"'),'bookmark UI ready');
  await ui.executeJavaScript('document.getElementById("bookmark").click();document.getElementById("manager-open").click()');
  await until(()=>webContents.getAllWebContents().some(w=>w.getURL()==='toast-ui://app/manager.html'),'manager open');
  const manager=webContents.getAllWebContents().find(w=>w.getURL()==='toast-ui://app/manager.html');

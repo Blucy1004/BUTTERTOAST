@@ -19,6 +19,13 @@ test('workflow refuses origin changes and malformed automation budgets',async()=
  assert.equal(calls,0);assert.equal(service.publicState().workflow.status,'paused');service.dispose();
  assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:100}),null);assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:1,approved:true}),null);
 });
+test('controlled draft cannot follow another tab on the same origin, and history has only a fixed failure cause',async t=>{
+ let captures=0,calls=0;const events=[];
+ const host={capture:async()=>({data:{source:'controlled',tab:++captures,origin:'https://same.test',text:'PRIVATE_PAGE',elements:[]},valid:()=>true,check:async()=>true,dispose(){},click:async()=>false}),taskEvent:e=>events.push(e),confirmWorkflow:async()=>true,openTask:async()=>{},closeTask(){},hide(){}};
+ const service=new AiService({models:async()=>['fixture'],chat:async()=>{calls++;throw Error('not allowed');}},{},host,()=>{});t.after(()=>service.dispose());
+ await service.command({type:'connect',provider:'compatible',endpoint:'http://127.0.0.1:1234/v1',key:'',remember:false});await service.runDraft('PRIVATE_GOAL',3,'controlled',()=>true);
+ assert.equal(calls,0);assert.equal(service.publicState().workflow.status,'paused');assert.deepEqual(events.at(-1),{type:'failed',reason:'page-changed'});assert.doesNotMatch(JSON.stringify(events),/PRIVATE/);
+});
 test('only provider Retry-After delays workflow continuation; early timers cannot bypass it',{timeout:5000},async t=>{
  t.mock.timers.enable({apis:['setTimeout']});
  const {AiFailure}=require('../dist/ai/adapter');let now=0,calls=0;

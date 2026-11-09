@@ -2,6 +2,7 @@
 (() => {
   // Fixed, bundled geometry only. Profile metadata selects a preset, never SVG markup or a URL.
   const paths = Object.freeze({
+    columns: 'M3 4h18v16H3zM12 4v16',
     plus: 'M12 5v14M5 12h14',
     minus: 'M5 12h14',
     download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',

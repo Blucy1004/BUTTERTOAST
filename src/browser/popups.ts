@@ -5,12 +5,13 @@ type Pending={url:string;source:string;frame:WebFrameMain};
 export class PopupPolicy {
   private pending=new WeakMap<WebContents,Pending>();private busy=false;
   constructor(private owner:BrowserWindow,private openTab:(url:string)=>void,private changed:()=>void){}
-  attach(wc:WebContents):void {
+  attach(wc:WebContents):()=>void {
     wc.setWindowOpenHandler(details=>{
       if(!details.postBody&&isWebUrl(details.url)&&details.url.length<=4096&&isWebUrl(wc.getURL()))this.pending.set(wc,{url:details.url,source:wc.getURL(),frame:wc.mainFrame});
       this.changed();return {action:'deny'};
     });
-    wc.on('did-start-navigation',event=>{if(event.isMainFrame){this.pending.delete(wc);this.changed();}});
+    const navigation=(event:{isMainFrame:boolean})=>{if(event.isMainFrame){this.pending.delete(wc);this.changed();}};wc.on('did-start-navigation',navigation);
+    return ()=>{this.pending.delete(wc);wc.removeListener('did-start-navigation',navigation);if(!wc.isDestroyed())wc.setWindowOpenHandler(()=>({action:'deny'}));};
   }
   blocked(wc:WebContents|undefined):boolean {return !!wc&&this.pending.has(wc);}
   async open(wc:WebContents|undefined):Promise<void> {

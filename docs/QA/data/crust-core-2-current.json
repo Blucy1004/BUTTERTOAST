@@ -1,0 +1,129 @@
+{
+  "schema": "golden-crust-core/1",
+  "label": "0.5.0",
+  "platform": "linux",
+  "versions": {
+    "electron": "45.2.3",
+    "chrome": "156.0.8078.80"
+  },
+  "tabs": 10,
+  "viewport": {
+    "width": 1050,
+    "height": 720
+  },
+  "setupMs": 596.143563,
+  "elapsedMs": 20120.609357999998,
+  "wallElapsedMs": 20121,
+  "loads": {
+    "samples": 10,
+    "medianMs": 52.90169000000003,
+    "p95Ms": 97.301301
+  },
+  "switches": {
+    "samples": 201,
+    "medianMs": 1.3459070000008069,
+    "p95Ms": 2.502328999999918
+  },
+  "ticks": 201,
+  "crashes": 0,
+  "unresponsive": 0,
+  "cpuPercent": 5.516731527609832,
+  "samples": [
+    {
+      "elapsedMs": 30.932412999999997,
+      "processes": 18,
+      "rssMiB": 709.0078125,
+      "pssMiB": 268.3564453125,
+      "privateMiB": 199.44140625,
+      "pssProcesses": 18,
+      "cpuTicks": 118
+    },
+    {
+      "elapsedMs": 2029.4392780000003,
+      "processes": 18,
+      "rssMiB": 712.5078125,
+      "pssMiB": 269.638671875,
+      "privateMiB": 200.48828125,
+      "pssProcesses": 18,
+      "cpuTicks": 130
+    },
+    {
+      "elapsedMs": 4026.805255,
+      "processes": 18,
+      "rssMiB": 713.3828125,
+      "pssMiB": 270.396484375,
+      "privateMiB": 201.23046875,
+      "pssProcesses": 18,
+      "cpuTicks": 148
+    },
+    {
+      "elapsedMs": 6021.011894,
+      "processes": 18,
+      "rssMiB": 714.21875,
+      "pssMiB": 270.65234375,
+      "privateMiB": 201.46875,
+      "pssProcesses": 18,
+      "cpuTicks": 158
+    },
+    {
+      "elapsedMs": 8017.808216,
+      "processes": 18,
+      "rssMiB": 714.59375,
+      "pssMiB": 270.63671875,
+      "privateMiB": 201.44921875,
+      "pssProcesses": 18,
+      "cpuTicks": 168
+    },
+    {
+      "elapsedMs": 10014.705183,
+      "processes": 18,
+      "rssMiB": 709.60546875,
+      "pssMiB": 264.3837890625,
+      "privateMiB": 195.1796875,
+      "pssProcesses": 18,
+      "cpuTicks": 179
+    },
+    {
+      "elapsedMs": 12011.644604,
+      "processes": 18,
+      "rssMiB": 706.9375,
+      "pssMiB": 261.7197265625,
+      "privateMiB": 192.515625,
+      "pssProcesses": 18,
+      "cpuTicks": 187
+    },
+    {
+      "elapsedMs": 14009.538905,
+      "processes": 18,
+      "rssMiB": 707.1875,
+      "pssMiB": 262.5595703125,
+      "privateMiB": 193.35546875,
+      "pssProcesses": 18,
+      "cpuTicks": 198
+    },
+    {
+      "elapsedMs": 16005.152659,
+      "processes": 18,
+      "rssMiB": 707.6875,
+      "pssMiB": 262.5712890625,
+      "privateMiB": 193.3671875,
+      "pssProcesses": 18,
+      "cpuTicks": 206
+    },
+    {
+      "elapsedMs": 18001.752424,
+      "processes": 18,
+      "rssMiB": 707.6875,
+      "pssMiB": 262.59375,
+      "privateMiB": 193.390625,
+      "pssProcesses": 18,
+      "cpuTicks": 215
+    }
+  ],
+  "limitations": [
+    "BrowserTabs core on a deterministic local fixture, not the full browser UI or real websites.",
+    "RSS sums shared pages; PSS availability and process counts are recorded separately.",
+    "CPU from Linux /proc live process tree ticks, not a portable OS profiler.",
+    "20-second measurement, not a long-duration soak or a Chrome superiority claim."
+  ]
+}

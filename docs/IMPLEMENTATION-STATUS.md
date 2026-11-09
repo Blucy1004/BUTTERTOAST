@@ -1,5 +1,8 @@
 # ButterToast 구현 현황 — 2026-11-09 / 0.4.2
 
+최신 개발 소스: **0.5.0 Golden Crust**. 커맨드바·새 탭·그룹·분할·창 이동·초안·작업 기록의 세부 상태는 [0.5 기능표](GOLDEN-CRUST-0.5.md), 검증 결과는 [0.5 QA 보고서](QA/GOLDEN-CRUST-REPORT.md)를 참조한다. 아래의 이전 단계 기록은 해당 버전 당시 범위다.
+
+
 0.4.2의 파일 전송 변경과 검증은 [파일 다운로드·업로드](FILE-TRANSFER-0.4.2.md)를 참조한다.
 
 0.4.1의 QA·세 가지 결함 수정·측정 및 남은 한계는 [Toast Torture 보고서](QA/TOAST-TORTURE-REPORT.md)를 참고한다.

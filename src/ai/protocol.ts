@@ -18,6 +18,8 @@ export function parseConnection(provider: unknown, endpoint: unknown, key: unkno
   } catch { return null; }
 }
 export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-context' | 'task-close' | 'approve' | 'reject' | 'continue-task' | 'handoff' | 'save-chat' | 'load-chat' | 'delete-chat' }
+  | {type:'history-retry'|'history-select';id:string}
+  | {type:'draft-create';text:string;kind:'text'|'link'|'selection'} | {type:'draft-start';id:string;goal:string;steps:number} | {type:'draft-refresh';goal?:string}|{type:'draft-dismiss'}
   | { type: 'task-display'; mode: 'status' | 'page' | 'controls' }
   | { type: 'visual-options'; speed: number; motion: boolean }
   | { type: 'replay'; id: number } | { type: 'task-return' | 'task-recover' }
@@ -30,6 +32,11 @@ export type AiCommand = { type: 'ready' | 'hide' | 'stop' | 'clear' | 'remove-co
   | {type:'run-task';goal:string;steps:number};
 export function parseAiCommand(value: unknown): AiCommand | null {
   if (!record(value)) return null;
+  if(['history-retry','history-select'].includes(value.type as string)&&exactKeys(value,['type','id'])&&typeof value.id==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(value.id))return value as AiCommand;
+  if(value.type==='draft-dismiss'&&exactKeys(value,['type']))return value as AiCommand;
+  if(value.type==='draft-refresh'&&exactKeys(value,['type',...(Object.hasOwn(value,'goal')?['goal']:[])])&&(!Object.hasOwn(value,'goal')||typeof value.goal==='string'&&value.goal.length<=12000))return value as AiCommand;
+  if(value.type==='draft-create'&&exactKeys(value,['type','text','kind'])&&typeof value.text==='string'&&value.text.trim().length>0&&value.text.length<=12000&&['text','link','selection'].includes(value.kind as string)){if(value.kind==='link'){try{const url=new URL(value.text);if(url.protocol!=='https:'||url.username||url.password||value.text.length>4096)return null;}catch{return null;}}return value as AiCommand;}
+  if(value.type==='draft-start'&&exactKeys(value,['type','id','goal','steps'])&&typeof value.id==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(value.id)&&typeof value.goal==='string'&&value.goal.trim().length>0&&value.goal.length<=12000&&Number.isSafeInteger(value.steps)&&(value.steps as number)>=1&&(value.steps as number)<=10)return value as AiCommand;
   if((value.type==='task-return'||value.type==='task-recover')&&exactKeys(value,['type']))return {type:value.type};
   if(value.type==='share-selection'&&exactKeys(value,['type']))return {type:'share-selection'};
   if(value.type==='task-display'&&exactKeys(value,['type','mode'])&&['status','page','controls'].includes(value.mode as string))return value as AiCommand;

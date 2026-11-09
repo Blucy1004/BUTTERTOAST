@@ -29,22 +29,26 @@ textarea { resize: vertical; min-height: 60px; max-height: 160px; }
 /* Owner's Toast panel: task surface first, connection/chat tools in a separate drawer. */
 body { border: 1px solid var(--border); border-radius: var(--panel-radius); overflow: hidden; background: var(--stage); }
 header { height: 48px; padding: 0 12px; background: var(--surface); gap: 6px; }
-header strong { font-size: 16px; font-weight: 500; flex: 0; white-space: nowrap; }header>.hint { flex: 1; font-size: 10px; }
-header button { font-size: 11px; padding: 5px; border: 0; }
-.task-toolbar { height: 38px; display: flex; gap: 2px; padding: 4px 8px; background: var(--toolbar); flex: none; }.task-toolbar button { padding: 4px 6px; font-size: 10px; border: 0; }.task-toolbar button[aria-pressed="true"] { background: var(--accent-soft); }
+header strong { font-size: 16px; font-weight: 500; flex: 0; white-space: nowrap; }header>.hint { flex: 1; font-size:var(--small-font); }
+header button { font-size:var(--small-font); padding: 5px; border: 0; }
+.task-toolbar { height: 38px; display: flex; gap: 2px; padding: 4px 8px; background: var(--toolbar); flex: none; }.task-toolbar button { padding: 4px 6px; font-size:var(--small-font); border: 0; }.task-toolbar button[aria-pressed="true"] { background: var(--accent-soft); }
 #task-stage { min-height: 0; flex: 1; position: relative; background-color:var(--stage);background-image:var(--scene);background-position:top center;background-size:var(--stage-size); }
 #task-status { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px; text-align: center; }
 #task-status h1 { font-size: clamp(20px,5.5vw,30px); font-weight: 400; line-height: 1.6; margin: 12px 0; }
 #task-status h1,header strong {font-family:var(--display-family);}
-#task-status p { color: var(--muted); font-size: 11px; line-height: 1.7; }.eyebrow { letter-spacing: 2px; }
+#task-status p { color: var(--muted); font-size:var(--small-font); line-height: 1.7; }.eyebrow { letter-spacing: 2px; }
 #show-page { border: 0; background: transparent; margin: 16px 0 4px; font-size: 15px; }#show-page span { display: inline-grid; place-items: center; background: var(--accent-solid);color:var(--on-accent); border-radius: 50%; width: 36px; height: 36px; margin-left: 10px; }
 #controls-drawer { position: absolute; z-index: 2; top: 86px; bottom: 168px; left: 0; right: 0; background: var(--surface); padding: 12px; overflow: auto; }
 footer { height: 168px; min-height: 168px; padding: 5px 10px; border-top: 1px solid var(--border); background: var(--chrome); overflow: auto; }
-footer .row { margin: 3px 0; flex-wrap: nowrap; }footer button { font-size: 11px; padding: 4px 9px; }footer textarea { min-height: 36px; height: 38px; max-height: 70px; padding: 7px; resize: none; font-size: 12px; }
-.quick-actions { display: flex; gap: 2px; margin-bottom: 4px; }.quick-actions button { border: 0; color: var(--muted); font-size: 10px; padding: 4px; }
-#ai-message { margin: 0; height: 17px; min-height: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-#proposal { padding: 4px; display: flex; align-items: center; gap: 4px; font-size: 10px; border-color: #9c7541; }#proposal-description { flex: 1; max-height: 28px; margin: 0; overflow: auto; }#proposal .row { flex: none; }
-#usage { font-size: 9px; color: var(--muted); margin: 2px 0; white-space: nowrap; overflow: hidden; }
-#event-log { padding-left: 22px; font-size: 11px; }#event-log li { margin: 8px 0; }#event-log button { font-size: 10px; margin-left: 6px; padding: 3px; }
+footer .row { margin: 3px 0; flex-wrap: nowrap; }footer button { font-size:var(--small-font); padding: 4px 9px; }footer textarea { min-height: 36px; height: 38px; max-height: 70px; padding: 7px; resize: none; font-size: 12px; }
+.quick-actions { display: flex; gap: 2px; margin-bottom: 4px; }.quick-actions button { border: 0; color: var(--muted); font-size:var(--small-font); padding: 4px; }
+#ai-message { margin: 0; height: 17px; min-height: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size:var(--small-font); }
+#proposal { padding: 4px; display: flex; align-items: center; gap: 4px; font-size:var(--small-font); border-color: #9c7541; }#proposal-description { flex: 1; max-height: 28px; margin: 0; overflow: auto; }#proposal .row { flex: none; }
+#usage { font-size:var(--small-font); color: var(--muted); margin: 2px 0; white-space: nowrap; overflow: hidden; }
+#event-log { padding-left: 22px; font-size:var(--small-font); }#event-log li { margin: 8px 0; }#event-log button { font-size:var(--small-font); margin-left: 6px; padding: 3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media(max-height:480px) { body { display: flex; height: 100vh; }main { overflow:auto; } }
+
+#task-history-list{padding-left:20px;max-height:220px;overflow:auto}#task-history-list button{text-align:left;overflow-wrap:anywhere;width:100%;margin:4px 0}#task-history-detail{font-size:var(--small-font)}#draft-info{border-left:3px solid var(--accent);padding-left:12px}#draft-origin{overflow-wrap:anywhere}
+
+#draft-reference{white-space:pre-wrap;overflow-wrap:anywhere;max-height:160px;overflow:auto;font:var(--small-font) var(--font-family);background:var(--field);padding:10px}

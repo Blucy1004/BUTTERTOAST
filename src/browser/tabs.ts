@@ -1,15 +1,19 @@
+import {splitGeometry} from './split';
+import {randomUUID} from 'node:crypto';
 import { BrowserWindow, WebContents, WebContentsView } from 'electron';
 import { WEB_PREFERENCES, hardenWebContents } from '../security/electron';
-import { restorableUrl, SessionSnapshot, TAB_LIMIT } from './session-store';
+import { restorableUrl, SessionSnapshot, TAB_LIMIT, TabGroup, GROUP_COLORS, validGroupName } from './session-store';
 import {installIdleProbe} from './idle';
 import type { Bounds } from './workspace';
 export type TabStatus = 'ready' | 'loading' | 'slow' | 'unresponsive' | 'crashed' | 'suspended';
-type Tab = { id: number; title: string; url: string; pinned: boolean; muted: boolean; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout; lastActive?:number };
-type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void; canSuspend?:(contents:WebContents)=>boolean };
+type Tab = { cleanup?:()=>void; group?:string; id: number; title: string; url: string; pinned: boolean; muted: boolean; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout; lastActive?:number };
+type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void|(()=>void); visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void; canSuspend?:(contents:WebContents)=>boolean };
 /** Human tabs only. No AI context, grants or renderer state are persisted or shared here. */
 export class BrowserTabs {
   private tabs: Tab[] = [];
-  private closed: { url: string; title: string; pinned: boolean; muted: boolean }[] = [];
+  private groups:TabGroup[]=[];
+  private split:{left:number;right:number;ratio:number}|null=null;
+  private closed: { group?:string; url: string; title: string; pinned: boolean; muted: boolean }[] = [];
   private finding = {open:false,query:'',active:0,matches:0};
   private findRequest = 0;
   private nextId = 1;
@@ -35,7 +39,7 @@ export class BrowserTabs {
     try {
       for(const tab of this.tabs){
         const wc=tab.view?.webContents;
-        const eligible=()=>this.memorySaver&&!this.disposed&&this.current()!==tab&&!tab.pinned&&tab.status==='ready'&&tab.view?.webContents===wc&&!!wc&&!wc.isDestroyed()&&!wc.isLoading()&&!wc.isCrashed()&&!wc.isCurrentlyAudible()&&now-(tab.lastActive??now)>=this.idleAfterMs&&(this.hooks.canSuspend?.(wc)??true);
+        const eligible=()=>this.memorySaver&&!this.disposed&&this.current()!==tab&&!this.inSplit(tab.id)&&!tab.pinned&&tab.status==='ready'&&tab.view?.webContents===wc&&!!wc&&!wc.isDestroyed()&&!wc.isLoading()&&!wc.isCrashed()&&!wc.isCurrentlyAudible()&&now-(tab.lastActive??now)>=this.idleAfterMs&&(this.hooks.canSuspend?.(wc)??true);
         if(!wc||this.idleProbes.has(wc)||!eligible())continue;
         let timer:NodeJS.Timeout|undefined;
         try {
@@ -68,14 +72,20 @@ export class BrowserTabs {
     if (persist && this.tabs.length) this.hooks.persist(this.snapshot());
     this.hooks.changed();
   }
-  snapshot(): SessionSnapshot { return { version: 2, active: Math.max(0, this.tabs.findIndex(t => t.id === this.active)), tabs: this.tabs.map(t => ({url:restorableUrl(t.url)?t.url:'',pinned:t.pinned,muted:t.muted})) }; }
+  commandTabs():{id:number;title:string;url:string}[]{return this.tabs.map(t=>({id:t.id,title:t.title,url:t.url}));}
+  createGroup(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(!tab||this.groups.length>=32)return;const group:TabGroup={id:randomUUID(),name:`그룹 ${this.groups.length+1}`,color:GROUP_COLORS[this.groups.length%GROUP_COLORS.length],collapsed:false};this.groups.push(group);tab.group=group.id;this.changed(true);}
+  assignGroup(id:number,group:string):void {const tab=this.tabs.find(t=>t.id===id);if(!tab||group&&!this.groups.some(g=>g.id===group))return;tab.group=group;this.changed(true);}
+  updateGroup(id:string,name:string,color:string):void {const group=this.groups.find(g=>g.id===id);if(!group||!validGroupName(name)||!GROUP_COLORS.includes(color as TabGroup['color']))return;group.name=name.trim();group.color=color as TabGroup['color'];this.changed(true);}
+  toggleGroup(id:string):void {const group=this.groups.find(g=>g.id===id);if(group){group.collapsed=!group.collapsed;this.changed(true);}}
+  removeGroup(id:string):void {this.groups=this.groups.filter(g=>g.id!==id);for(const tab of this.tabs)if(tab.group===id)tab.group='';this.changed(true);}
+  snapshot(): SessionSnapshot { if(this.groups.length||this.split)return {version:3,active:Math.max(0,this.tabs.findIndex(t=>t.id===this.active)),tabs:this.tabs.map(t=>({url:restorableUrl(t.url)?t.url:'',pinned:t.pinned,muted:t.muted,group:t.group??''})),groups:this.groups.map(g=>({...g})),split:this.split?{left:this.tabs.findIndex(t=>t.id===this.split!.left),right:this.tabs.findIndex(t=>t.id===this.split!.right),ratio:this.split.ratio}:null};return { version: 2, active: Math.max(0, this.tabs.findIndex(t => t.id === this.active)), tabs: this.tabs.map(t => ({url:restorableUrl(t.url)?t.url:'',pinned:t.pinned,muted:t.muted})) }; }
   state() {
     const tab = this.current(), wc = tab?.view?.webContents;
     const live = wc && !wc.isDestroyed() && !wc.isCrashed();
     return {
-      tabs: this.tabs.map(t => ({ id: t.id, title: t.title, status: t.status, pinned:t.pinned, muted:t.muted,
+      tabs: this.tabs.map(t => ({ id: t.id, empty:!t.url, group:t.group??'', title: t.title, status: t.status, pinned:t.pinned, muted:t.muted,
         host: (()=>{try{return new URL(t.url).hostname;}catch{return '';}})(), audible:!!t.view&&!t.view.webContents.isDestroyed()&&t.view.webContents.isCurrentlyAudible() })), active: this.active,
-      tabLimit:TAB_LIMIT,find:{...this.finding}, zoom:live?Math.round(wc.getZoomFactor()*100):100,
+      groups:this.groups.map(g=>({...g})),split:this.split?{...this.split,geometry:this.splitBounds()}:null,tabLimit:TAB_LIMIT,find:{...this.finding}, zoom:live?Math.round(wc.getZoomFactor()*100):100,
       url: tab?.url || '', status: tab?.status || 'ready',
       canBack: !!live && wc.navigationHistory.canGoBack(), canForward: !!live && wc.navigationHistory.canGoForward(),
       loading: tab?.status === 'loading' || tab?.status === 'slow', canReopen: this.closed.length > 0,
@@ -84,9 +94,10 @@ export class BrowserTabs {
   }
   initialize(saved: SessionSnapshot | null): void {
     if (saved) {
+      if(saved.version===3)this.groups=saved.groups.map(g=>({...g}));
       const entries=saved.version===1?saved.tabs.map(url=>({url,pinned:false,muted:false})):saved.tabs;
       for (const entry of entries) this.tabs.push({ id: this.nextId++, title: entry.url ? new URL(entry.url).hostname : '새 탭', ...entry, status: 'suspended', error: '복원 대기: 탭을 선택하면 다시 엽니다.' });
-      this.active = this.tabs[saved.active].id; this.changed();
+      this.active = this.tabs[saved.active].id;if(saved.version===3&&saved.split)this.split={left:this.tabs[saved.split.left].id,right:this.tabs[saved.split.right].id,ratio:saved.split.ratio}; this.changed();
     } else this.newTab();
   }
   private reservedWidth = 0;
@@ -108,64 +119,82 @@ export class BrowserTabs {
     for(const tab of this.tabs){this.detach(tab);tab.status='suspended';tab.error='사이트 데이터를 지우기 위해 페이지를 종료했습니다. 탭을 선택하면 다시 엽니다.';}
     this.changed();
   }
-  layout(): void {
-    const [width, height] = this.window.getContentSize();
-    for (const tab of this.tabs) { tab.view?.setBounds(this.viewport ?? { x: 0, y: 116, width: Math.max(0, width - this.reservedWidth), height: Math.max(0, height - 116) }); tab.view?.setVisible(this.workspaceVisible && tab.id === this.active && !!tab.url); }
+  private inSplit(id:number):boolean {return !!this.split&&(this.split.left===id||this.split.right===id);}
+  private splitBounds(){const [width,height]=this.window.getContentSize();return splitGeometry(this.viewport??{x:0,y:116,width:Math.max(0,width-this.reservedWidth),height:Math.max(0,height-116)},this.split?.ratio??.5,!!this.split&&width>=760);}
+  splitTab(id:number,side:'left'|'right'='right'):void {
+    if(!this.tabs.some(t=>t.id===id))return;
+    const other=side==='left'?'right':'left';
+    if(this.split){if(this.split[other]===id)[this.split.left,this.split.right]=[this.split.right,this.split.left];else this.split[side]=id;}
+    else {let partner=this.active!==id?this.active:this.tabs.find(t=>t.id!==id)?.id;if(!partner){this.newTab();partner=this.active;}if(partner===id)return;this.split={left:side==='left'?id:partner,right:side==='right'?id:partner,ratio:.5};}
+    for(const pane of [this.split.left,this.split.right])this.resume(this.tabs.find(t=>t.id===pane)!);
+    this.active=id;this.layout();this.activeContents()?.focus();this.changed(true);
   }
-  private attach(tab: Tab): void {
+  closeSplit():void {this.split=null;this.layout();this.changed(true);}
+  resizeSplit(ratio:number):void {if(!this.split||!Number.isFinite(ratio)||ratio<.25||ratio>.75)return;this.split.ratio=ratio;this.layout();this.changed(true);}
+  private resume(tab:Tab):void {if(!tab.view&&tab.status==='suspended'){this.attach(tab);if(restorableUrl(tab.url)&&tab.url)void tab.view!.webContents.loadURL(tab.url).catch(()=>{});}}
+  layout(): void {
+    const geometry=this.splitBounds();
+    for(const tab of this.tabs){const pane=this.split&&geometry.visible?(tab.id===this.split.left?geometry.left:geometry.right):(this.viewport??geometry.left);tab.view?.setBounds(pane);tab.view?.setVisible(this.workspaceVisible&&!!tab.url&&(geometry.visible?this.inSplit(tab.id):tab.id===this.active));}
+  }
+  private attach(tab: Tab, transferred?:WebContentsView): void {
     if (tab.view || this.disposed) return;
-    const view = new WebContentsView({ webPreferences: { ...WEB_PREFERENCES, partition: 'persist:human' } });
+    const view = transferred??new WebContentsView({ webPreferences: { ...WEB_PREFERENCES, partition: 'persist:human' } });
     view.setBorderRadius(16);
     tab.view = view; const wc = view.webContents;
     const valid = () => !this.disposed && tab.view === view && this.tabs.includes(tab);
     const clearSlow = () => { clearTimeout(tab.slowTimer); tab.slowTimer = undefined; };
     this.window.contentView.addChildView(view); view.setVisible(tab.id === this.active);
-    hardenWebContents(wc); this.hooks.input(wc);
+    if(!transferred)hardenWebContents(wc);
+    const cleanups:(()=>void)[]=[];const cleanup=this.hooks.input(wc);if(typeof cleanup==='function')cleanups.push(cleanup);
+    const on:WebContents['on']=(event:any,listener:any)=>{wc.on(event,listener);cleanups.push(()=>wc.removeListener(event,listener));return wc;};
+    tab.cleanup=()=>{for(const off of cleanups)off();};
+    on('focus',()=>{if(valid()&&this.inSplit(tab.id)&&this.active!==tab.id){this.clearFind(false);this.active=tab.id;tab.lastActive=Date.now();this.changed(true);}});
     wc.setAudioMuted(tab.muted);tab.lastActive=Date.now();
-    wc.on('dom-ready',()=>{if(valid())void wc.executeJavaScriptInIsolatedWorld(1003,[{code:`(${installIdleProbe.toString()})()`}]).catch(()=>{});});
-    wc.on('media-started-playing',()=>{if(valid())this.changed();});
-    wc.on('media-paused',()=>{if(valid())this.changed();});
-    wc.on('found-in-page',(_event,result)=>{
+    on('dom-ready',()=>{if(valid())void wc.executeJavaScriptInIsolatedWorld(1003,[{code:`(${installIdleProbe.toString()})()`}]).catch(()=>{});});
+    on('media-started-playing',()=>{if(valid())this.changed();});
+    on('media-paused',()=>{if(valid())this.changed();});
+    on('found-in-page',(_event,result)=>{
       if(valid()&&this.current()===tab&&this.finding.open&&result.requestId===this.findRequest){this.finding.active=result.activeMatchOrdinal;this.finding.matches=result.matches;this.changed();}
     });
-    wc.on('did-start-navigation',event=>{if(valid()&&event.isMainFrame&&this.current()===tab)this.clearFind(false);});
-    wc.on('did-finish-load', () => { if (valid()) { this.hooks.visited?.(wc.getURL(), wc.getTitle()); this.hooks.loaded?.(wc); } });
-    wc.on('page-title-updated', (_e, title) => { if (valid()) { tab.title = title.slice(0, 120) || '새 탭'; this.changed(); } });
-    wc.on('did-start-loading', () => {
+    on('did-start-navigation',event=>{if(valid()&&event.isMainFrame&&this.current()===tab)this.clearFind(false);});
+    on('did-finish-load', () => { if (valid()) { this.hooks.visited?.(wc.getURL(), wc.getTitle()); this.hooks.loaded?.(wc); } });
+    on('page-title-updated', (_e, title) => { if (valid()) { tab.title = title.slice(0, 120) || '새 탭'; this.changed(); } });
+    on('did-start-loading', () => {
       if (!valid()) return;
       clearSlow(); tab.status = 'loading'; tab.error = '';
       tab.slowTimer = setTimeout(() => { if (valid() && tab.status === 'loading') { tab.status = 'slow'; tab.error = '페이지 로딩이 오래 걸립니다. 중지하거나 탭을 다시 시작할 수 있습니다.'; this.changed(); } }, this.slowAfterMs);
       tab.slowTimer.unref(); this.changed();
     });
-    wc.on('did-stop-loading', () => { if (valid()) { clearSlow(); if (tab.status === 'slow') tab.error = ''; if (['loading', 'slow'].includes(tab.status)) tab.status = 'ready'; this.changed(); } });
+    on('did-stop-loading', () => { if (valid()) { clearSlow(); if (tab.status === 'slow') tab.error = ''; if (['loading', 'slow'].includes(tab.status)) tab.status = 'ready'; this.changed(); } });
     const navigated = (_e: unknown, url: string, mainFrame = true) => {
       if (valid() && mainFrame) { tab.url = url === 'about:blank' ? '' : url; this.changed(true); }
     };
-    wc.on('did-navigate', (e, url) => navigated(e, url));
-    wc.on('did-navigate-in-page', (e, url, main) => { navigated(e, url, main); if (valid() && main) { this.hooks.visited?.(url, wc.getTitle()); this.hooks.loaded?.(wc); } });
-    wc.on('did-fail-load', (_e, code, _description, _url, main) => {
+    on('did-navigate', (e, url) => navigated(e, url));
+    on('did-navigate-in-page', (e, url, main) => { navigated(e, url, main); if (valid() && main) { this.hooks.visited?.(url, wc.getTitle()); this.hooks.loaded?.(wc); } });
+    on('did-fail-load', (_e, code, _description, _url, main) => {
       if (valid() && main && code !== -3) { clearSlow(); tab.status = 'ready'; tab.error = `페이지를 불러오지 못했습니다 (${code}). 주소와 연결 상태를 확인하세요.`; this.changed(); }
     });
-    wc.on('unresponsive', () => { if (valid()) { clearSlow(); tab.status = 'unresponsive'; tab.error = '페이지가 응답하지 않습니다. 다른 탭으로 이동하거나 이 탭을 다시 시작하세요.'; this.changed(); } });
-    wc.on('responsive', () => { if (valid() && tab.status === 'unresponsive') { tab.status = wc.isLoading() ? 'loading' : 'ready'; tab.error = ''; this.changed(); } });
-    wc.on('render-process-gone', () => { if (valid()) { clearSlow(); tab.status = 'crashed'; tab.error = '탭 프로세스가 종료되었습니다. 이 탭을 다시 시작하거나 주소를 입력하세요.'; this.changed(); } });
-    wc.on('destroyed', () => { if (valid()) { tab.view = undefined; clearSlow(); tab.status = 'crashed'; tab.error = '탭이 종료되었습니다. 다시 시작할 수 있습니다.'; this.changed(); } });
+    on('unresponsive', () => { if (valid()) { clearSlow(); tab.status = 'unresponsive'; tab.error = '페이지가 응답하지 않습니다. 다른 탭으로 이동하거나 이 탭을 다시 시작하세요.'; this.changed(); } });
+    on('responsive', () => { if (valid() && tab.status === 'unresponsive') { tab.status = wc.isLoading() ? 'loading' : 'ready'; tab.error = ''; this.changed(); } });
+    on('render-process-gone', () => { if (valid()) { clearSlow(); tab.status = 'crashed'; tab.error = '탭 프로세스가 종료되었습니다. 이 탭을 다시 시작하거나 주소를 입력하세요.'; this.changed(); } });
+    on('destroyed', () => { if (valid()) { tab.view = undefined; clearSlow(); tab.status = 'crashed'; tab.error = '탭이 종료되었습니다. 다시 시작할 수 있습니다.'; this.changed(); } });
     tab.status = 'ready'; tab.error = ''; this.layout();
   }
   private detach(tab: Tab): void {
     if(this.current()===tab)this.clearFind(false);
-    const view = tab.view; tab.view = undefined;
+    const view = tab.view;tab.cleanup?.();tab.cleanup=undefined; tab.view = undefined;
     clearTimeout(tab.slowTimer); tab.slowTimer = undefined;
     if (!view) return;
     clearTimeout(this.probes.get(view.webContents)); this.probes.delete(view.webContents);
     if (!this.window.isDestroyed()) this.window.contentView.removeChildView(view);
     if (!view.webContents.isDestroyed()) view.webContents.close({ waitForBeforeUnload: false });
   }
-  newTab(url = '', title = '새 탭', options = {pinned:false,muted:false}): void {
+  newTab(url = '', title = '새 탭', options:{pinned:boolean;muted:boolean;group?:string} = {pinned:false,muted:false}): void {
     if (this.disposed || this.tabs.length >= TAB_LIMIT || !restorableUrl(url)) return;
     this.clearFind(false);
     const tab: Tab = { id: this.nextId++, title, url, ...options, status: 'ready', error: '' }; this.tabs.push(tab);
     this.tabs.sort((a,b)=>Number(b.pinned)-Number(a.pinned));
+    if(this.split){const side=this.split.left===this.active?'left':'right';this.split[side]=tab.id;}
     this.active = tab.id; this.attach(tab);
     for (const t of this.tabs) t.view?.setVisible(t === tab);
     if (url) void tab.view!.webContents.loadURL(url).catch(() => {});
@@ -174,6 +203,7 @@ export class BrowserTabs {
   select(id: number): void {
     const tab = this.tabs.find(t => t.id === id); if (!tab) return;
     if(this.active!==id)this.clearFind(false);
+    if(this.split&&!this.inSplit(id)){const side=this.split.left===this.active?'left':'right';this.split[side]=id;}
     const old=this.current();if(old)old.lastActive=Date.now();this.active = id;tab.lastActive=Date.now();
     if (!tab.view && tab.status === 'suspended') {
       this.attach(tab);
@@ -181,6 +211,7 @@ export class BrowserTabs {
       if (tab.url) void tab.view!.webContents.loadURL(tab.url).catch(() => {});
     }
     for (const t of this.tabs) t.view?.setVisible(t === tab);
+    if(this.split)for(const id of [this.split.left,this.split.right]){const other=this.tabs.find(t=>t.id===id);if(other)this.resume(other);}
     this.layout(); if (tab.view && !tab.view.webContents.isDestroyed()) tab.view.webContents.focus(); this.changed(true);
   }
   cycle(delta: number): void { if (!this.tabs.length) return; const index = this.tabs.findIndex(t => t.id === this.active); this.select(this.tabs[(index + delta + this.tabs.length) % this.tabs.length]?.id); }
@@ -193,22 +224,37 @@ export class BrowserTabs {
   reorder(id:number,before:number):void {
     const source=this.tabs.find(t=>t.id===id),target=this.tabs.find(t=>t.id===before);
     if(!source||!target||source===target||source.pinned!==target.pinned)return;
-    this.tabs.splice(this.tabs.indexOf(source),1);this.tabs.splice(this.tabs.indexOf(target),0,source);this.changed(true);
+    source.group=target.group;this.tabs.splice(this.tabs.indexOf(source),1);this.tabs.splice(this.tabs.indexOf(target),0,source);this.changed(true);
   }
   close(id = this.active): void {
     const index = this.tabs.findIndex(t => t.id === id); if (index < 0) return;
     if(this.active===id)this.clearFind(false);
+    if(this.inSplit(id))this.split=null;
     const [tab] = this.tabs.splice(index, 1);
-    this.closed.push({ url: restorableUrl(tab.url) ? tab.url : '', title: tab.title, pinned:tab.pinned, muted:tab.muted }); if (this.closed.length > 20) this.closed.shift();
+    this.closed.push({ group:tab.group,url: restorableUrl(tab.url) ? tab.url : '', title: tab.title, pinned:tab.pinned, muted:tab.muted }); if (this.closed.length > 20) this.closed.shift();
     this.detach(tab);
     if (!this.tabs.length) this.newTab();
     else if (this.active === id) this.select(this.tabs[Math.min(index, this.tabs.length - 1)].id);
-    else this.changed(true);
+    else {this.layout();this.changed(true);}
   }
-  reopen(): void { if (this.tabs.length >= TAB_LIMIT) return; const old = this.closed.pop(); if (old) this.newTab(old.url, old.title,{pinned:old.pinned,muted:old.muted}); }
+  transferTo(id:number,destination:BrowserTabs):boolean {
+    const index=this.tabs.findIndex(t=>t.id===id);if(index<0||destination===this||destination.disposed||destination.tabs.length>=TAB_LIMIT)return false;
+    const tab=this.tabs[index],view=tab.view,group=this.groups.find(g=>g.id===tab.group);if(group&&!destination.groups.some(g=>g.id===group.id)&&destination.groups.length>=32)return false;this.clearFind(false);
+    tab.cleanup?.();tab.cleanup=undefined;clearTimeout(tab.slowTimer);tab.slowTimer=undefined;
+    if(view){clearTimeout(this.probes.get(view.webContents));this.probes.delete(view.webContents);this.window.contentView.removeChildView(view);}
+    if(this.inSplit(id))this.split=null;
+    this.tabs.splice(index,1);tab.view=undefined;tab.id=destination.nextId++;
+    if(group){const same=destination.groups.find(g=>g.id===group.id);if(!same)destination.groups.push({...group});}
+    destination.clearFind(false);if(destination.split){const side=destination.split.left===destination.active?'left':'right';destination.split[side]=tab.id;}destination.tabs.push(tab);destination.tabs.sort((a,b)=>Number(b.pinned)-Number(a.pinned));destination.active=tab.id;
+    if(view)destination.attach(tab,view);else destination.resume(tab);
+    destination.layout();destination.changed(true);
+    if(!this.tabs.length)this.newTab();else if(!this.tabs.some(t=>t.id===this.active))this.select(this.tabs[Math.min(index,this.tabs.length-1)].id);else{this.layout();this.changed(true);}
+    return true;
+  }
+  reopen(): void { if (this.tabs.length >= TAB_LIMIT) return; const old = this.closed.pop(); if (old) this.newTab(old.url, old.title,{pinned:old.pinned,muted:old.muted,group:this.groups.some(g=>g.id===old.group)?old.group:''}); }
   pin(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(!tab)return;tab.pinned=!tab.pinned;this.tabs.sort((a,b)=>Number(b.pinned)-Number(a.pinned));this.changed(true);}
   mute(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(!tab)return;tab.muted=!tab.muted;if(tab.view&&!tab.view.webContents.isDestroyed())tab.view.webContents.setAudioMuted(tab.muted);this.changed(true);}
-  duplicate(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(tab)this.newTab(restorableUrl(tab.url)?tab.url:'',tab.title,{pinned:false,muted:tab.muted});}
+  duplicate(id:number):void {const tab=this.tabs.find(t=>t.id===id);if(tab)this.newTab(restorableUrl(tab.url)?tab.url:'',tab.title,{pinned:false,muted:tab.muted,group:tab.group});}
   closableOthers(id:number):number[] {return this.tabs.some(t=>t.id===id)?this.tabs.filter(t=>t.id!==id&&!t.pinned).map(t=>t.id):[];}
   closeMany(ids:number[]):void {for(const id of ids)this.close(id);}
   openFind():void {this.finding.open=true;this.changed();}

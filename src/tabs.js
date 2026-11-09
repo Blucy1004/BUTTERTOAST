@@ -3,7 +3,11 @@ const tabStatus = { loading: '로딩 중', slow: '로딩 지연', unresponsive: 
 window.renderTabs = (state, send, filter='') => {
   const container = document.getElementById('tabs');
   container.replaceChildren();
-  for (const tab of state.tabs) {
+  const rendered=new Set();const ordered=[];for(const tab of state.tabs){if(tab.pinned||!tab.group){ordered.push(tab);continue;}if(!rendered.has(tab.group)){rendered.add(tab.group);ordered.push(...state.tabs.filter(t=>!t.pinned&&t.group===tab.group));}}
+  const headings=new Set();
+  for (const tab of ordered) {
+    const group=state.groups?.find(g=>g.id===tab.group);
+    if(group&&!tab.pinned&&!state.layout?.compact){if(!headings.has(group.id)){headings.add(group.id);const header=document.createElement('button');header.className='group-heading';header.dataset.color=group.color;header.textContent=group.name;header.setAttribute('aria-expanded',String(!group.collapsed));header.onclick=()=>send('group-toggle',{id:group.id});container.append(header);}if(group.collapsed&&!filter)continue;}
     if(filter&&!`${tab.title} ${tab.host}`.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))continue;
     const wrap = document.createElement('span'); wrap.className = 'tab' + (tab.id === state.active ? ' active' : '');
     wrap.classList.toggle('pinned',tab.pinned);

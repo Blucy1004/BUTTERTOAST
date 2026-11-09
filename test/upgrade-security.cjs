@@ -50,7 +50,7 @@ app.whenReady().then(async()=>{
  await send({type:'find',text:'NEEDLE',forward:true,next:false});await until(async()=>(await shell()).find.matches===3,'native page matches');
  const before=(await shell()).find.active;await send({type:'find',text:'NEEDLE',forward:true,next:true});await until(async()=>(await shell()).find.active!==before,'next match');
  const bounds=main.contentView.children.find(v=>v.webContents===duplicate).getBounds();assert.deepEqual(bounds,(await shell()).layout.human);
- const contentY=await ui.executeJavaScript('document.querySelector(".browser-empty").getBoundingClientRect().y');assert.equal(contentY,bounds.y);
+ const contentY=await ui.executeJavaScript('document.getElementById("browser-content").getBoundingClientRect().y');assert.equal(contentY,bounds.y);
  await send({type:'zoom',direction:1});await until(async()=>(await shell()).zoom===110,'zoom 110');await send({type:'zoom',direction:0});
  await send({type:'select',id:first});await until(async()=>!(await shell()).find.open,'tab change cancels find');
  assert.deepEqual(await human.executeJavaScript('[typeof browser,typeof require]'),['undefined','undefined']);

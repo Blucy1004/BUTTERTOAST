@@ -1,0 +1,30 @@
+{
+  "platform": "linux",
+  "scope": "X11 composite captures of actual Electron window and child views; test-cipher and local fixtures only",
+  "sizes": [
+    {
+      "width": 1500,
+      "overflow": false,
+      "small": 12,
+      "theme": "dark"
+    },
+    {
+      "width": 1080,
+      "overflow": false,
+      "small": 12,
+      "theme": "dark"
+    },
+    {
+      "width": 760,
+      "overflow": false,
+      "small": 12,
+      "theme": "dark"
+    },
+    {
+      "width": 600,
+      "overflow": false,
+      "small": 12,
+      "theme": "dark"
+    }
+  ]
+}

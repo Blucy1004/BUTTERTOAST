@@ -88,14 +88,14 @@ try {
   await fs.cp(path.join(root, 'docs', 'SECURITY-VALIDATION.md'), path.join(output, 'SECURITY-VALIDATION.md'));
   await fs.cp(path.join(root,'docs'),path.join(output,'docs'),{recursive:true});
   await fs.cp(path.join(root,'README.md'),path.join(output,'README.md'));
-  await fs.writeFile(path.join(output,'LATEST-VALIDATION.md'),'# Latest validation\n\n[0.4.2 file transfers](docs/FILE-TRANSFER-0.4.2.md) · [Toast Torture QA and measured results](docs/QA/TOAST-TORTURE-REPORT.md) · [0.4 implementation](docs/GOLDEN-TOAST-0.4.md)\n');
+  await fs.writeFile(path.join(output,'LATEST-VALIDATION.md'),'# Latest validation\n\n[0.5.0 Golden Crust](docs/GOLDEN-CRUST-0.5.md) · [0.5.0 QA](docs/QA/GOLDEN-CRUST-REPORT.md) · [0.4.2 file transfers](docs/FILE-TRANSFER-0.4.2.md) · [Toast Torture QA and measured results](docs/QA/TOAST-TORTURE-REPORT.md) · [0.4 implementation](docs/GOLDEN-TOAST-0.4.md)\n');
   await fs.cp(path.join(root, 'src', 'fonts','OFL-Pretendard.txt'), path.join(output, 'OFL-Pretendard.txt'));
   await fs.cp(path.join(root, 'src', 'fonts','README.md'), path.join(output, 'FONT-NOTICE.md'));
   await fs.cp(path.join(root, 'docs', 'IMPLEMENTATION-STATUS.md'), path.join(output, 'IMPLEMENTATION-STATUS.md'));
   await fs.cp(path.join(root, 'docs', 'WINDOWS-TEST-BUILD.md'), path.join(output, 'READ-ME-FIRST.md'));
   await fs.cp(path.join(root, 'docs', 'DESIGN-IMPLEMENTATION.md'), path.join(output, 'DESIGN-IMPLEMENTATION.md'));
   await fs.mkdir(path.join(output, 'design'), {recursive:true});
-  for(const name of ['BRIEF.md','owner-layout.png','implemented-workspace.png','upgrade-workspace.png','profile-light-workspace.png','profile-settings.png','profile-appearance.png','golden-light-workspace.png','golden-dark-workspace.png']) await fs.cp(path.join(root,'docs','design',name),path.join(output,'design',name));
+  for(const name of ['BRIEF.md','owner-layout.png','implemented-workspace.png','upgrade-workspace.png','profile-light-workspace.png','profile-settings.png','profile-appearance.png','golden-light-workspace.png','golden-dark-workspace.png','crust-light-newtab.png','crust-dark-split.png','crust-command-bar.png']) await fs.cp(path.join(root,'docs','design',name),path.join(output,'design',name));
   await fs.cp(path.join(root,'docs','performance'),path.join(output,'performance'),{recursive:true});
   await fs.cp(path.join(root, 'artifacts', 'sbom.cdx.json'), path.join(output, 'SBOM.cdx.json'));
   console.log(`Verified Windows x64 test build: ${output}`);

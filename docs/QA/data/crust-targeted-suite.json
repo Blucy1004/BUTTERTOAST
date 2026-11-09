@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-11-09T13:08:11.331Z",
+  "results": [
+    {
+      "name": "provider",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 61311.33312,
+      "log": "provider-suite.log"
+    },
+    {
+      "name": "ai-dom",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 23055.210045,
+      "log": "ai-dom-suite.log"
+    },
+    {
+      "name": "blocked-renderer",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 5353.443325999993,
+      "log": "blocked-renderer-suite.log"
+    },
+    {
+      "name": "restore",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 7174.610837,
+      "log": "restore-suite.log"
+    },
+    {
+      "name": "native-browser",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 1774.871471999999,
+      "log": "native-browser-suite.log"
+    }
+  ],
+  "unverified": []
+}

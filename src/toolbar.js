@@ -2,13 +2,14 @@
 window.initToolbar = send => {
   const $ = id => document.getElementById(id);
   for (const id of ['back', 'forward', 'reload', 'stop', 'restart', 'suspend', 'privacy-toggle']) $(id).onclick = () => send(id);
-  let suggestTimer;
+  let suggestTimer,renderedActive;
   $('address').addEventListener('input',()=>{clearTimeout(suggestTimer);$('address-suggestions').replaceChildren();const query=$('address').value;suggestTimer=setTimeout(()=>send('suggest',{query:query.slice(0,256)}),100);});
   window.browser.onSuggestions(state=>{if(state.query!==$('address').value||document.activeElement!==$('address'))return;$('address-suggestions').replaceChildren(...state.items.map(item=>{const option=document.createElement('option');option.value=item.url;option.label=(item.source==='bookmark'?'북마크 · ':'방문 기록 · ')+item.title;return option;}));});
   $('address').addEventListener('blur',()=>{clearTimeout(suggestTimer);$('address-suggestions').replaceChildren();});
   $('address-form').onsubmit = event => { event.preventDefault(); send('navigate', { address: $('address').value }); $('address').blur(); };
   return state => {
-    if (document.activeElement !== $('address')) $('address').value = state.url;
+    if (document.activeElement !== $('address') || renderedActive !== state.active) $('address').value = state.url;
+    renderedActive=state.active;
     $('address').disabled = !state.initialized;
     $('back').disabled = !state.canBack; $('forward').disabled = !state.canForward;
     $('reload').disabled = !state.initialized || state.status === 'suspended';
