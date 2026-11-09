@@ -16,6 +16,7 @@ import { BrowserLibrary } from './browser/library';
 import { BrowserManager } from './browser/manager';
 import {DownloadStore} from './browser/download-store';
 import { DownloadManager } from './browser/downloads';
+import { showPageMenu } from './browser/file-menu';
 import { GoogleTheme } from './browser/theme';
 import { installSitePermissions } from './browser/permissions';
 import {BrowserUpdates} from './browser/updates';
@@ -125,7 +126,7 @@ function keyboard(wc: WebContents): void {
       if(isWebUrl(params.linkURL)&&params.linkURL.length<=4096){const url=params.linkURL;items.push({label:'링크를 새 탭에서 열기',click:()=>tabs.newTab(url)},{label:'링크를 새 창에서 열기',click:()=>extraWindows.open(url)});}
       if(params.isEditable)items.push({role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'});
       else if(params.selectionText)items.push({role:'copy'});
-      if(items.length)Menu.buildFromTemplate(items).popup({window});
+      showPageMenu(window,wc,params,items,()=>tabs.activeContents()===wc);
     });
   }
   wc.on('before-input-event', (event, input) => {
@@ -196,6 +197,7 @@ ipcMain.on('browser:command', (event, input: unknown) => {
     case 'workspace-drag': arranging=cmd.active;clearTimeout(arrangeTimer);if(arranging)arrangeTimer=setTimeout(endArrange,15000);emitState();break;
     case 'ai-next':ai.next();emitState();break;
     case 'manager-open': manager.open(); break;
+    case 'downloads-open': manager.open('downloads'); break;
     case 'bookmark': manager.bookmark(); break;
     case 'ai-toggle': if(workspace.rightCollapsed||!ai.isOpen()||(window.getContentSize()[0]<760&&!narrowToast)){narrowToast=true;ai.open();}else ai.toggle();break;
     case 'account-open': account.open(); break;
@@ -256,7 +258,7 @@ app.whenReady().then(async () => {
   updates=new BrowserUpdates(window,()=>manager?.emit());
   manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates,appearance);
   ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();},appearance);
-  extraWindows=new BrowserWindows(window,library,appearance);
+  extraWindows=new BrowserWindows(window,library,appearance,()=>manager.open('downloads'));
   tabMenu=new TabMenu(window,tabs,id=>{void ai.delegate(id);});
   window.on('resize', () => emitState());
   window.on('blur',endArrange);

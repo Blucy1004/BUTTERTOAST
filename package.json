@@ -1,6 +1,6 @@
 {
   "name": "buttertoast",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "description": "A security-first Chromium browser shell",
   "main": "dist/main.js",
@@ -16,7 +16,7 @@
     "test:toastir": "npm run build && node scripts/test-toastir.cjs",
     "test:browser": "npm run build && node scripts/test-browser.cjs",
     "test:extended": "npm run build && node scripts/test-extended.cjs",
-    "test:security": "npm test && node scripts/test-electron.cjs && node scripts/test-toastir.cjs && node scripts/test-browser.cjs && node scripts/test-extended.cjs && node scripts/test-account.cjs && node scripts/test-ai.cjs && node scripts/test-manager.cjs && node scripts/test-workspace.cjs && node scripts/test-upgrade.cjs && node scripts/test-profile.cjs && node scripts/test-golden.cjs && npm run audit:deps && npm run scan:secrets",
+    "test:security": "npm test && node scripts/test-electron.cjs && node scripts/test-toastir.cjs && node scripts/test-browser.cjs && node scripts/test-extended.cjs && node scripts/test-account.cjs && node scripts/test-ai.cjs && node scripts/test-manager.cjs && node scripts/test-workspace.cjs && node scripts/test-upgrade.cjs && node scripts/test-profile.cjs && node scripts/test-golden.cjs && node scripts/test-files.cjs && npm run audit:deps && npm run scan:secrets",
     "test:account": "npm run build && node scripts/test-account.cjs",
     "test:ai": "npm run build && node scripts/test-ai.cjs",
     "test:manager": "npm run build && node scripts/test-manager.cjs",
@@ -31,7 +31,8 @@
     "test:compatibility": "npm run build && node scripts/test-compatibility.cjs",
     "test:torture": "npm run build && node scripts/test-torture.cjs",
     "benchmark:torture": "npm run build && electron --disable-gpu test/torture/ir-benchmark.cjs",
-    "benchmark:torture:long": "npm run build && node scripts/torture-long.cjs"
+    "benchmark:torture:long": "npm run build && node scripts/torture-long.cjs",
+    "test:files": "npm run build && node scripts/test-files.cjs"
   },
   "devDependencies": {
     "@electron/asar": "4.3.1",

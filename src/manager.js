@@ -8,8 +8,41 @@ for(const el of document.querySelectorAll('[data-export]'))el.onclick=()=>send('
 function show(section) { if (!['bookmarks','history','downloads','settings','audit','support'].includes(section)) return; document.querySelectorAll('main > section').forEach(e => { e.hidden = e.id !== section; }); }
 for (const button of document.querySelectorAll('[data-section]')) button.onclick = () => show(button.dataset.section);
 for (const id of ['bookmark-current','history-clear','audit-clear','default-browser','clear-site-data','update-check','update-install']) $(id).onclick = () => send(id);
-function button(parent, label, fn) { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; parent.append(b); }
+function button(parent, label, fn) { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; parent.append(b); return b; }
 function row(parent, title, detail) { const e = document.createElement('div'); e.className = 'entry'; const t = document.createElement('div'); t.textContent = title; const d = document.createElement('div'); d.className = 'detail'; d.textContent = detail; e.append(t,d); parent.append(e); return e; }
+function bytes(value) {
+  if (!Number.isFinite(value) || value < 0) return '알 수 없음';
+  const units=['B','KiB','MiB','GiB','TiB'];let size=value,unit=0;
+  while(size>=1024&&unit<units.length-1){size/=1024;unit++;}
+  return `${unit?size.toFixed(1):size} ${units[unit]}`;
+}
+function downloads(items) {
+  const list=$('download-list'),existing=new Map([...list.children].map(e=>[e.dataset.id,e]));
+  const states={progressing:'다운로드 중',interrupted:'연결 중단',verifying:'파일 확인 중',completed:'완료',cancelled:'취소됨','interrupted-after-restart':'이전 실행에서 중단됨 · 사이트에서 다시 다운로드하세요'};
+  for(const item of [...items].reverse()){
+    let e=existing.get(item.id);existing.delete(item.id);
+    if(!e){e=row(list,'','');e.dataset.id=item.id;e.append(document.createElement('progress'),document.createElement('div'));}
+    const [title,detail,progress,actions]=e.children;
+    const live=['progressing','interrupted'].includes(item.state),percent=item.total>0?Math.min(100,Math.floor(item.received/item.total*100)):null;
+    const protection=item.protection==='marked'?' · Windows 인터넷 출처 표시됨':item.protection==='unavailable'?' · Windows 출처 표시를 기록하지 못함':'';
+    title.textContent=item.name;
+    detail.textContent=`${item.origin} · ${item.paused?'일시정지':states[item.state]||'상태 확인 중'} · ${bytes(item.received)} / ${item.total>0?bytes(item.total):'크기 미정'}${percent!==null?` (${percent}%)`:''}${protection}`;
+    progress.setAttribute('aria-label',`${item.name} 다운로드 진행률`);progress.max=item.total||1;
+    if(item.total>0)progress.value=item.received;else progress.removeAttribute('value');
+    progress.hidden=!live&&item.state!=='verifying'&&item.state!=='completed';
+    const choices=live?[[item.paused||item.state==='interrupted'?'resume':'pause',item.paused||item.state==='interrupted'?'계속':'일시정지'],['cancel','취소']]:item.state==='completed'?[['show','폴더에서 보기'],['remove','목록에서 제거']]:item.state==='verifying'?[]:[['remove','목록에서 제거']];
+    const signature=JSON.stringify([choices,item.canResume]);
+    if(actions.dataset.signature!==signature){
+      const focus=actions.contains(document.activeElement);actions.replaceChildren();actions.dataset.signature=signature;
+      for(const [action,label] of choices){const b=button(actions,label,()=>send('download',{id:item.id,action}));b.disabled=action==='resume'&&!item.canResume;if(b.disabled)b.title='이 전송은 재개할 수 없습니다. 사이트에서 다시 다운로드하세요.';}
+      if(focus)actions.querySelector('button:not(:disabled)')?.focus();
+    }
+    // Inserting only new entries keeps focused controls stable during progress updates.
+    if(!e.dataset.ordered){list.prepend(e);e.dataset.ordered='true';}
+  }
+  for(const e of existing.values())e.remove();
+  if(!items.length){const e=row(list,'다운로드한 파일이 없습니다.','웹사이트의 다운로드 버튼 또는 링크·이미지의 우클릭 메뉴를 사용하세요.');e.dataset.id='empty';}
+}
 function entries(kind) {
   const bookmark = kind === 'bookmarks', list = $(bookmark ? 'bookmark-list' : 'history-list'); list.replaceChildren();
   const query = $(bookmark ? 'bookmark-filter' : 'history-filter').value.toLocaleLowerCase();
@@ -34,9 +67,7 @@ window.manager.onState(state => {
   // Do not replace a bookmark title while the owner is editing it.
   if (!$('bookmark-list').contains(document.activeElement)) entries('bookmarks'); entries('history');
   $('download-storage').textContent=state.downloadStorage==='available'?'다운로드 기록 보호 저장 사용 중':state.downloadStorage==='failed'?'다운로드 기록 저장·복원을 확인하지 못했습니다.':'다운로드 기록은 이번 실행 동안만 유지됩니다.';
-  $('download-list').replaceChildren();
-  for (const item of state.downloads) { const protection=item.protection==='marked'?' · Windows 인터넷 출처 표시됨':item.protection==='unavailable'?' · Windows 출처 표시를 기록하지 못함':'';const e=row($('download-list'),item.name,`${item.origin} · ${item.state} · ${item.received} / ${item.total || '?'} bytes${protection}`); const live=['progressing','interrupted'].includes(item.state);
-    for (const [action,label] of (live ? [[item.paused || item.state==='interrupted'?'resume':'pause',item.paused || item.state==='interrupted'?'계속':'일시정지'],['cancel','취소']] : item.state==='completed' ? [['show','폴더에서 보기'],['remove','목록에서 제거']] : [['remove','목록에서 제거']])) button(e,label,() => send('download',{id:item.id,action})); }
+  downloads(state.downloads);
   $('permission-list').replaceChildren();
   for (const rule of state.permissions) { const e=row($('permission-list'),rule.origin,`${rule.permission}: ${rule.decision}`); for (const [decision,label] of [['ask','다시 묻기'],['deny','차단'],['allow','허용']]) button(e,label,() => send('permission',{origin:rule.origin,permission:rule.permission,decision})); }
   $('audit-list').replaceChildren(); for (const item of state.audit.slice(0,300)) row($('audit-list'),`${item.operation} · ${item.outcome}`,`${new Date(item.time).toLocaleString()} · ${item.origin}`);

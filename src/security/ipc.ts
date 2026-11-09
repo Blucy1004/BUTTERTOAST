@@ -1,4 +1,4 @@
-export type Command = { type: 'ready' | 'new' | 'back' | 'forward' | 'reload' | 'stop' | 'reopen' | 'restart' | 'suspend' | 'privacy-toggle' | 'account-open' | 'ai-toggle' | 'ai-next' | 'ai-stop-all' | 'manager-open' | 'bookmark' | 'workspace-resize-end' | 'find-open' | 'find-close' | 'theme-cycle' | 'reload-hard' | 'fullscreen' | 'new-window' | 'popup-open' }
+export type Command = { type: 'ready' | 'new' | 'back' | 'forward' | 'reload' | 'stop' | 'reopen' | 'restart' | 'suspend' | 'privacy-toggle' | 'account-open' | 'ai-toggle' | 'ai-next' | 'ai-stop-all' | 'downloads-open' | 'manager-open' | 'bookmark' | 'workspace-resize-end' | 'find-open' | 'find-close' | 'theme-cycle' | 'reload-hard' | 'fullscreen' | 'new-window' | 'popup-open' }
   | { type: 'move'; id: number; delta: -1 | 1 } | { type: 'select' | 'close' | 'delegate' | 'tab-menu'; id: number } | { type: 'navigate'; address: string }
   | {type:'suggest';query:string} | {type:'reorder';id:number;before:number} | {type:'find';text:string;forward:boolean;next:boolean} | {type:'zoom';direction:-1|0|1}
   | { type: 'workspace-toggle'; side: 'left' | 'right' }
@@ -14,7 +14,7 @@ export function exactKeys(value: Record<string, unknown>, keys: string[]): boole
 export function parseCommand(value: unknown): Command | null {
   if (!record(value)) return null;
   const type = value.type;
-  if (['ready', 'new', 'back', 'forward', 'reload', 'stop', 'reopen', 'restart', 'suspend', 'privacy-toggle', 'account-open', 'ai-toggle', 'ai-next', 'ai-stop-all', 'manager-open', 'bookmark', 'workspace-resize-end','find-open','find-close','theme-cycle','reload-hard','fullscreen','new-window','popup-open'].includes(type as string) && exactKeys(value, ['type'])) return value as Command;
+  if (['ready', 'new', 'back', 'forward', 'reload', 'stop', 'reopen', 'restart', 'suspend', 'privacy-toggle', 'account-open', 'ai-toggle', 'ai-next', 'ai-stop-all', 'downloads-open', 'manager-open', 'bookmark', 'workspace-resize-end','find-open','find-close','theme-cycle','reload-hard','fullscreen','new-window','popup-open'].includes(type as string) && exactKeys(value, ['type'])) return value as Command;
   if (['select','close','delegate','tab-menu'].includes(type as string) && exactKeys(value, ['type', 'id']) && Number.isSafeInteger(value.id) && (value.id as number) > 0) return value as Command;
   if(type==='suggest'&&exactKeys(value,['type','query'])&&typeof value.query==='string'&&value.query.length<=256&&!/[\u0000-\u001f\u007f]/.test(value.query))return value as Command;
   if(type==='reorder'&&exactKeys(value,['type','id','before'])&&[value.id,value.before].every(id=>Number.isSafeInteger(id)&&(id as number)>0))return value as Command;

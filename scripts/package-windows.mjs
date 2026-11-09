@@ -88,7 +88,7 @@ try {
   await fs.cp(path.join(root, 'docs', 'SECURITY-VALIDATION.md'), path.join(output, 'SECURITY-VALIDATION.md'));
   await fs.cp(path.join(root,'docs'),path.join(output,'docs'),{recursive:true});
   await fs.cp(path.join(root,'README.md'),path.join(output,'README.md'));
-  await fs.writeFile(path.join(output,'LATEST-VALIDATION.md'),'# Latest validation\n\n[Toast Torture QA and measured results](docs/QA/TOAST-TORTURE-REPORT.md) · [0.4 implementation](docs/GOLDEN-TOAST-0.4.md)\n');
+  await fs.writeFile(path.join(output,'LATEST-VALIDATION.md'),'# Latest validation\n\n[0.4.2 file transfers](docs/FILE-TRANSFER-0.4.2.md) · [Toast Torture QA and measured results](docs/QA/TOAST-TORTURE-REPORT.md) · [0.4 implementation](docs/GOLDEN-TOAST-0.4.md)\n');
   await fs.cp(path.join(root, 'src', 'fonts','OFL-Pretendard.txt'), path.join(output, 'OFL-Pretendard.txt'));
   await fs.cp(path.join(root, 'src', 'fonts','README.md'), path.join(output, 'FONT-NOTICE.md'));
   await fs.cp(path.join(root, 'docs', 'IMPLEMENTATION-STATUS.md'), path.join(output, 'IMPLEMENTATION-STATUS.md'));

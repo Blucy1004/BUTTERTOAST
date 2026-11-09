@@ -6,3 +6,4 @@ button,input,select { font:inherit; color:inherit; background:var(--surface); bo
 button { cursor:pointer; } button:hover { background:var(--hover); } button:disabled { opacity:.5; cursor:default; }
 label { display:block; margin:var(--spacing) 0; } .entry { padding:var(--spacing) 0; border-bottom:1px solid var(--border); overflow-wrap:anywhere; }
 .entry button { margin:4px; } .detail { color:var(--text); opacity:.8; font-size:var(--small-font); } #status { min-height:20px; } [hidden] { display:none !important; }
+#download-list progress { display:block; width:min(100%,420px); margin:var(--spacing) 0; accent-color:var(--accent); }

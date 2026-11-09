@@ -29,6 +29,7 @@ document.getElementById('delegate').onclick = () => current && send('delegate',{
 document.getElementById('account-open').onclick = () => send('account-open');
 document.getElementById('new').onclick = () => send('new');
 document.getElementById('manager-open').onclick = () => send('manager-open');
+document.getElementById('downloads-open').onclick = () => send('downloads-open');
 document.getElementById('bookmark').onclick = () => send('bookmark');
 document.getElementById('reopen').onclick = () => send('reopen');
 for (const [id, delta] of [['move-left', -1], ['move-right', 1]]) {
@@ -44,6 +45,7 @@ window.browser.onState(state => {
   document.getElementById('find-count').textContent=`${state.find.active} / ${state.find.matches}`;
   if(!state.find.open){clearTimeout(findTimer);document.getElementById('find-text').value='';}
   document.getElementById('manager-open').disabled = !state.initialized;
+  document.getElementById('downloads-open').disabled = !state.initialized;
   document.getElementById('bookmark').disabled = !state.initialized || !/^https?:/.test(state.url);
   document.getElementById('account-open').disabled = !state.initialized;
   document.getElementById('account-name').textContent = state.accountSignedIn ? state.accountProfile?.name||'프로필' : '로그인';

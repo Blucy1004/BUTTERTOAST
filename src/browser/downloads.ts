@@ -15,11 +15,15 @@ export class DownloadManager {
   storageStatus(){return this.store?.status??'unavailable';}
   private persist():void {this.store?.save([...this.entries.values()].map(({item,...entry})=>({...entry,paused:false})));}
   async flush():Promise<void>{this.persist();await this.store?.flush();}
-  snapshot() { return [...this.entries.values()].reverse().map(({ item, path: _path, ...entry }) => entry); }
+  snapshot() { return [...this.entries.values()].reverse().map(({ item, path: _path, ...entry }) => {
+    let canResume = false;
+    try { canResume = !!item && ['progressing','interrupted'].includes(entry.state) && (item.isPaused() || item.canResume()); } catch {}
+    return { ...entry, canResume };
+  }); }
   /** Called synchronously from will-download so no bytes are written before a native destination decision. */
   accept = (event: Electron.Event, item: DownloadItem, wc: WebContents): void => {
     const chain = item.getURLChain();
-    if (this.disposed || !wc || wc.isDestroyed() || wc.isCrashed() || wc !== this.active()&&!this.additionalActive?.(wc) || !safeDownloadChain(chain) || this.prompting || this.parent.isDestroyed()
+    if (this.disposed || !wc || wc.isDestroyed() || wc.isCrashed() || wc !== this.active()&&!this.additionalActive?.(wc) || !safeDownloadChain(chain, wc.getURL()) || item.getURL() !== chain.at(-1) || this.prompting || this.parent.isDestroyed()
       || Date.now() - this.lastPrompt < 1500 || [...this.entries.values()].filter(e => ['progressing', 'interrupted'].includes(e.state)).length >= 5) { event.preventDefault(); return; }
     this.prompting = true; this.lastPrompt = Date.now();
     const name = safeDownloadName(item.getFilename()), origin = new URL(item.getURL()).origin;
@@ -28,10 +32,10 @@ export class DownloadManager {
     const revoke=()=>{revoked=true;};
     wc.on('did-start-navigation',navigation);wc.on('destroyed',revoke);wc.on('render-process-gone',revoke);
     const valid=()=>!revoked&&!this.disposed&&!this.parent.isDestroyed()&&!wc.isDestroyed()&&!wc.isCrashed()&&(wc===this.active()||this.additionalActive?.(wc))&&wc.getURL()===sourceUrl&&wc.mainFrame===frame
-      &&safeDownloadChain(item.getURLChain())&&JSON.stringify(item.getURLChain())===JSON.stringify(chain)&&item.getURL()===chain.at(-1);
+      &&safeDownloadChain(item.getURLChain(),sourceUrl)&&JSON.stringify(item.getURLChain())===JSON.stringify(chain)&&item.getURL()===chain.at(-1);
     try {
       const response = dialog.showMessageBoxSync(this.parent, { type: 'warning', title: '파일 다운로드', message: `${name} 파일을 저장할까요?`,
-        detail: `제공 사이트: ${origin}\n${executableName(name) ? '실행 가능한 파일입니다. 신뢰하는 출처인지 확인하세요.\n' : ''}다운로드 후 자동으로 열거나 실행하지 않습니다.`,
+        detail: `제공 사이트: ${origin}\n${chain[0].startsWith('blob:')?'이 웹페이지가 생성한 파일입니다.\n':''}${executableName(name) ? '실행 가능한 파일입니다. 신뢰하는 출처인지 확인하세요.\n' : ''}다운로드 후 자동으로 열거나 실행하지 않습니다.`,
         buttons: ['취소', '저장 위치 선택'], defaultId: 0, cancelId: 0, noLink: true });
       if (response !== 1 || !valid()) { event.preventDefault(); return; }
       const destination = dialog.showSaveDialogSync(this.parent, { title: '다운로드 저장', defaultPath: path.join(app.getPath('downloads'), name), properties: ['showOverwriteConfirmation'] });
@@ -49,6 +53,7 @@ export class DownloadManager {
       this.entries.set(entry.id, entry);this.persist();
       item.on('updated', (_e, state) => { entry.state = state; entry.received = item.getReceivedBytes(); entry.total = item.getTotalBytes(); entry.paused = item.isPaused(); this.changed(); });
       item.once('done', (_e, state) => { entry.state = state==='completed'?'verifying':state;entry.paused=false;
+        entry.received=item.getReceivedBytes();entry.total=item.getTotalBytes();entry.item=undefined;
         if(state==='completed')void this.completed(entry);else {this.persist();this.changed();}
       }); this.changed();
     } catch { event.preventDefault(); } finally { this.prompting = false;wc.removeListener('did-start-navigation',navigation);wc.removeListener('destroyed',revoke);wc.removeListener('render-process-gone',revoke); }
@@ -64,11 +69,12 @@ export class DownloadManager {
     const entry = this.entries.get(id); if (!entry) return;
     try {
       if (action === 'show' && entry.state === 'completed') shell.showItemInFolder(entry.path);
-      if (action === 'remove' && !['progressing', 'interrupted'].includes(entry.state)) this.entries.delete(id);
+      if (action === 'remove' && !['progressing', 'interrupted', 'verifying'].includes(entry.state)) this.entries.delete(id);
       if (['progressing', 'interrupted'].includes(entry.state)) {
         if (action === 'cancel') entry.item?.cancel();
         if (action === 'pause') entry.item?.pause();
-        if (action === 'resume' && entry.item?.canResume()) entry.item?.resume();
+        if (action === 'resume' && (entry.item?.isPaused() || entry.item?.canResume())) entry.item?.resume();
+        if (entry.item) entry.paused=entry.item.isPaused();
       }
       this.persist();this.changed();
     } catch { /* Completed native items no longer expose live methods. */ }

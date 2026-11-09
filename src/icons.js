@@ -4,6 +4,7 @@
   const paths = Object.freeze({
     plus: 'M12 5v14M5 12h14',
     minus: 'M5 12h14',
+    download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
     close: 'm6 6 12 12M6 18 18 6',
     'arrow-left': 'M19 12H5m6-6-6 6 6 6',
     'arrow-right': 'M5 12h14m-6-6 6 6-6 6',

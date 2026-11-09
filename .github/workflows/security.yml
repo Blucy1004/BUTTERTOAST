@@ -46,6 +46,14 @@ jobs:
       - run: npm run test:golden
       - run: npm run test:compatibility
       - run: npm run test:profile
+      - run: npm run test:files
+      - name: Preserve file transfer results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: files-${{ matrix.os }}
+          path: artifacts/file-transfer/results.json
+          if-no-files-found: ignore
       - name: Run Mock AI and ToastIR defect regressions
         run: npm run test:torture
       - name: Preserve targeted regression results

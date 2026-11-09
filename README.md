@@ -90,6 +90,8 @@ Security tests cover malicious page fixtures, element substitution, forged IPC, 
 
 ## Download and run
 
+The current source is **0.4.2**, with a downloads shortcut, link/image saving, same-origin Blob exports and validated website file uploads. See [file transfer behavior and tests](docs/FILE-TRANSFER-0.4.2.md). These changes are not included in the previously published 0.4.1 download below.
+
 The **0.4.1 development preview** fixes ToastIR renderer timeouts, Shadow DOM input events and approved navigation recovery. See the [release and downloads](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.4.1-dev.1) and [Toast Torture QA report](docs/QA/TOAST-TORTURE-REPORT.md) for validation results and remaining limits.
 
 - [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.4.1-dev.1/ButterToast-0.4.1-Setup-x64.exe)
