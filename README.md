@@ -10,11 +10,11 @@ ButterToast is a Chromium-based desktop browser that gives people and AI assista
 
 **Development preview · Windows 11 x64 · Electron / TypeScript**
 
-[Download](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [AI connection guide](docs/AI-CONNECTION.md)
+[Published 0.3 download](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1) · [0.4 source changes](docs/GOLDEN-TOAST-0.4.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [AI connection guide](docs/AI-CONNECTION.md)
 
-![ButterToast browser workspace in the dawn light theme](docs/design/profile-light-workspace.png)
+![ButterToast browser workspace in the dawn light theme](docs/design/golden-light-workspace.png)
 
-Actual application screenshot with a local test profile. [Profiles and appearance settings](docs/PROFILE-THEMES-0.3.md).
+Actual 0.4 application UI in a fresh local profile. [Dark theme](docs/design/golden-dark-workspace.png) · [Current validation](docs/GOLDEN-TOAST-0.4.md).
 
 ## How it works
 
@@ -32,14 +32,14 @@ AI models propose structured actions. The application checks their scope, docume
 
 | Area | Implemented capabilities |
 | --- | --- |
-| Browsing | Multiple tabs, navigation, tab search, pinning, muting, address duplication, reopening, session restoration, page search and zoom |
-| Browser management | Bookmarks, history, download approval and progress, site permissions, privacy settings and search-provider selection |
+| Browsing | Tabs and drag ordering, local address suggestions, pinning, muting, reopening, session restoration, page search, zoom, hard reload, additional browsing windows and opt-in memory saving |
+| Browser management | Bookmarks/history imports, encrypted download history, native download/popup approval, site permissions, privacy settings and search-provider selection |
 | AI connections | OpenAI, Anthropic Claude, Google Gemini, OpenAI-compatible endpoints and supported local model servers |
 | AI collaboration | Three independent model workspaces, explicit page sharing, per-action approval, bounded multi-step tasks, handoff and emergency stop |
-| Accounts | Supabase email sign-up, email confirmation, sign-in, sign-out, password recovery and password changes |
+| Accounts | Supabase email sign-up, email confirmation, sign-in, sign-out, password recovery, password changes, opt-in remembered login and other-session sign-out |
 | Profiles and appearance | Account nickname, bio and six vector avatars; dark/light/system themes, accents, backgrounds, text size, spacing, corners and reduced effects; local preview and account save/reload |
 | Reliability | Human-tab restart, suspended-tab restoration and consent-based recovery of AI task pages in a fresh isolated session |
-| Usage visibility | Provider-reported token usage, user-configured cost estimates, request limits and optional encrypted conversation archives |
+| Usage visibility | Provider-reported token usage, user-configured cost estimates, ToastIR capture/payload metrics and optional encrypted conversation archives |
 
 Search opens the selected search engine's normal results page. The optional Google theme applies local styling to supported search pages.
 ButterToast is an independently developed project. This repository does not claim approval, certification or endorsement by OpenAI or other model providers.
@@ -58,8 +58,8 @@ ButterToast is an independently developed project. This repository does not clai
 | --- | --- |
 | Model API keys | Kept in the main process; optionally saved using OS-protected encryption. Sent to the selected provider or configured endpoint. Not stored in Supabase. |
 | Prompts and shared page context | Sent to the selected model provider when the user submits a request. Page sharing is explicit; bounded workflows require separate consent. |
-| ButterToast account credentials | Sent over HTTPS to Supabase Auth for the requested authentication operation. Access and refresh tokens remain in main-process memory. |
-| Account profile and appearance | Name, bio, preset avatar and appearance choices are saved to the signed-in user's Supabase Auth metadata. Read on sign-in or explicit reload; no real-time cross-device updates. |
+| ButterToast account credentials | Sent over HTTPS to Supabase Auth for the requested authentication operation. Access tokens remain in main-process memory. Remembered login is opt-in and stores only refresh credentials and identity binding with OS encryption. |
+| Account profile and appearance | Local OS-protected storage by default. Per-account/device opt-in enables Supabase Auth metadata reads/writes; disabling stops future profile sync but leaves existing server data. No real-time cross-device updates. |
 | Bookmarks, history and device settings | Managed locally; persisted using OS-protected encryption when available. Guest appearance also stays on this device. |
 | Conversation archives | Saved locally only on explicit request, using OS-protected encryption. |
 | AI action audit records | Limited to metadata such as time, site origin, action and outcome; input values and API keys are excluded. |
@@ -86,11 +86,11 @@ Model responses and webpage content are treated as untrusted input. The model ca
 
 Downloads require native confirmation and a destination selected by the user. Redirect chains and filenames are checked, and Windows downloads receive Internet-zone metadata when the filesystem supports it. These controls do not replace malware scanning.
 
-Security tests cover malicious page fixtures, element substitution, forged IPC, approval bypass attempts, session isolation, cancellation races, renderer crashes, profile injection and update tampering. Results and remaining risks are documented in [Security](SECURITY.md), [implementation status](docs/IMPLEMENTATION-STATUS.md) and [0.3 validation notes](docs/PROFILE-THEMES-0.3.md).
+Security tests cover malicious page fixtures, element substitution, forged IPC, approval bypass attempts, session isolation, cancellation races, renderer crashes, profile injection and update tampering. Results and remaining risks are documented in [Security](SECURITY.md), [implementation status](docs/IMPLEMENTATION-STATUS.md) and [0.4 validation notes](docs/GOLDEN-TOAST-0.4.md).
 
 ## Download and run
 
-The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
+**Source version 0.4.0 is prepared locally and has not been published as a new release.** The current downloadable preview is [**v0.3.0-dev.1**](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1).
 
 - [Windows installer](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Setup-x64.exe)
 - [Windows portable ZIP](https://github.com/Blucy1004/BUTTERTOAST/releases/download/v0.3.0-dev.1/ButterToast-0.3.0-Windows-x64.zip)
@@ -116,6 +116,8 @@ Validation and packaging:
 npm test
 npm run test:security
 npm run benchmark
+# Optional Chrome comparison: see docs/performance/GOLDEN-TOAST-0.4.md
+npm run benchmark:golden
 npm run package:win
 # Requires NSIS / makensis
 npm run package:installer
@@ -127,11 +129,13 @@ The CI workflow runs security regressions on Windows and Ubuntu. Packaging verif
 
 ## Project status
 
-ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The linked release's feature and validation record is available in [the 0.3 notes](docs/PROFILE-THEMES-0.3.md). Profile saving and account switching have local fixture coverage; live Supabase profile writes and reads from another device still need validation.
+ButterToast is in active development. Implemented behavior, local fixture tests, CI validation and live-service validation are tracked separately. The source changes and current tests are in [the 0.4 notes](docs/GOLDEN-TOAST-0.4.md); the separately linked published download still has [0.3 behavior](docs/PROFILE-THEMES-0.3.md). Profile saving and account switching have local fixture coverage; live Supabase profile writes and reads from another device still need validation.
 
 Live model inference and complex website task success, production email delivery, end-user Windows installation, Authenticode signing and an operational update service require further validation or configuration. Automatic updates are currently disabled. Passing tests does not establish that a browser is free of vulnerabilities or that every prompt-injection attempt is prevented.
 
-Performance targets in the project requirements are goals, not measured guarantees. The project owner retains final UI/UX direction; browser logic and replaceable UI components remain separated.
+Core browsing, BYOK, ToastIR and basic task history remain free, without plan-based artificial delay. Paid plans and payments are not active. The official ChatGPT connection remains disabled pending eligibility/approval and implementation; see the [official integration investigation](docs/CHATGPT-OFFICIAL-INTEGRATION.md).
+
+Performance targets in the project requirements are goals, not measured guarantees. [Local measurements and their limits](docs/performance/GOLDEN-TOAST-0.4.md) include 10/25/50 tabs and an official Chrome reference; they do not establish Chrome parity. The project owner retains final UI/UX direction; browser logic and replaceable UI components remain separated.
 
 ## Third-party notices
 

@@ -20,6 +20,8 @@
   el('workflow-form').onsubmit = event => {event.preventDefault();send('run-task',{goal:el('goal').value,steps:Number(el('steps').value)});};
   el('choose-model').onclick = () => send('model', { model: el('model').value.trim() });
   el('task-form').onsubmit = event => { event.preventDefault(); send('task-open', { url: el('task-url').value }); };
+  el('prompt').ondragover=event=>{if(event.isTrusted)event.preventDefault();};
+  el('prompt').ondrop=event=>{if(!event.isTrusted)return;event.preventDefault();const data=event.dataTransfer;if(!data||data.files.length){el('drag-message').textContent='파일·이미지 드래그는 아직 지원하지 않습니다. 웹사이트 파일 업로드는 해당 페이지의 파일 선택을 사용하세요.';return;}const text=(data.getData('text/uri-list')||data.getData('text/plain')).trim();if(!text||text.length>12000){el('drag-message').textContent='텍스트 또는 웹 링크를 12,000자 이내로 전달해 주세요.';return;}if(data.types.includes('text/uri-list')){try{const url=new URL(text.split(/\r?\n/).find(line=>!line.startsWith('#'))||'');if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw Error();}catch{el('drag-message').textContent='HTTP 또는 HTTPS 웹 링크만 지원합니다.';return;}}el('prompt').value=text;el('drag-message').textContent='입력란에만 넣었습니다. 내용을 확인한 뒤 전송하세요.';};
   el('chat-form').onsubmit = event => { event.preventDefault(); if (!state || state.busy || !state.connected) return; const text = el('prompt').value.trim(); if (!text) return; el('prompt').value = ''; send('send', { text }); };
   window.ai.onState(next => {
     state = next; settings(state);
@@ -36,6 +38,7 @@
     }
     el('save-chat').disabled=state.busy||!state.storageAvailable;el('load-chat').disabled=state.busy||!state.storageAvailable;el('delete-chat').disabled=state.busy;
     el('cost').textContent = `${state.options.inputPrice > 0 || state.options.outputPrice > 0 ? '추정 누적 $'+state.estimatedCost.toFixed(6) : '단가 미설정'} · 컨텍스트 잔여 ${state.contextRemaining === null ? '모름' : state.contextRemaining+' 토큰 (입력 한도 기준)'}`;
+    const metrics=state.metrics;if(metrics)el('ir-metrics').textContent=`ToastIR 수집 ${metrics.captureMs.toFixed(1)}ms · 이번 페이지 ${metrics.contextBytes.toLocaleString()}B (${metrics.frame==='delta'?'변경분':'전체'}) · 모델 응답 ${(metrics.modelMs/1000).toFixed(2)}초 · 동작 ${metrics.actions}회 / 확인 실패 ${metrics.failures}회`;
     el('workflow-status').textContent=state.workflow ? `${state.workflow.status} · ${state.workflow.step}/${state.workflow.limit} 단계 · ${state.workflow.origin}` : '작업 없음';
     el('continue-task').disabled=state.busy || state.workflow?.status!=='paused';
     el('run-task').disabled=state.busy || !state.connected;
@@ -44,7 +47,7 @@
     for (const id of ['share-human', 'share-task', 'task-open', 'approve']) el(id).disabled = state.busy;
     el('context').hidden = !state.context;
     el('context-origin').textContent = state.context ? `${state.context.source === 'human' ? '현재 탭 읽기' : state.context.source === 'controlled' ? '현재 탭 제어 공유' : 'AI 작업'} · ${state.context.origin}` : '';
-    el('context-preview').textContent = state.context ? `${state.context.text}\n\n${state.context.elements.map(e => `[${e.id}] ${e.name}`).join('\n')}` : '';
+    el('context-preview').textContent = state.context ? `${state.context.truncated?'[수집 한도에 따라 페이지 일부만 포함됩니다]\n':''}${state.context.text}\n\n${state.context.elements.map(e => `[${e.id}] ${e.name}`).join('\n')}` : '';
     el('proposal').hidden = !state.proposal;
     el('proposal-description').textContent = state.proposal ? `${state.proposal.origin}\n${state.proposal.action?.op || "CLICK"} 제안: ${state.proposal.name}\n${state.proposal.action?.value || ""}` : '';
     el('ai-message').textContent = state.message;

@@ -1,5 +1,7 @@
 # 오너 디자인 적용 — 2026-11-08
 
+> 과거 버전의 구현/검증 기록입니다. 현재 0.4 변경 사항·보안 범위·최신 검사 수치는 [Golden Toast 기록](GOLDEN-TOAST-0.4.md)을 참고하세요.
+
 입력은 `ButterToast_Codex_Design_Brief.html`과 “중앙에서 벗어나거나 매끄럽지 않은 선·디자인은 수정해도 된다”는 후속 요청이다. [브리프](design/BRIEF.md)의 수정된 시안을 기준으로 기존 브라우저·계정·AI 구현을 유지했다. 오너의 왼쪽 Butter / 중앙 Browser / 오른쪽 Toast 역할을 보존한다.
 
 ![적용한 3패널 화면](design/implemented-workspace.png)

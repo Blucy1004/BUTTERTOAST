@@ -1,0 +1,77 @@
+{
+  "engine": "Google Chrome for Testing",
+  "version": "157.0.8103.38",
+  "readyMs": 399.92236599999995,
+  "results": [
+    {
+      "tabs": 10,
+      "load": {
+        "samples": 10,
+        "medianMs": 83.40791100000001,
+        "p95Ms": 105.30619200000001
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 49.99951699999997,
+        "p95Ms": 57.72042599999986
+      },
+      "memory": {
+        "processes": 21,
+        "rssMiB": 2679.234375,
+        "pssMiB": 599.060546875,
+        "privateMiB": 363.48828125,
+        "pssProcesses": 21,
+        "cpuTicks": 354,
+        "idleCpuPercent": 5.842957658423033,
+        "intervalMs": 1026.8772
+      }
+    },
+    {
+      "tabs": 25,
+      "load": {
+        "samples": 15,
+        "medianMs": 76.48657300000013,
+        "p95Ms": 100.84694899999977
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 35.28221399999984,
+        "p95Ms": 47.81304799999998
+      },
+      "memory": {
+        "processes": 36,
+        "rssMiB": 4887.21875,
+        "pssMiB": 885.1044921875,
+        "privateMiB": 597.57421875,
+        "pssProcesses": 36,
+        "cpuTicks": 711,
+        "idleCpuPercent": 6.689938739934688,
+        "intervalMs": 1046.3473990000002
+      }
+    },
+    {
+      "tabs": 50,
+      "load": {
+        "samples": 25,
+        "medianMs": 82.65712600000006,
+        "p95Ms": 97.52208700000028
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 49.637831000000006,
+        "p95Ms": 52.167937000000165
+      },
+      "memory": {
+        "processes": 61,
+        "rssMiB": 8562.375,
+        "pssMiB": 1358.6025390625,
+        "privateMiB": 985.08203125,
+        "pssProcesses": 61,
+        "cpuTicks": 1293,
+        "idleCpuPercent": 8.439389579326823,
+        "intervalMs": 1066.4278399999985
+      }
+    }
+  ],
+  "generatedAt": "2026-11-09T00:16:38.588Z"
+}

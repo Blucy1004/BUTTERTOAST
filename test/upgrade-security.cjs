@@ -1,4 +1,5 @@
 // Production browser + local HTTPS protocol fixtures. No live models, keys or public attacks.
+const modelContext=require('./fixtures/model-context.cjs');
 const {app,BrowserWindow,webContents,session,dialog,Menu}=require('electron');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict');
 const {EventEmitter}=require('node:events');
@@ -84,7 +85,7 @@ app.whenReady().then(async()=>{
  const pending=[];let callCount=0,replyMode='deferred';
  async function respond(request){if(request.method==='GET')return Response.json({data:[{id:'gpt-fixture'}]});callCount++;const body=await request.json();
    if(replyMode==='deferred')await new Promise(resolve=>pending.push(resolve));
-   const context=JSON.parse(body.messages.at(-1).content).untrusted_page_context;
+   const context=modelContext(body.messages);
    return Response.json({choices:[{message:{content:JSON.stringify({reply:'fixture reply',action:replyMode==='action'?{op:'CLICK',target:context.elements.find(e=>e.actions.includes('CLICK')).id,value:''}:null})}}],usage:{prompt_tokens:10,completion_tokens:4}});
  }
  async function connect(wc,partition){const net=session.fromPartition(partition);try{net.protocol.unhandle('https')}catch{}net.protocol.handle('https',respond);await aisend(wc,{type:'connect',provider:'openai',endpoint:'https://api.openai.com/v1',key:'fixture-key-not-real',remember:false});await until(async()=>(await aistate(wc)).connected,'model connected');}

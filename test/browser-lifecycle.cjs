@@ -85,17 +85,17 @@ app.whenReady().then(async()=>{
   await until(()=>manager.state().url===longUrl,'live address must not retain previous URL');
   assert.equal(manager.snapshot().tabs.at(-1).url,'');
   console.log('PASS overlong page-controlled URL updates address display but is excluded from restore');
-  // Keep logical tabs while releasing all their WebContents; creation is bounded to 30.
+  // Keep logical tabs while releasing all their WebContents; creation is bounded to 64.
   while(manager.state().tabs.length<8)manager.newTab();
   const retained=manager.state().tabs.map(t=>t.id);
   for(const id of retained){manager.select(id);manager.suspend();}
   await until(()=>created.every(w=>w.isDestroyed()),'all suspended contents released');
   assert.equal(manager.state().tabs.length,8);
   manager.select(retained[0]);assert.equal(created.filter(w=>!w.isDestroyed()).length,1);
-  while(manager.state().tabs.length<30){manager.newTab();manager.suspend();}
-  manager.newTab();assert.equal(manager.state().tabs.length,30);
+  while(manager.state().tabs.length<64){manager.newTab();manager.suspend();}
+  manager.newTab();assert.equal(manager.state().tabs.length,64);
   manager.dispose();await until(()=>created.every(w=>w.isDestroyed()),'disposed contents released');
-  console.log('PASS eight tabs release all contents; one selection recreates only one; 30-tab limit holds');
+  console.log('PASS eight tabs release all contents; one selection recreates only one; 64-tab limit holds');
   // Controlled local tracker root avoids any request to real advertising services.
   const privacySession=session.fromPartition('privacy-test');hardenSession(privacySession);
   const privacy=installPrivacy(privacySession,['localhost']);

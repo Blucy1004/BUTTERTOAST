@@ -9,7 +9,7 @@ const email='profile@example.test',id='11111111-1111-4111-8111-111111111111';
 const profile=()=>({...defaultProfile(),name:'새벽 여행자',bio:'나만의 브라우저',avatar:'sun',appearance:{...defaultAppearance(),theme:'light',accent:'violet'}});
 const user=(p=profile(),extra={})=>({id,email,email_confirmed_at:'2026-11-08T00:00:00Z',user_metadata:{[PROFILE_KEY]:p,external_role:'admin',unrelated:'preserved-on-server'},...extra});
 const token=(u=user())=>({access_token:'fixture-access-profile-not-live',refresh_token:'fixture-refresh-not-live',expires_in:3600,token_type:'bearer',user:u});
-function harness(handler){let now=Date.now();const calls=[];const service=new AuthService({request:async(...args)=>{calls.push(args);return handler(...args)}},()=>{},undefined,()=>now);return {service,calls,advance:()=>now+=61000};}
+function harness(handler){let now=Date.now();const calls=[];const service=new AuthService({request:async(...args)=>{calls.push(args);return handler(...args)}},()=>{},undefined,()=>now,{available:false,profile:()=>({profile:defaultProfile(),sync:true}),saveProfile:async()=>{},saveSession:async()=>{},loadSession:async()=>null,flush:async()=>{}});return {service,calls,advance:()=>now+=61000};}
 const login=h=>h.service.command({type:'login',email,password:'fixture-password'});
 const save=(h,p=profile())=>h.service.command({type:'profile-save',revision:h.service.publicState().profileRevision,profile:p});
 

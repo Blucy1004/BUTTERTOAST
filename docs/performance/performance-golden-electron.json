@@ -1,0 +1,187 @@
+{
+  "engine": "ButterToast browser core",
+  "version": "0.4.0",
+  "electron": "45.2.3",
+  "chromium": "156.0.8078.80",
+  "readyMs": 81.92251100000001,
+  "results": [
+    {
+      "tabs": 10,
+      "load": {
+        "samples": 10,
+        "medianMs": 64.17732500000005,
+        "p95Ms": 92.07203299999998
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 16.618707000000086,
+        "p95Ms": 18.43558299999995
+      },
+      "memory": {
+        "processes": 18,
+        "rssMiB": 812.37109375,
+        "pssMiB": 305.7705078125,
+        "privateMiB": 206.234375,
+        "pssProcesses": 18,
+        "cpuTicks": 174,
+        "idleCpuPercent": 5.867898276967268,
+        "intervalMs": 1022.5126130000001
+      }
+    },
+    {
+      "tabs": 25,
+      "load": {
+        "samples": 15,
+        "medianMs": 68.01340699999992,
+        "p95Ms": 98.45483700000023
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 16.693391999999676,
+        "p95Ms": 32.098111000000245
+      },
+      "memory": {
+        "processes": 33,
+        "rssMiB": 1498.33203125,
+        "pssMiB": 487.029296875,
+        "privateMiB": 381.82421875,
+        "pssProcesses": 33,
+        "cpuTicks": 367,
+        "idleCpuPercent": 3.8898514083083042,
+        "intervalMs": 1028.3169149999999
+      }
+    },
+    {
+      "tabs": 50,
+      "load": {
+        "samples": 25,
+        "medianMs": 85.65775099999973,
+        "p95Ms": 108.25758799999949
+      },
+      "switch": {
+        "samples": 10,
+        "medianMs": 17.95398699999987,
+        "p95Ms": 58.61585399999967
+      },
+      "memory": {
+        "processes": 58,
+        "rssMiB": 2630.47265625,
+        "pssMiB": 784.5419921875,
+        "privateMiB": 678.4140625,
+        "pssProcesses": 58,
+        "cpuTicks": 744,
+        "idleCpuPercent": 5.77740127566349,
+        "intervalMs": 1038.5292129999998
+      }
+    }
+  ],
+  "toastir": {
+    "capture": {
+      "samples": 12,
+      "medianMs": 17.930216999999175,
+      "p95Ms": 43.78292699999838
+    },
+    "rawDomCapture": {
+      "samples": 12,
+      "medianMs": 0.6915769999995973,
+      "p95Ms": 1.8782350000001315
+    },
+    "guardedDispatch": {
+      "samples": 12,
+      "medianMs": 41.520635000000766,
+      "p95Ms": 63.800288000000364
+    },
+    "directDomDispatch": {
+      "samples": 12,
+      "medianMs": 0.4024390000013227,
+      "p95Ms": 1.0909799999990355
+    },
+    "successes": 12,
+    "attempts": 12,
+    "retries": 0,
+    "fixtureApprovals": 12,
+    "realHumanApprovalTimeIncluded": false,
+    "htmlBytes": 33288,
+    "fullJsonBytes": [
+      101640,
+      101640,
+      101640,
+      101641,
+      101641,
+      101642,
+      101642,
+      101642,
+      101642,
+      101642,
+      101642,
+      101642
+    ],
+    "compactJsonBytes": [
+      27525,
+      27525,
+      27525,
+      27526,
+      27526,
+      27527,
+      27527,
+      27527,
+      27527,
+      27527,
+      27527,
+      27527
+    ],
+    "selectedFrameBytes": [
+      27525,
+      12948,
+      12948,
+      12949,
+      12950,
+      12951,
+      12951,
+      12951,
+      12951,
+      12951,
+      12951,
+      12951
+    ],
+    "captureStatistics": {
+      "visited": 607,
+      "elements": 362,
+      "textCharacters": 12000,
+      "shadowRoots": 0,
+      "framesSkipped": 0,
+      "truncated": true,
+      "captureMs": 8.799999999813735
+    },
+    "realModelTokens": null
+  },
+  "shortSoak": {
+    "durationMs": 8986.047988,
+    "switches": 60,
+    "crashes": 0
+  },
+  "memoryRelease": {
+    "logicalTabs": 50,
+    "before": {
+      "processes": 58,
+      "rssMiB": 2691.03515625,
+      "pssMiB": 817.400390625,
+      "privateMiB": 696.875,
+      "pssProcesses": 58,
+      "cpuTicks": 1026,
+      "idleCpuPercent": 4.827073863274118,
+      "intervalMs": 1035.824215999999
+    },
+    "after": {
+      "processes": 10,
+      "rssMiB": 396.25390625,
+      "pssMiB": null,
+      "privateMiB": null,
+      "pssProcesses": 9,
+      "cpuTicks": 506,
+      "idleCpuPercent": 0.9889830932756687,
+      "intervalMs": 1011.1396310000018
+    }
+  },
+  "generatedAt": "2026-11-09T00:16:28.246Z"
+}

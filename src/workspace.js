@@ -18,19 +18,22 @@ window.initWorkspace = send => {
   let gesture=null, suppressClick=false;
   const endDrag = () => { if(draggedId!==null){draggedId=null;$('drag-target').hidden=true;send('workspace-drag',{active:false});}gesture=null; };
   document.addEventListener('pointerdown',e=>{
-    const tab=e.target.closest?.('.tab');if(!tab||e.button!==0||!e.isTrusted||e.target!==tab.querySelector('button'))return;
-    gesture={id:Number(tab.dataset.tabId),x:e.clientX,y:e.clientY,element:e.target,pointer:e.pointerId};
-    e.target.setPointerCapture(e.pointerId);
+    const tab=e.target.closest?.('.tab');if(!tab||e.button!==0||!e.isTrusted||e.target.closest('button')!==tab.querySelector('button'))return;
+    gesture={id:Number(tab.dataset.tabId),x:e.clientX,y:e.clientY,element:tab.querySelector('button'),pointer:e.pointerId,kind:null};
+    gesture.element.setPointerCapture(e.pointerId);
   });
   document.addEventListener('pointermove',e=>{
     if(!gesture||e.pointerId!==gesture.pointer)return;
-    if(draggedId===null&&Math.abs(e.clientX-gesture.x)>10){draggedId=gesture.id;$('drag-target').hidden=false;send('workspace-drag',{active:true});}
+    if(draggedId===null&&Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y)>10){draggedId=gesture.id;gesture.kind=Math.abs(e.clientX-gesture.x)>Math.abs(e.clientY-gesture.y)?'delegate':'reorder';if(gesture.kind==='delegate'){$('drag-target').hidden=false;send('workspace-drag',{active:true});}}
     if(draggedId!==null)e.preventDefault();
   });
   document.addEventListener('pointerup',e=>{
     if(!gesture||e.pointerId!==gesture.pointer)return;
     const id=draggedId,rect=$('drag-target').getBoundingClientRect(),inside=e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom;
-    if(id!==null){suppressClick=true;setTimeout(()=>{suppressClick=false;},0);e.preventDefault();}endDrag();if(id!==null&&inside)send('delegate',{id});
+    const kind=gesture.kind,target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.tab');
+    if(id!==null){suppressClick=true;setTimeout(()=>{suppressClick=false;},0);e.preventDefault();}endDrag();
+    if(id!==null&&kind==='delegate'&&inside)send('delegate',{id});
+    if(id!==null&&kind==='reorder'&&target)send('reorder',{id,before:Number(target.dataset.tabId)});
   });
   document.addEventListener('click',e=>{if(suppressClick){e.stopImmediatePropagation();e.preventDefault();suppressClick=false;}},true);
   document.addEventListener('pointercancel',endDrag);

@@ -1,9 +1,10 @@
-import { BrowserWindow, ipcMain, session } from 'electron';
+import { BrowserWindow, ipcMain, session,dialog } from 'electron';
 import path from 'node:path';
 import { WEB_PREFERENCES, hardenSession } from '../security/electron';
 import { RateGate } from '../security/ipc';
 import { AuthApi } from './api';
 import { parseAuthConfig, PROJECT_URL, PUBLISHABLE_KEY } from './config';
+import type {AuthPersistence} from './storage';
 import { AuthService } from './service';
 import { parseAuthCommand } from './protocol';
 import { UiAppearance } from '../profile/appearance';
@@ -13,7 +14,7 @@ export class AccountWindow {
   private service: AuthService;
   private gate = new RateGate();
   private handler: (event: Electron.IpcMainEvent, input: unknown) => void;
-  constructor(private parent: BrowserWindow, changed: () => void,private appearance?:UiAppearance) {
+  constructor(private parent: BrowserWindow, changed: () => void,private appearance?:UiAppearance,persistence?:AuthPersistence) {
     const config = parseAuthConfig(process.env.BUTTERTOAST_SUPABASE_URL ?? PROJECT_URL,
       process.env.BUTTERTOAST_SUPABASE_PUBLISHABLE_KEY ?? PUBLISHABLE_KEY);
     const network = session.fromPartition('toast-auth-network'); hardenSession(network);
@@ -24,12 +25,14 @@ export class AccountWindow {
     });
     this.service = new AuthService(config ? new AuthApi(config, (url, options) => network.fetch(url, options)) : null, () => {
       this.emit(); changed();
-    });
+    },undefined,Date.now,persistence);
+    void this.service.restoreRemembered();
     this.handler = (event, input) => {
       const wc = this.window?.webContents;
       if (!wc || wc.isDestroyed() || event.sender !== wc || event.senderFrame !== wc.mainFrame || event.senderFrame?.url !== ACCOUNT_URL) return;
       const command = parseAuthCommand(input);
       if(command?.type==='logout'){void this.service.command(command);return;}
+      if(command?.type==='logout-others'){if(this.gate.allow())void this.service.confirmLogoutOthers(async()=>{const answer=await dialog.showMessageBox(this.window!,{type:'warning',message:'다른 기기에서 ButterToast 계정을 로그아웃할까요?',detail:'현재 기기의 로그인은 유지됩니다. 이미 발급된 접근 토큰은 만료까지 유효할 수 있습니다.',buttons:['취소','다른 기기 로그아웃'],defaultId:0,cancelId:0,noLink:true});return answer.response===1;});return;}
       if(!this.gate.allow())return;
       if (command) void this.service.command(command);
     };

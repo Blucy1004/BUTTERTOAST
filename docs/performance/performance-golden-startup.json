@@ -1,0 +1,19 @@
+{
+  "freshProfiles": true,
+  "osFilesystemCacheCleared": false,
+  "iterations": [
+    {
+      "entryToReadyMs": 337,
+      "spawnToReadyMs": 475
+    },
+    {
+      "entryToReadyMs": 342,
+      "spawnToReadyMs": 461
+    },
+    {
+      "entryToReadyMs": 312,
+      "spawnToReadyMs": 436
+    }
+  ],
+  "generatedAt": "2026-11-09T00:07:17.705Z"
+}

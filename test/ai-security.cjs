@@ -1,5 +1,6 @@
 // Authorized local fixtures: real main/UI/network adapter/controller/guard. No vendor calls or real keys.
 const {app,BrowserWindow,webContents,session,dialog}=require('electron');
+const modelContext=require('./fixtures/model-context.cjs');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 app.setPath('userData',fs.mkdtempSync(path.join(os.tmpdir(),'bt-ai-')));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -22,9 +23,9 @@ app.whenReady().then(async()=>{
   const body=request.method==='POST'?await request.json():null;calls.push({url:request.url,headers:Object.fromEntries(request.headers),body});
   if(url.pathname==='/v1/models')return Response.json({data:[{id:provider==='anthropic'?'claude-fixture':'gpt-fixture'}]});
   if(modelMode==='late')return new Promise(resolve=>{late=()=>resolve(Response.json(reply(provider,JSON.stringify({reply:'LATE_RESULT',action:null}))))});
-  const context=JSON.parse(body.messages.at(-1).content).untrusted_page_context;
+  const context=modelContext(body.messages);
   const action=modelMode==='click'&&context?{op:'CLICK',target:context.elements[0].id}:modelMode==='fill'&&context?{op:'FILL',target:context.elements.find(e=>e.actions.includes('FILL')).id,value:'APPROVED_FORM_TEXT'}:null;
-  return Response.json(reply(provider,JSON.stringify({reply:`Fixture reply <img src="https://exfil.invalid/"> ${key}`,action})));
+  return Response.json(reply(provider,JSON.stringify({reply:`Fixture reply <img src="https://exfil.invalid/"> ${key}`,action,done:modelMode==='text'})));
  });
  await ui.executeJavaScript('document.getElementById("ai-toggle").click()');
  await until(()=>webContents.getAllWebContents().some(w=>w.getURL()==='toast-ui://app/ai.html'),'AI panel opened');

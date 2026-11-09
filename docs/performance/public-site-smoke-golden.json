@@ -1,0 +1,104 @@
+{
+  "version": "0.4.0",
+  "scope": "Public landing-page rendering only; no login, video playback, editing or submission",
+  "results": [
+    {
+      "requested": "https://www.google.com/",
+      "finalOrigin": "https://www.google.com",
+      "httpStatus": 200,
+      "elapsedMs": 1357,
+      "title": "Google",
+      "ready": "complete",
+      "textCharacters": 155,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    },
+    {
+      "requested": "https://www.youtube.com/",
+      "httpStatus": null,
+      "elapsedMs": 43,
+      "outcome": "not-verified",
+      "reason": "ERR_TUNNEL_CONNECTION_FAILED"
+    },
+    {
+      "requested": "https://github.com/",
+      "finalOrigin": "https://github.com",
+      "httpStatus": 200,
+      "elapsedMs": 2345,
+      "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub",
+      "ready": "complete",
+      "textCharacters": 3383,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    },
+    {
+      "requested": "https://www.wikipedia.org/",
+      "finalOrigin": "https://www.wikipedia.org",
+      "httpStatus": 200,
+      "elapsedMs": 1192,
+      "title": "Wikipedia",
+      "ready": "complete",
+      "textCharacters": 4100,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    },
+    {
+      "requested": "https://docs.google.com/",
+      "finalOrigin": "https://accounts.google.com",
+      "httpStatus": 200,
+      "elapsedMs": 1178,
+      "title": "Sign in - Google Accounts",
+      "ready": "complete",
+      "textCharacters": 963,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    },
+    {
+      "requested": "https://drive.google.com/",
+      "finalOrigin": "https://workspace.google.com",
+      "httpStatus": 200,
+      "elapsedMs": 3267,
+      "title": "Google Drive: Share Files Online with Secure Cloud Storage | Google Workspace",
+      "ready": "complete",
+      "textCharacters": 5022,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    },
+    {
+      "requested": "https://mail.google.com/",
+      "finalOrigin": "https://workspace.google.com",
+      "httpStatus": 200,
+      "elapsedMs": 2690,
+      "title": "Gmail: Secure, AI-Powered Email for Everyone | Google Workspace",
+      "ready": "complete",
+      "textCharacters": 3475,
+      "bridges": [
+        "undefined",
+        "undefined",
+        "undefined"
+      ],
+      "outcome": "document-loaded"
+    }
+  ],
+  "generatedAt": "2026-11-09T00:15:26.574Z"
+}

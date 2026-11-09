@@ -1,0 +1,63 @@
+{
+  "version": "0.4.0",
+  "startup": {
+    "entryToReadyMs": 327,
+    "spawnToReadyMs": null
+  },
+  "durationMs": 301425,
+  "tabs": 50,
+  "switches": 454,
+  "reloads": 22,
+  "crashes": 0,
+  "samples": [
+    {
+      "elapsedMs": 0,
+      "processes": 58,
+      "rssMiB": 2737.65625,
+      "cpuTicks": 1130,
+      "idleCpuPercent": 0.9944116412572824,
+      "intervalMs": 1005.6197639999991
+    },
+    {
+      "elapsedMs": 60496,
+      "processes": 58,
+      "rssMiB": 2725.1328125,
+      "cpuTicks": 1627,
+      "idleCpuPercent": 0.9952908133658529,
+      "intervalMs": 1004.7314680000127
+    },
+    {
+      "elapsedMs": 120385,
+      "processes": 58,
+      "rssMiB": 2744.0625,
+      "cpuTicks": 2142,
+      "idleCpuPercent": 1.9886889141759556,
+      "intervalMs": 1005.6877099999983
+    },
+    {
+      "elapsedMs": 180058,
+      "processes": 58,
+      "rssMiB": 2740.5703125,
+      "cpuTicks": 2642,
+      "idleCpuPercent": 0.9957917254166985,
+      "intervalMs": 1004.2260589999787
+    },
+    {
+      "elapsedMs": 240619,
+      "processes": 58,
+      "rssMiB": 2749.48828125,
+      "cpuTicks": 3194,
+      "idleCpuPercent": 2.9871955356959736,
+      "intervalMs": 1004.2864500000142
+    },
+    {
+      "elapsedMs": 300118,
+      "processes": 58,
+      "rssMiB": 2747.26953125,
+      "cpuTicks": 3647,
+      "idleCpuPercent": 0.9972236565428407,
+      "intervalMs": 1002.7840730000171
+    }
+  ],
+  "generatedAt": "2026-11-09T00:13:35.033Z"
+}

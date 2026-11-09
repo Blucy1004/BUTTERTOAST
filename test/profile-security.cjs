@@ -73,7 +73,7 @@ app.whenReady().then(async()=>{
  for(const wc of [ui,aw,manager,ai])await until(()=>wc.executeJavaScript('document.documentElement.dataset.theme==="light"'),'theme reaches each trusted UI');
  await aw.executeJavaScript('window.states=[];account.onState(s=>states.push(s));account.command({type:"state"})');
  const state=()=>aw.executeJavaScript('states.at(-1)');
- const login=async email=>{await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('email').value=${JSON.stringify(email)};document.getElementById('password').value='fixture-password';document.getElementById('submit').click()`);await until(async()=>(await state())?.status==='signed-in','profile login');};
+ const login=async email=>{await aw.executeJavaScript(`document.getElementById('mode-login').click();document.getElementById('email').value=${JSON.stringify(email)};document.getElementById('password').value='fixture-password';document.getElementById('submit').click()`);await until(async()=>(await state())?.status==='signed-in','profile login');if(!(await state()).syncEnabled){await aw.executeJavaScript('document.getElementById("profile-sync").click()');await until(async()=>(await state()).syncEnabled&&!(await state()).busy,'explicit profile sync');}};
  await login(emailA);await until(()=>ui.executeJavaScript('document.getElementById("account-name").textContent==="새벽 여행자"'),'account name in main');
  assert.equal((await state()).profile.name,'새벽 여행자');
  for(const wc of [ui,aw,manager,ai])await until(()=>wc.executeJavaScript('document.documentElement.dataset.theme==="dark"'),'account preferences replace guest theme');

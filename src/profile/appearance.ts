@@ -16,7 +16,7 @@ export class UiAppearance {
   state(){return {options:{...this.options},resolved:this.options.theme==='system'?(nativeTheme.shouldUseDarkColors?'dark':'light'):this.options.theme};}
   set(value:Appearance):void {const parsed=parseAppearance(value);if(!parsed||JSON.stringify(parsed)===JSON.stringify(this.options))return;this.options=parsed;this.broadcast();}
   register(wc:WebContents,url:string):void {
-    if(!['toast-ui://app/index.html','toast-ui://app/account.html','toast-ui://app/manager.html','toast-ui://app/ai.html'].includes(url)||this.targets.has(wc))throw new Error('Unexpected UI target');
+    if(!['toast-ui://app/index.html','toast-ui://app/account.html','toast-ui://app/manager.html','toast-ui://app/ai.html','toast-ui://app/browse.html'].includes(url)||this.targets.has(wc))throw new Error('Unexpected UI target');
     this.targets.set(wc,{url,gate:new RateGate()});
     wc.on('did-finish-load',()=>this.send(wc));wc.once('destroyed',()=>this.targets.delete(wc));
   }

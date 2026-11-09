@@ -12,6 +12,7 @@
   function render() {
     const signedIn = state.status === 'signed-in', signup = mode === 'signup';
     el('auth-form').hidden = signedIn; el('auth-modes').hidden = signedIn; el('signed-in').hidden = !signedIn;
+    el('remember-field').hidden=signup;el('remember-login').disabled=!state.storageAvailable||state.busy;el('profile-sync').checked=!!state.syncEnabled;el('profile-sync').disabled=state.busy;el('logout-others').disabled=state.busy;el('session-storage').textContent=state.remembered?'이 기기: 로그인 유지 켜짐 · OS 보호 저장소':'이 기기: 앱 종료 시 다시 로그인';
     el('recover').hidden = signedIn; el('recover').disabled = state.busy;
     for (const id of ['reauthenticate','password-update']) el(id).disabled = state.busy;
     el('signed-in-email').textContent = signedIn ? state.email : '';
@@ -39,7 +40,7 @@
     if (mode === 'signup' && el('password').value !== el('password-confirm').value) {
       el('password-confirm').setCustomValidity('비밀번호가 일치하지 않습니다.'); el('password-confirm').reportValidity(); return;
     }
-    const command = { type: mode, email: el('email').value, password: el('password').value };
+    const command = { type: mode, email: el('email').value, password: el('password').value,...(mode==='login'?{remember:el('remember-login').checked}:{}) };
     clearPassword(); window.account.command(command);
   };
   el('recover').onclick = () => { const email=el('email').value; clearPassword(); window.account.command({type:'recover',email}); };
@@ -47,6 +48,8 @@
   el('password-form').onsubmit = event => { event.preventDefault(); if(state.busy)return; if(Array.from(el('new-password').value).length<8){el('new-password').setCustomValidity('비밀번호는 8자 이상 입력해 주세요.');el('new-password').reportValidity();return;} if(el('new-password').value!==el('new-password-confirm').value){el('new-password-confirm').setCustomValidity('비밀번호가 일치하지 않습니다.');el('new-password-confirm').reportValidity();return;} const command={type:'password-update',password:el('new-password').value,currentPassword:el('current-password').value,nonce:el('reauth-code').value}; clearPassword(); window.account.command(command); };
   el('new-password').oninput=()=>el('new-password').setCustomValidity('');
   el('new-password-confirm').oninput=()=>el('new-password-confirm').setCustomValidity('');
+  el('profile-sync').onchange=()=>window.account.command({type:'profile-sync',revision:state.profileRevision,enabled:el('profile-sync').checked});
+  el('logout-others').onclick=()=>window.account.command({type:'logout-others'});
   el('logout').onclick = () => { clearPassword(); window.account.command({ type: 'logout' }); };
   window.account.onState(next => { const previous=state.status; state = next; if (state.status !== previous){clearPassword();if(previous==='signed-in')el('email').value='';} render(); });
   window.addEventListener('pagehide', clearPassword);

@@ -10,7 +10,7 @@
 <label for="api-key">API 키</label><input id="api-key" type="password" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="로컬 서버는 키 없이 연결 가능">
 <label class="check"><input id="remember" type="checkbox"> OS 암호화로 저장</label><p class="hint" id="storage-hint">저장하지 않으면 이번 실행 중에만 키를 사용합니다.</p>
 <div class="row"><button id="connect" type="submit">연결 확인</button><button id="restore" type="button">저장된 연결</button><button id="forget" type="button">키 삭제</button></div>
-</form></details>
+</form><p class="hint">ChatGPT 구독 연결: 공식 연동 자격·승인과 구현 확인 전까지 비활성입니다. 현재는 위 API 키 연결을 사용할 수 있습니다.</p></details>
 <button id="clear">새 대화</button><p id="active-connection" class="hint">연결되지 않음</p><label for="model">모델</label><div class="row"><input id="model" list="models" maxlength="200" placeholder="연결 후 모델 선택 또는 ID 입력"><datalist id="models"></datalist><button id="choose-model">선택</button></div>
 <details><summary>모델 옵션 · 추정 예산</summary><form id="options-form">
 <label>출력 토큰 상한<input id="max-output" type="number" min="128" max="8192" value="2048" required></label>
@@ -19,7 +19,7 @@
 <label>입력 / 100만 토큰 ($)<input id="input-price" type="number" min="0" max="10000" step="0.0001" value="0" required></label>
 <label>캐시 입력 / 100만 토큰 ($)<input id="cached-price" type="number" min="0" max="10000" step="0.0001" value="0" required></label>
 <label>출력 / 100만 토큰 ($)<input id="output-price" type="number" min="0" max="10000" step="0.0001" value="0" required></label>
-<label>추정 예산 ($, 0: 끔)<input id="budget" type="number" min="0" max="10000" step="0.01" value="0" required></label><button type="submit">옵션 적용</button></form><p class="hint">공식 단가와 모델 한도를 직접 입력하세요. 표시 금액은 추정이며 실제 잔액·청구 한도가 아닙니다. 오류·중단된 요청은 보수적 예약 비용으로 집계합니다.</p><p id="cost"></p></details>
+<label>추정 예산 ($, 0: 끔)<input id="budget" type="number" min="0" max="10000" step="0.01" value="0" required></label><button type="submit">옵션 적용</button></form><p class="hint">공식 단가와 모델 한도를 직접 입력하세요. 표시 금액은 추정이며 실제 잔액·청구 한도가 아닙니다. 오류·중단된 요청은 보수적 예약 비용으로 집계합니다.</p><p id="cost"></p><p id="ir-metrics" class="hint" aria-live="polite"></p></details>
 <details><summary>페이지 공유 · AI 작업</summary><p class="hint">공유할 내용은 전송 전에 미리 확인하세요. 입력란·숨김 내용은 제외하지만, 화면에 보이는 개인정보는 포함될 수 있습니다. 선택 공유는 한 텍스트 영역만 지원하며 입력란·비공개 영역은 제외합니다.</p>
 <div class="row"><button id="share-human">현재 탭 읽기</button><button id="share-selection">선택한 텍스트만</button><button id="share-task">AI 작업 읽기</button><button id="share-control">현재 탭 제어 공유</button></div>
 <form id="task-form"><label for="task-url">별도 AI 작업 주소</label><input id="task-url" type="url" maxlength="4096" placeholder="https://…" required><div class="row"><button id="task-open" type="submit">작업 페이지 열기</button><button id="task-close" type="button">작업 종료</button></div></form></details>
@@ -29,5 +29,5 @@
 </main>
 <footer><section id="proposal" hidden><p id="proposal-description"></p><div class="row"><button id="approve">동작 검토</button><button id="reject">거절</button></div></section>
 <p id="ai-message" role="status" aria-live="polite"></p>
-<div class="quick-actions"><button id="quick-pause">일시정지</button><button id="quick-continue">재개</button><button id="quick-handoff">직접 개입</button><button id="quick-end">작업 종료</button></div><form id="chat-form"><label for="prompt" class="sr-only">작업 지시 또는 메시지</label><textarea id="prompt" rows="2" maxlength="12000" placeholder="AI에게 요청할 내용을 입력하세요" required></textarea><div class="row"><button id="send" type="submit" disabled>전송</button><button id="ai-stop" type="button">중단</button></div></form><p id="usage" class="hint">사용량은 서버가 보고한 토큰 기준입니다.</p></footer>
+<div class="quick-actions"><button id="quick-pause">일시정지</button><button id="quick-continue">재개</button><button id="quick-handoff">직접 개입</button><button id="quick-end">작업 종료</button></div><p id="drag-message" class="hint" role="status">선택한 텍스트나 웹 링크를 입력란에 놓고 내용을 확인한 뒤 전송할 수 있습니다.</p><form id="chat-form"><label for="prompt" class="sr-only">작업 지시 또는 메시지</label><textarea id="prompt" rows="2" maxlength="12000" placeholder="AI에게 요청할 내용을 입력하세요" required></textarea><div class="row"><button id="send" type="submit" disabled>전송</button><button id="ai-stop" type="button">중단</button></div></form><p id="usage" class="hint">사용량은 서버가 보고한 토큰 기준입니다.</p></footer>
 </body></html>

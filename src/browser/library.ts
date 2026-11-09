@@ -5,23 +5,24 @@ import type { OsCipher } from '../security/vault';
 import { exactKeys, record } from '../security/ipc';
 import { restorableUrl } from './session-store';
 import { defaultWorkspace, parseWorkspace, WorkspacePreferences } from './workspace';
+import type {ImportedEntry} from './import';
 import { Appearance, defaultAppearance, parseAppearance } from '../profile/model';
 
-export type Settings = { search: 'google' | 'brave' | 'duckduckgo'; theme: 'off' | 'light' | 'dark'; history: boolean; restoreTabs: boolean };
+export type Settings = { search: 'google' | 'brave' | 'duckduckgo'; theme: 'off' | 'light' | 'dark'; history: boolean; restoreTabs: boolean; memorySaver:boolean };
 export type Entry = { id: string; url: string; title: string; time: number };
 export type SitePermission = 'geolocation' | 'notifications' | 'media';
 export type SiteRule = { origin: string; permission: SitePermission; decision: 'allow' | 'deny' };
 export type AuditEntry = { id: string; time: number; origin: string; operation: string; outcome: string };
 export type LibraryData = { version: 1; workspace: WorkspacePreferences; appearance:Appearance; settings: Settings; bookmarks: Entry[]; history: Entry[]; permissions: SiteRule[]; audit: AuditEntry[] };
-const defaults = (): LibraryData => ({ version: 1, workspace: defaultWorkspace(),appearance:defaultAppearance(), settings: { search: 'google', theme: 'off', history: true, restoreTabs: true }, bookmarks: [], history: [], permissions: [], audit: [] });
+const defaults = (): LibraryData => ({ version: 1, workspace: defaultWorkspace(),appearance:defaultAppearance(), settings: { search: 'google', theme: 'off', history: true, restoreTabs: true,memorySaver:false }, bookmarks: [], history: [], permissions: [], audit: [] });
 export function httpsOrigin(value: unknown): value is string {
   if (typeof value !== 'string' || value.length > 4096) return false;
   try { const u = new URL(value); return u.protocol === 'https:' && !u.username && !u.password && u.origin === value; } catch { return false; }
 }
 export function parseSettings(value: unknown): Settings | null {
-  if (!record(value) || !exactKeys(value, ['search', 'theme', 'history', 'restoreTabs']) || !['google', 'brave', 'duckduckgo'].includes(value.search as string)
-    || !['off', 'light', 'dark'].includes(value.theme as string) || typeof value.history !== 'boolean' || typeof value.restoreTabs !== 'boolean') return null;
-  return { search: value.search as Settings['search'], theme: value.theme as Settings['theme'], history: value.history, restoreTabs: value.restoreTabs };
+  if (!record(value) || !exactKeys(value, ['search', 'theme', 'history', 'restoreTabs',...(Object.hasOwn(value,'memorySaver')?['memorySaver']:[])]) || !['google', 'brave', 'duckduckgo'].includes(value.search as string)
+    || !['off', 'light', 'dark'].includes(value.theme as string) || typeof value.history !== 'boolean' || typeof value.restoreTabs !== 'boolean'||Object.hasOwn(value,'memorySaver')&&typeof value.memorySaver!=='boolean') return null;
+  return { search: value.search as Settings['search'], theme: value.theme as Settings['theme'], history: value.history, restoreTabs: value.restoreTabs,memorySaver:value.memorySaver===true };
 }
 export function sitePermission(value: unknown): value is SitePermission { return ['geolocation', 'notifications', 'media'].includes(value as string); }
 export function parseLibrary(value: unknown): LibraryData | null {
@@ -95,6 +96,11 @@ export class BrowserLibrary {
     if (previous?.url === url && Date.now() - previous.time < 10000) { previous.title = title.slice(0, 200); return; }
     if(Date.now()-this.lastVisit<500)return;this.lastVisit=Date.now();
     this.data.history.unshift({ id: randomUUID(), url, title: title.slice(0, 200), time: Date.now() }); this.data.history.length = Math.min(3000, this.data.history.length); this.save();
+  }
+  importEntries(kind:'bookmarks'|'history',entries:ImportedEntry[]):number {
+    const known=new Set(this.data[kind].map(e=>e.url)),limit=kind==='bookmarks'?1000:3000;let count=0;
+    for(const entry of entries){if(this.data[kind].length>=limit)break;if(!entry.url||!restorableUrl(entry.url)||known.has(entry.url)||!Number.isSafeInteger(entry.time)||entry.time<0)continue;known.add(entry.url);this.data[kind].push({...entry,title:entry.title.slice(0,200),id:randomUUID()});count++;}
+    if(kind==='history')this.data.history.sort((a,b)=>b.time-a.time);if(count)this.save();return count;
   }
   remove(kind: 'bookmarks' | 'history', id: string): void { this.data[kind] = this.data[kind].filter(e => e.id !== id); this.save(); }
   clear(kind: 'history' | 'audit'): void { this.data[kind] = []; this.save(); }

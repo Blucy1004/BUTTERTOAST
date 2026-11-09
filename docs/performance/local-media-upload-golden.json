@@ -1,0 +1,13 @@
+{
+  "version": "0.4.0",
+  "playback": {
+    "currentTime": 0.5032,
+    "width": 64,
+    "height": 64,
+    "decodedFrames": 9,
+    "error": null
+  },
+  "uploads": 1,
+  "scope": "Local VP9 silent clip; CDP fixture file selection + web form submission; OS file chooser, DRM and external uploads not tested",
+  "generatedAt": "2026-11-09T00:26:56.030Z"
+}

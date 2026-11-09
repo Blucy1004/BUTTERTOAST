@@ -170,12 +170,13 @@ export class AiPanel {
     const dispose = () => { valid = false;if(controlOwners.get(wc)===invalidate)controlOwners.delete(wc);controller.dispose(); wc.removeListener('did-start-navigation', navigate); wc.removeListener('destroyed', invalidate); wc.removeListener('render-process-gone', invalidate);wc.removeListener('before-input-event',invalidate);wc.removeListener('before-mouse-event',mouse); };
     try {
       controller.grant(new Set(['read'])); const snapshot = await bounded(controller.snapshot()); if (!current()) throw new Error('Page changed');
+      const statistics=await bounded(controller.statistics());if(!current())throw new Error('Page changed');
       if(source==='task')this.taskDocument=snapshot.document;
       if(selectionOnly){snapshot.text=await bounded(controller.selectedText());snapshot.elements=[];if(!snapshot.text||!current())throw new Error('Selection unavailable');}
-      const data: PageContext = { source, origin: snapshot.origin, text: safeText(snapshot.text, 12000), elements: snapshot.elements.filter(e => e.visible && e.enabled && !e.sensitive)
+      const data: PageContext = { source, origin: snapshot.origin, document:snapshot.document,version:snapshot.version,captureMs:statistics.captureMs,truncated:statistics.truncated,text: safeText(snapshot.text, 12000), elements: snapshot.elements.filter(e => e.visible && e.enabled && !e.sensitive)
         .sort((a,b) => Number(b.actions.includes('CLICK'))-Number(a.actions.includes('CLICK'))).slice(0, 100).map(e => ({ id: e.id, role: e.role, name: safeText(e.name, 160), actions: e.actions })) };
       const check = async () => { if (!current()) return false; try { const latest = await bounded(controller.snapshot()); return current() && latest.document === snapshot.document && latest.version === snapshot.version; } catch { return false; } };
-      const act = async (proposal: Proposal): Promise<boolean> => {
+      const act = async (proposal: Proposal): Promise<boolean|{ok:boolean;text?:string;matches?:boolean;reason?:string}> => {
         const element = data.elements.find(e => e.id === proposal.target);
         if (source === 'human' || (proposal.target && (!element || !element.actions?.includes(proposal.op))) || !await check()) return false;
         controller.grant(new Set(['read', 'write', 'transmit', 'delete', 'pay']));
@@ -197,9 +198,9 @@ export class AiPanel {
           if(ok&&this.mode==='page'&&this.visible&&this.presented&&this.taskDocument===snapshot.document)this.cursor.show(event,this.taskBounds(),1,this.visual.motion);
           this.emit();
         }
-        return ok;
+        return {ok,text:result.text,matches:result.matches,reason:result.reason};
       };
-      return { data, valid: current, check, dispose, act, click: target => act({op:'CLICK',target,value:''}) };
+      return { data, valid: current, check, dispose, act, click: async target => {const result=await act({op:'CLICK',target,value:''});return typeof result==='boolean'?result:result.ok;} };
     } catch { dispose(); throw new Error('Page unavailable'); }
   }
   dispose(): void { ipcMain.removeListener('ai:command', this.handler); this.service.dispose(); this.closeTask();this.cursor.dispose(); if (this.view && !this.view.webContents.isDestroyed()) this.view.webContents.close({ waitForBeforeUnload: false }); this.view = undefined; }

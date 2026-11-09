@@ -20,7 +20,7 @@ function testCipher() {
 async function setup(t) { const dir=await fs.mkdtemp(path.join(os.tmpdir(),'bt-session-'));t.after(()=>fs.rm(dir,{recursive:true,force:true}));return path.join(dir,'session.enc'); }
 test('session restore accepts only bounded URL snapshots and copies caller data', () => {
   const copy=parseSession(sample); copy.tabs.push(''); assert.equal(sample.tabs.length,1);
-  for(const bad of [{...sample,approved:true},{...sample,active:-1},{...sample,active:1},{...sample,tabs:[]},{...sample,tabs:Array(31).fill('')},{...sample,tabs:Array(1)},{...sample,version:2}])assert.equal(parseSession(bad),null);
+  for(const bad of [{...sample,approved:true},{...sample,active:-1},{...sample,active:1},{...sample,tabs:[]},{...sample,tabs:Array(65).fill('')},{...sample,tabs:Array(1)},{...sample,version:2}])assert.equal(parseSession(bad),null);
   for(const url of ['file:///etc/passwd','javascript:alert(1)','https://u:p@example.test','https://example.test/\n','https://example.test/'+ 'x'.repeat(4096),null])assert.equal(parseSession({...sample,tabs:[url]}),null);
   assert.ok(parseSession({...sample,tabs:['','http://localhost/']}));
 });

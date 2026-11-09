@@ -1,5 +1,7 @@
 # ToastIR·승인·탭 경계 공격 검증 — 2026-11-07
 
+> 과거 버전의 구현/검증 기록입니다. 현재 0.4 변경 사항·보안 범위·최신 검사 수치는 [Golden Toast 기록](GOLDEN-TOAST-0.4.md)을 참고하세요.
+
 ## 입력 보고서와 이번 범위
 
 사용자 첨부 `ButterToast-security-report.html`을 실행하지 않고 텍스트로 읽었다. 보고서의 EXE SHA-256 `d30aaf21c041ac33541dbd989a3b6dbc53bdcee726c940e93a4acfe69c5dee64`는 보관된 Windows 테스트 빌드와 일치한다. 보고서는 제한된 Windows 블랙박스 검사에서 침투 성공을 확인하지 못했고 미서명을 보완 사항으로 기록한다. Windows 관찰은 **사용자 제공 보고서의 결과**이며 이번 클라우드 실행으로 독립 재현한 결과가 아니다. 원본 보고서 SHA-256: `390e29fe24b953d8f78cd72e8268a1d716020bc9d3ea874070096fdb15db6610`.

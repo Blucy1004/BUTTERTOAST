@@ -1,11 +1,13 @@
+import {requireFeature} from '../product/access';
 import type { WebContents } from 'electron';
 import { randomUUID } from 'node:crypto';
 import { ToastGuard, parseAction, PageState, Permission, Op } from '../security/guard';
 import { installToastRuntime } from './runtime';
-import {encodeIR,diffIR,IRDelta} from './codec';
+import {encodeIR,diffIR,IRDelta,validateSnapshot} from './codec';
 const WORLD = 1001;
 export type Snapshot = { text: string; document: string; version: number; origin: string; elements: { id: string; parent: string|null; role: string; name: string; visible: boolean; enabled: boolean; sensitive: boolean; actions: Op[] }[] };
 export type ActionPoint = { x: number; y: number; width: number; height: number };
+export type CaptureStatistics={visited:number;elements:number;textCharacters:number;shadowRoots:number;framesSkipped:number;truncated:boolean;captureMs:number};
 export type Result = { ok: boolean; reason?: string; text?: string; matches?: boolean; point?: ActionPoint };
 /** Main-only experimental READ/CLICK path, permanently bound to one WebContents.
  * No page/renderer IPC exports. Caller may not substitute snapshots or tab objects.
@@ -31,17 +33,24 @@ export class ToastController {
   }
   /** Trusted host only, after user explicitly authorizes this task's origin. */
   grant(permissions: ReadonlySet<Permission>): void {
+    requireFeature('toastir');
     if (this.disposed || this.contents.isDestroyed()) throw new Error('Task unavailable');
     const origin = new URL(this.contents.getURL()).origin;
     this.stop(); this.guard.grant({ tab: this.contents.id, origin, permissions });
   }
-  private async call(method: 'capture' | 'perform' | 'selection', input?: unknown): Promise<unknown> {
+  private async call(method: 'capture' | 'perform' | 'selection' | 'statistics', input?: unknown): Promise<unknown> {
     if (this.disposed || this.contents.isDestroyed()) throw new Error('Task unavailable');
     // Only fixed app code plus JSON data crosses the boundary. The web page cannot access WORLD.
     const code = `(${installToastRuntime.toString()})(${JSON.stringify(randomUUID())}); globalThis.__toastIR.${method}(${input === undefined ? '' : JSON.stringify(input)})`;
     return this.contents.executeJavaScriptInIsolatedWorld(WORLD, [{ code }]);
   }
-  private async capture(includeText = false): Promise<Snapshot> { return await this.call('capture', includeText) as Snapshot; }
+  private async capture(includeText = false): Promise<Snapshot> {
+    let timer:NodeJS.Timeout|undefined;
+    try {
+      const raw=await Promise.race([this.call('capture',includeText),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{this.stop();reject(new Error('Capture timeout'));},5000);timer.unref();})]);
+      const result=validateSnapshot(raw);if(!result)throw new Error('Invalid capture');return result;
+    } finally {clearTimeout(timer);}
+  }
   private state(snapshot: Snapshot): PageState {
     return { document: snapshot.document, tab: this.contents.id, origin: snapshot.origin, version: snapshot.version,
       elements: new Map(snapshot.elements.map(e => [e.id, { ...e, actions: new Set(e.actions) }])) };
@@ -55,6 +64,13 @@ export class ToastController {
     return { ...data, tab: this.contents.id };
   }
   async binarySnapshot():Promise<Buffer> {const {tab,...snapshot}=await this.snapshot();return encodeIR(snapshot);}
+  async statistics():Promise<CaptureStatistics> {
+    const epoch=this.generation;
+    if(this.disposed||this.contents.isDestroyed()||!this.guard.canRead({tab:this.contents.id,origin:new URL(this.contents.getURL()).origin}))throw new Error('Context access denied');
+    const data=await this.call('statistics') as CaptureStatistics;
+    if(epoch!==this.generation||!data||typeof data.truncated!=='boolean'||Object.values(data).some(x=>typeof x==='number'&&(!Number.isFinite(x)||x<0)))throw new Error('Invalid statistics');
+    return data;
+  }
   async selectedText():Promise<string> {
     const epoch=this.generation;
     await this.snapshot();const text=await this.call('selection');

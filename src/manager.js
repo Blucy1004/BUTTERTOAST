@@ -2,7 +2,10 @@
 const $ = id => document.getElementById(id);
 const send = (type, extra = {}) => window.manager.command({ type, ...extra });
 let current, settingsDirty = false;
-function show(section) { if (!['bookmarks','history','downloads','settings','audit'].includes(section)) return; document.querySelectorAll('main > section').forEach(e => { e.hidden = e.id !== section; }); }
+for(const el of document.querySelectorAll('[data-support]'))el.onclick=()=>send('support-open',{id:el.dataset.support});
+for(const el of document.querySelectorAll('[data-import]'))el.onclick=()=>send('import',{kind:el.dataset.import});
+for(const el of document.querySelectorAll('[data-export]'))el.onclick=()=>send('export',{kind:el.dataset.export});
+function show(section) { if (!['bookmarks','history','downloads','settings','audit','support'].includes(section)) return; document.querySelectorAll('main > section').forEach(e => { e.hidden = e.id !== section; }); }
 for (const button of document.querySelectorAll('[data-section]')) button.onclick = () => show(button.dataset.section);
 for (const id of ['bookmark-current','history-clear','audit-clear','default-browser','clear-site-data','update-check','update-install']) $(id).onclick = () => send(id);
 function button(parent, label, fn) { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; parent.append(b); }
@@ -19,15 +22,18 @@ function entries(kind) {
 }
 $('bookmark-filter').oninput = () => current && entries('bookmarks'); $('history-filter').oninput = () => current && entries('history');
 $('settings-form').oninput = () => { settingsDirty = true; };
-$('settings-form').onsubmit = e => { e.preventDefault(); settingsDirty = false; send('settings',{settings:{search:$('search').value,theme:$('theme').value,history:$('remember-history').checked,restoreTabs:$('restore-tabs').checked}}); };
+$('settings-form').onsubmit = e => { e.preventDefault(); settingsDirty = false; send('settings',{settings:{search:$('search').value,theme:$('theme').value,history:$('remember-history').checked,restoreTabs:$('restore-tabs').checked,memorySaver:$('memory-saver').checked}}); };
 window.manager.onSection(show);
 window.manager.onState(state => {
   current = state;
+  $('plan-list').replaceChildren(...state.product.plans.map(plan=>{const tr=document.createElement('tr');for(const text of [plan.tier,plan.name,plan.status]){const td=document.createElement('td');td.textContent=text;tr.append(td);}return tr;}));
+  for(const [id,items] of [['product-progress',state.product.progress],['product-pending',state.product.pending]])$(id).replaceChildren(...items.map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));
   $('update-status').textContent=state.updates.message;$('update-check').disabled=!state.updates.configured||state.updates.busy;$('update-install').disabled=!state.updates.version||state.updates.busy;
   $('status').textContent = (state.storage === 'available' ? 'OS 암호화 저장 사용 중.' : state.storage === 'failed' ? '저장·복원에 실패했습니다. 변경은 메모리에만 남을 수 있습니다.' : '보호 저장소를 사용할 수 없어 기록과 설정은 이번 실행 동안만 유지됩니다.') + ' ' + state.message;
-  if (!settingsDirty) { $('search').value=state.settings.search; $('theme').value=state.settings.theme; $('remember-history').checked=state.settings.history; $('restore-tabs').checked=state.settings.restoreTabs; }
+  if (!settingsDirty) { $('search').value=state.settings.search; $('theme').value=state.settings.theme; $('remember-history').checked=state.settings.history; $('restore-tabs').checked=state.settings.restoreTabs;$('memory-saver').checked=state.settings.memorySaver; }
   // Do not replace a bookmark title while the owner is editing it.
   if (!$('bookmark-list').contains(document.activeElement)) entries('bookmarks'); entries('history');
+  $('download-storage').textContent=state.downloadStorage==='available'?'다운로드 기록 보호 저장 사용 중':state.downloadStorage==='failed'?'다운로드 기록 저장·복원을 확인하지 못했습니다.':'다운로드 기록은 이번 실행 동안만 유지됩니다.';
   $('download-list').replaceChildren();
   for (const item of state.downloads) { const protection=item.protection==='marked'?' · Windows 인터넷 출처 표시됨':item.protection==='unavailable'?' · Windows 출처 표시를 기록하지 못함':'';const e=row($('download-list'),item.name,`${item.origin} · ${item.state} · ${item.received} / ${item.total || '?'} bytes${protection}`); const live=['progressing','interrupted'].includes(item.state);
     for (const [action,label] of (live ? [[item.paused || item.state==='interrupted'?'resume':'pause',item.paused || item.state==='interrupted'?'계속':'일시정지'],['cancel','취소']] : item.state==='completed' ? [['show','폴더에서 보기'],['remove','목록에서 제거']] : [['remove','목록에서 제거']])) button(e,label,() => send('download',{id:item.id,action})); }

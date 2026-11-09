@@ -26,11 +26,11 @@ BTIR v1은 제한된 JSON 스키마를 표준 DEFLATE로 압축한 바이너리�
 
 ## 계정·배포
 
-Supabase 토큰/PKCE verifier는 메인의 별도 인증 네트워크 세션과 RAM에 둔다. 가입·복구 콜백은 예상 이메일과 묶고 로그아웃·만료 후 지연 응답을 거부한다. 계정 로그인은 AI 권한을 부여하지 않는다.
+Supabase access token/PKCE verifier는 메인의 별도 인증 네트워크 세션과 RAM에 둔다. 0.4에서 로그인 유지를 선택하면 refresh token과 신원 바인딩을 AccountStorage의 별도 OS 암호화 파일에 보관한다. 가입·복구 콜백은 예상 이메일과 묶고 로그아웃·만료 후 지연 응답을 거부한다. 계정 로그인은 AI 권한을 부여하지 않는다.
 
-0.3의 `Profile`은 표시용 스키마이며 `AuthService`가 현재 bearer로 Auth `/user`에 `buttertoast_profile` namespace만 저장/조회한다. 사용자 ID·이메일·인증 상태·revision·세션 세대를 검사한다. 메타데이터의 권한 필드는 사용하지 않는다. 새 테이블이나 관리자 키는 필요 없다.
+`Profile`은 표시용 스키마이며 0.4 기본 저장소는 로컬 AccountStorage다. 계정/기기별 sync opt-in 후에만 `AuthService`가 현재 bearer로 Auth `/user`에 `buttertoast_profile` namespace를 저장/조회한다. 사용자 ID·이메일·인증 상태·revision·세션 세대를 검사한다. 메타데이터의 권한 필드는 사용하지 않는다. 새 테이블이나 관리자 키는 필요 없다.
 
-`UiAppearance`는 로그인 프로필 또는 `BrowserLibrary`의 비로그인 설정에서 가져온 옵션을 등록된 앱 뷰에만 전달한다. `appearance.js`는 허용 dataset 값과 디자인 토큰만 적용하며 네이티브 웹 뷰의 크기·권한을 변경하지 않는다. `profile.js`는 서버 저장 전 미리보기와 편집 충돌 표시를 담당한다. `icons.js`는 고정 벡터 path를 생성하며 외부 자산이나 사용자 SVG를 로드하지 않는다. [저장 범위·검증](PROFILE-THEMES-0.3.md)을 참조한다.
+`UiAppearance`는 로그인 프로필 또는 `BrowserLibrary`의 비로그인 설정에서 가져온 옵션을 등록된 앱 뷰에만 전달한다. `appearance.js`는 허용 dataset 값과 디자인 토큰만 적용하며 네이티브 웹 뷰의 크기·권한을 변경하지 않는다. `profile.js`는 로컬/선택적 서버 저장 전 미리보기와 편집 충돌 표시를 담당한다. `icons.js`는 고정 벡터 path를 생성하며 외부 자산이나 사용자 SVG를 로드하지 않는다. [현재 저장 범위·검증](ACCOUNT-STORAGE-AND-DELETION.md)을 참조한다.
 
 Windows 포터블 패키지는 자산 허용 목록과 ASAR/fuse/PE 해시를 검사한다. NSIS는 현재 사용자 폴더에 설치하고 사용자별 URL 등록을 제공한다. 제거는 패키지 파일 목록만 대상으로 하며 사용자 프로필은 보존한다. 코드 서명과 실제 Windows 실행은 별도다.
 
@@ -43,3 +43,9 @@ Windows 포터블 패키지는 자산 허용 목록과 ASAR/fuse/PE 해시를 �
 Toast 작업은 기존의 독립 임시 세션을 유지한 채 부모 창에 내장한다. 상태·실제 페이지·연결/대화 도구 전환은 표시만 바꾸며 작업이나 세션을 새로 만들지 않는다. 탭 위임은 메인이 원본 WebContents/문서를 확인하고 네이티브 승인 뒤 query·fragment 없는 HTTPS 주소만 새 AI 세션에서 연다. 결과는 승인 후 주소만 사람용 새 탭으로 연다.
 
 선택 공유는 명시적인 버튼과 미리보기를 거치며 한 개의 가시적 텍스트 노드만 지원한다. 입력란·private 영역은 제외하고 모델 권한을 확대하지 않는다. 실행 기록의 가상 커서는 별도의 무권한 신뢰 UI 뷰이며 웹 DOM에 스크립트/요소를 주입하지 않는다. 재생은 실행기에 명령을 보내지 않는다. 문서·뷰포트가 달라진 기록은 화면에 재생하지 않는다.
+
+## Golden Toast 구성요소
+
+`toastir/model.ts`는 모델용 snapshot/delta 스키마와 동일성 검사를 담당한다. `AiService`는 승인된 workflow에만 임시 wire history를 두며 model snapshot과 실행 observation을 외부 데이터로 보낸다. BrowserTabs의 idle probe는 isolated world 1003의 고정 코드이며 메모리 절약은 opt-in이다. `BrowserWindows`는 같은 사람 프로필과 별도의 엄격한 toolbar IPC를 사용한다. PopupPolicy는 native 승인과 navigation revocation을 담당한다.
+
+`AccountStorage`는 프로필과 remembered session을 별도 파일에 직렬 저장한다. `DownloadStore`는 OS 암호화 목록만 저장하며 재시작 후 네트워크 요청을 복원하지 않는다. `product/access.ts`는 무료 핵심 기능과 아직 지원하지 않는 선택 기능을 main에서 구분한다. `ai/subscription.ts`는 비활성 계약이며 OAuth 구현으로 취급하지 않는다. 상세 기능·외부 서버 미배포 상태는 [0.4 기록](GOLDEN-TOAST-0.4.md)에 있다.

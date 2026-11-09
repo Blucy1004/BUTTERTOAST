@@ -1,10 +1,11 @@
 import { BrowserWindow, WebContents, WebContentsView } from 'electron';
 import { WEB_PREFERENCES, hardenWebContents } from '../security/electron';
 import { restorableUrl, SessionSnapshot, TAB_LIMIT } from './session-store';
+import {installIdleProbe} from './idle';
 import type { Bounds } from './workspace';
 export type TabStatus = 'ready' | 'loading' | 'slow' | 'unresponsive' | 'crashed' | 'suspended';
-type Tab = { id: number; title: string; url: string; pinned: boolean; muted: boolean; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout };
-type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void };
+type Tab = { id: number; title: string; url: string; pinned: boolean; muted: boolean; status: TabStatus; error: string; view?: WebContentsView; slowTimer?: NodeJS.Timeout; lastActive?:number };
+type Hooks = { changed: () => void; persist: (snapshot: SessionSnapshot) => void; input: (contents: WebContents) => void; visited?: (url: string, title: string) => void; loaded?: (contents: WebContents) => void; canSuspend?:(contents:WebContents)=>boolean };
 /** Human tabs only. No AI context, grants or renderer state are persisted or shared here. */
 export class BrowserTabs {
   private tabs: Tab[] = [];
@@ -16,11 +17,35 @@ export class BrowserTabs {
   private disposed = false;
   private probes = new Map<WebContents, NodeJS.Timeout>();
   private heartbeat: NodeJS.Timeout;
-  constructor(private window: BrowserWindow, private hooks: Hooks, private slowAfterMs = 30_000) {
+  private memoryTimer:NodeJS.Timeout;
+  private memorySaver=false;
+  private memoryChecking=false;
+  private idleProbes=new WeakSet<WebContents>();
+  constructor(private window: BrowserWindow, private hooks: Hooks, private slowAfterMs = 30_000,private idleAfterMs=15*60_000) {
     // Native unresponsive events are not reliable on every host. Probe only the active,
     // fully loaded page, once per five seconds, with at most one outstanding probe.
     this.heartbeat = setInterval(() => this.checkResponsive(), 5000);
     this.heartbeat.unref();
+    this.memoryTimer=setInterval(()=>{void this.releaseIdle();},30_000);this.memoryTimer.unref();
+  }
+  configureMemorySaver(enabled:boolean):void {this.memorySaver=enabled;}
+  async releaseIdle(now=Date.now()):Promise<number> {
+    if(!this.memorySaver||this.memoryChecking||this.disposed)return 0;
+    this.memoryChecking=true;let released=0;
+    try {
+      for(const tab of this.tabs){
+        const wc=tab.view?.webContents;
+        const eligible=()=>this.memorySaver&&!this.disposed&&this.current()!==tab&&!tab.pinned&&tab.status==='ready'&&tab.view?.webContents===wc&&!!wc&&!wc.isDestroyed()&&!wc.isLoading()&&!wc.isCrashed()&&!wc.isCurrentlyAudible()&&now-(tab.lastActive??now)>=this.idleAfterMs&&(this.hooks.canSuspend?.(wc)??true);
+        if(!wc||this.idleProbes.has(wc)||!eligible())continue;
+        let timer:NodeJS.Timeout|undefined;
+        try {
+          this.idleProbes.add(wc);const probe=wc.executeJavaScriptInIsolatedWorld(1003,[{code:'globalThis.__toastIdle?.() === true'}]).finally(()=>this.idleProbes.delete(wc));
+          const safe=await Promise.race([probe,new Promise(resolve=>{timer=setTimeout(()=>resolve(false),500);})]);
+          if(safe===true&&eligible()){this.detach(tab);tab.status='suspended';tab.error='메모리 절약으로 쉬는 탭입니다. 선택하면 주소를 다시 엽니다.';released++;this.changed();}
+        }catch{}finally{clearTimeout(timer);}
+      }
+    }finally{this.memoryChecking=false;}
+    return released;
   }
   private checkResponsive(): void {
     const tab = this.current(), wc = tab?.view?.webContents;
@@ -50,7 +75,7 @@ export class BrowserTabs {
     return {
       tabs: this.tabs.map(t => ({ id: t.id, title: t.title, status: t.status, pinned:t.pinned, muted:t.muted,
         host: (()=>{try{return new URL(t.url).hostname;}catch{return '';}})(), audible:!!t.view&&!t.view.webContents.isDestroyed()&&t.view.webContents.isCurrentlyAudible() })), active: this.active,
-      find:{...this.finding}, zoom:live?Math.round(wc.getZoomFactor()*100):100,
+      tabLimit:TAB_LIMIT,find:{...this.finding}, zoom:live?Math.round(wc.getZoomFactor()*100):100,
       url: tab?.url || '', status: tab?.status || 'ready',
       canBack: !!live && wc.navigationHistory.canGoBack(), canForward: !!live && wc.navigationHistory.canGoForward(),
       loading: tab?.status === 'loading' || tab?.status === 'slow', canReopen: this.closed.length > 0,
@@ -96,7 +121,8 @@ export class BrowserTabs {
     const clearSlow = () => { clearTimeout(tab.slowTimer); tab.slowTimer = undefined; };
     this.window.contentView.addChildView(view); view.setVisible(tab.id === this.active);
     hardenWebContents(wc); this.hooks.input(wc);
-    wc.setAudioMuted(tab.muted);
+    wc.setAudioMuted(tab.muted);tab.lastActive=Date.now();
+    wc.on('dom-ready',()=>{if(valid())void wc.executeJavaScriptInIsolatedWorld(1003,[{code:`(${installIdleProbe.toString()})()`}]).catch(()=>{});});
     wc.on('media-started-playing',()=>{if(valid())this.changed();});
     wc.on('media-paused',()=>{if(valid())this.changed();});
     wc.on('found-in-page',(_event,result)=>{
@@ -148,7 +174,7 @@ export class BrowserTabs {
   select(id: number): void {
     const tab = this.tabs.find(t => t.id === id); if (!tab) return;
     if(this.active!==id)this.clearFind(false);
-    this.active = id;
+    const old=this.current();if(old)old.lastActive=Date.now();this.active = id;tab.lastActive=Date.now();
     if (!tab.view && tab.status === 'suspended') {
       this.attach(tab);
       if (!restorableUrl(tab.url)) { tab.url = ''; tab.error = '이 주소는 자동 복원할 수 없습니다. 주소를 다시 입력하세요.'; }
@@ -163,6 +189,11 @@ export class BrowserTabs {
     const index = this.tabs.findIndex(t => t.id === id), next = index + delta;
     if (index < 0 || next < 0 || next >= this.tabs.length || this.tabs[index].pinned!==this.tabs[next].pinned) return;
     [this.tabs[index], this.tabs[next]] = [this.tabs[next], this.tabs[index]]; this.changed(true);
+  }
+  reorder(id:number,before:number):void {
+    const source=this.tabs.find(t=>t.id===id),target=this.tabs.find(t=>t.id===before);
+    if(!source||!target||source===target||source.pinned!==target.pinned)return;
+    this.tabs.splice(this.tabs.indexOf(source),1);this.tabs.splice(this.tabs.indexOf(target),0,source);this.changed(true);
   }
   close(id = this.active): void {
     const index = this.tabs.findIndex(t => t.id === id); if (index < 0) return;
@@ -216,13 +247,14 @@ export class BrowserTabs {
     const tab = this.current(); if (!tab || !tab.view) return;
     this.detach(tab); tab.status = 'suspended'; tab.error = '메모리 해제됨: 탭을 선택하면 주소를 다시 엽니다. 입력 내용은 복원되지 않습니다.'; this.changed();
   }
-  history(direction: 'back' | 'forward' | 'reload' | 'stop'): void {
+  history(direction: 'back' | 'forward' | 'reload' | 'reload-hard' | 'stop'): void {
     const tab = this.current(), wc = tab?.view?.webContents;
     if (!wc || wc.isDestroyed()) return;
     if (direction === 'back' && wc.navigationHistory.canGoBack()) wc.navigationHistory.goBack();
     if (direction === 'forward' && wc.navigationHistory.canGoForward()) wc.navigationHistory.goForward();
     if (direction === 'reload') wc.reload();
+    if (direction === 'reload-hard') wc.reloadIgnoringCache();
     if (direction === 'stop') { wc.stop(); if (tab && ['loading', 'slow'].includes(tab.status)) { tab.status = 'ready'; tab.error = '페이지 로딩을 중지했습니다.'; clearTimeout(tab.slowTimer); this.changed(); } }
   }
-  dispose(): void { this.disposed = true; clearInterval(this.heartbeat); for (const tab of this.tabs) this.detach(tab); this.tabs = []; }
+  dispose(): void { this.disposed = true; clearInterval(this.heartbeat);clearInterval(this.memoryTimer); for (const tab of this.tabs) this.detach(tab); this.tabs = []; }
 }

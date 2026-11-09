@@ -1,5 +1,7 @@
 # 0.3 라이트 테마·계정 프로필·아이콘
 
+> 과거 버전의 구현/검증 기록입니다. 현재 0.4 변경 사항·보안 범위·최신 검사 수치는 [Golden Toast 기록](GOLDEN-TOAST-0.4.md)을 참고하세요.
+
 2026-11-08. 기존 Butter / Browser / Toast 구조에 새벽빛 라이트 테마, 계정별 프로필·꾸미기와 로컬 SVG 아이콘을 추가했다. 최종 UI/UX 결정권은 프로젝트 오너에게 있다.
 
 ![새벽빛 라이트 테마](design/profile-light-workspace.png)

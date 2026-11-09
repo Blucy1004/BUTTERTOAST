@@ -59,5 +59,5 @@ export function parseProposal(value: unknown, origin = 'https://proposal.invalid
   const action = parseAction({ ...value, protocol:2, document:'proposal_document_0001', id:'proposal', tab:1, origin, version:0 });
   return action ? {op:action.op,target:action.target,value:action.value} : null;
 }
-export type ModelReply = { text: string; click: string | null; action?: Proposal | null; usage: Usage };
+export type ModelReply = { text: string; click: string | null; action?: Proposal | null; completed?:boolean; usage: Usage };
 export function safeText(value: string, max: number): string { return value.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g, '').slice(0, max); }

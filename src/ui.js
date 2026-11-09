@@ -35,6 +35,7 @@ for (const [id, delta] of [['move-left', -1], ['move-right', 1]]) {
   document.getElementById(id).onclick = () => current && send('move', { id: current.active, delta });
 }
 window.browser.onState(state => {
+  document.getElementById('popup-open').hidden=!state.popupBlocked;
   document.getElementById('ai-stop-all').disabled=!state.initialized;
   document.getElementById('app-version').textContent=`v${state.version||''}`;
   document.getElementById('zoom-reset').textContent=`${state.zoom}%`;
@@ -58,12 +59,14 @@ window.browser.onState(state => {
   current = state; renderWorkspace(state);
   const signature=JSON.stringify([state.tabs,state.active,state.layout?.compact]);
   if(signature!==tabsSignature){tabsSignature=signature;window.renderTabs(state, send,tabSearch.value.trim());} renderToolbar(state);
-  document.getElementById('new').disabled = !state.initialized || state.tabs.length >= 30;
-  document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= 30;
+  document.getElementById('new').disabled = !state.initialized || state.tabs.length >= (state.tabLimit||30);
+  document.getElementById('reopen').disabled = !state.initialized || !state.canReopen || state.tabs.length >= (state.tabLimit||30);
   const index = state.tabs.findIndex(tab => tab.id === state.active);
   document.getElementById('move-left').disabled = index <= 0 || state.tabs[index]?.pinned!==state.tabs[index-1]?.pinned;
   document.getElementById('move-right').disabled = index < 0 || index >= state.tabs.length - 1 || state.tabs[index]?.pinned!==state.tabs[index+1]?.pinned;
 });
 window.browser.onFocusAddress(() => { const input = document.getElementById('address'); input.focus(); input.select(); });
 window.browser.onFocusTools(tool=>{const input=document.getElementById(tool==='find'?'find-text':'tab-search');input.focus();input.select();});
+document.getElementById('popup-open').onclick=()=>send('popup-open');
+document.getElementById('new-window').onclick=()=>send('new-window');
 send('ready');

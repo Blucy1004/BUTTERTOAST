@@ -1,6 +1,6 @@
 # 행동 정책 — 문서 v2 / Action protocol v2
 
-모델 응답은 reply와 action을 가진 JSON이다. action은 null 또는 op/target/value만 포함한다. CLICK·FILL·SELECT·READ·EXTRACT·VERIFY는 현재 요소 ID를 사용한다. SCROLL·NAVIGATE·WAIT·HANDOFF는 빈 target을 사용한다. 메인이 protocol/document/id/tab/origin/version을 실제 캡처와 결합한다. 모델이 승인·권한·문서 버전을 지정할 수 없다.
+모델 응답은 reply, action과 선택적인 done(boolean)을 가진 JSON이다. 작업을 완료했다고 판단한 근거를 reply에 설명하고 action:null, done:true로 명시한다. done이 없거나 false인 행동 없는 응답은 완료가 아니라 확인 대기다. action은 null 또는 op/target/value만 포함한다. CLICK·FILL·SELECT·READ·EXTRACT·VERIFY는 현재 요소 ID를 사용한다. SCROLL·NAVIGATE·WAIT·HANDOFF는 빈 target을 사용한다. 메인이 protocol/document/id/tab/origin/version을 실제 캡처와 결합한다. 모델이 승인·권한·문서 버전을 지정할 수 없다.
 
 CLICK/FILL/SELECT/SCROLL/NAVIGATE는 각각 정확한 문서·버전·인자에 묶인 네이티브 일회성 승인이 필요하다. 웹 이벤트는 전송·삭제·결제를 일으킬 수 있어 write/transmit/delete/pay 권한을 모두 요구한다. 승인은 30초 후 만료된다.
 

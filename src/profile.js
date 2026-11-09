@@ -10,7 +10,7 @@ window.createProfileEditor=()=>{
     $('preview-greeting').textContent=$('profile-name').value.trim()?`${$('profile-name').value.trim()}님의 브라우저`:'어디로 떠나볼까요?';
     $('profile-counter').textContent=`${Array.from($('profile-bio').value).length} / 160`;
     for(const button of document.querySelectorAll('[data-avatar]'))button.setAttribute('aria-pressed',String(button.dataset.avatar===avatar));
-    $('profile-dirty').textContent=conflict?'계정 설정이 바뀌었어요. 변경 취소 또는 다시 불러오기를 눌러 주세요.':dirty?'저장하지 않은 변경사항':'계정에 저장된 설정';
+    $('profile-dirty').textContent=conflict?'계정 설정이 바뀌었어요. 변경 취소 또는 다시 불러오기를 눌러 주세요.':dirty?'저장하지 않은 변경사항':state?.syncEnabled?'계정에 동기화된 설정':state?.storageAvailable?'이 기기에 저장된 설정':'이번 실행에 적용된 설정';
     $('profile-save').disabled=!!state?.busy||conflict;
   }
   function fill(profile){

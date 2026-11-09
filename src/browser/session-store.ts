@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import type { OsCipher } from '../security/vault';
 import { isWebUrl } from '../policy';
 import { exactKeys, record } from '../security/ipc';
-export const TAB_LIMIT = 30;
+export const TAB_LIMIT = 64;
 export type SavedTab = { url: string; pinned: boolean; muted: boolean };
 export type SessionSnapshot = { version: 1; active: number; tabs: string[] } | { version: 2; active: number; tabs: SavedTab[] };
 export function restorableUrl(value: unknown): value is string {
@@ -34,11 +34,11 @@ export class TabSessionStore {
       const handle = await open(this.file, 'r');
       let data: Buffer;
       try {
-        if ((await handle.stat()).size > 512 * 1024) throw new Error('Invalid session size');
+        if ((await handle.stat()).size > 1024 * 1024) throw new Error('Invalid session size');
         data = await handle.readFile();
       } finally { await handle.close(); }
       const text = await this.cipher.decrypt(data);
-      if (text.length > 256 * 1024) throw new Error('Invalid session size');
+      if (text.length > 512 * 1024) throw new Error('Invalid session size');
       const parsed = parseSession(JSON.parse(text));
       if (!parsed) throw new Error('Invalid session');
       return parsed;

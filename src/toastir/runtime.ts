@@ -8,45 +8,87 @@ export function installToastRuntime(documentId: string): void {
   let version = 0, nextId = 1, previous = '';
   const ids = new WeakMap<Element, string>();
   let entries = new Map<string, Entry>();
+  const roots = new WeakSet<Node>();let rootCount=0,shadowSkipped=false;
+  let stats={visited:0,elements:0,textCharacters:0,shadowRoots:0,framesSkipped:0,truncated:false,captureMs:0};
+  const privateSelector = 'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private]';
+  const excluded='script,style,noscript,template,input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private],[hidden],[aria-hidden="true"],[inert]';
+  let privateParents=new WeakSet<Element>();
   const observer = new MutationObserver(records => { if (records.length) version++; });
   observer.observe(document, { subtree: true, attributes: true, childList: true, characterData: true });
   const flush = () => { if (observer.takeRecords().length) version++; };
+  function parentOf(node:Element):Element|null {
+    const root=node.getRootNode();
+    return node.assignedSlot||node.parentElement||(root instanceof ShadowRoot?root.host:null);
+  }
+  function within(node:Element,selector:string):boolean {
+    let current:Element|null=node,depth=0;
+    while(current&&depth++<128){if(current.matches(selector))return true;current=parentOf(current);}
+    return !!current; // Excessive depth is opaque, never an escape from a private ancestor.
+  }
+  function* walk(root:Node,limit=10000):Generator<Node> {
+    const stack:Node[]=[];let node:Node|null=root,visited=0;
+    while(node&&visited++<limit){
+      yield node;
+      if(node!==root&&node.nextSibling)stack.push(node.nextSibling);
+      const shadow:ShadowRoot|null=node instanceof Element?node.shadowRoot:null;
+      if(shadow&&(roots.has(shadow)||rootCount<128)){
+        if(!roots.has(shadow)){roots.add(shadow);rootCount++;observer.observe(shadow,{subtree:true,attributes:true,childList:true,characterData:true});}
+        if(node.firstChild)stack.push(node.firstChild);
+        node=shadow.firstChild||stack.pop()||null;
+      }else {if(shadow)shadowSkipped=true;node=node.firstChild||stack.pop()||null;}
+    }
+  }
+  function readable(node:Element):boolean {return !within(node,excluded)&&node.checkVisibility({opacityProperty:true,visibilityProperty:true,contentVisibilityAuto:true});}
+  function visibleText(root:Node,limit=12000):string {
+    const parts:string[]=[];let length=0;
+    for(const node of walk(root)){
+      if(node.nodeType!==Node.TEXT_NODE)continue;
+      const tree=node.getRootNode(),parent=node.parentElement||(tree instanceof ShadowRoot?tree.host:null);if(!parent||!readable(parent))continue;
+      const text=(node.textContent||'').replace(/\s+/g,' ').trim().slice(0,limit-length);
+      if(text){parts.push(text);length+=text.length+1;}if(length>=limit)break;
+    }
+    return parts.join('\n').slice(0,limit);
+  }
   function describe(node: HTMLElement) {
     const style = getComputedStyle(node), rect = node.getBoundingClientRect();
-    const privateSelector = 'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private]';
     const field = node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement;
     const secretField = node instanceof HTMLInputElement && (['password','hidden','file'].includes(node.type)
       || /password|secret|token|credit|card|cc-|cvc|cvv|otp|one-time|ssn/i.test(`${node.name} ${node.id} ${node.autocomplete}`));
-    const sensitive = !!(secretField || node.closest('[data-private],[contenteditable]:not([contenteditable="false"])') || (!field && node.querySelector(privateSelector)));
+    const sensitive = !!(secretField || within(node,'[data-private],[contenteditable]:not([contenteditable="false"])') || (!field && privateParents.has(node)));
     const visible = node.checkVisibility({ opacityProperty: true, visibilityProperty: true, contentVisibilityAuto: true }) && node.isConnected && rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility === 'visible'
-      && !node.closest('[hidden],[aria-hidden="true"],[inert]') && Number(style.opacity) !== 0;
+      && !within(node,'[hidden],[aria-hidden="true"],[inert]') && Number(style.opacity) !== 0;
     const enabled = !node.matches(':disabled,[aria-disabled="true"]') && style.pointerEvents !== 'none';
-    const form = node.closest('form');
-    const accessibleLabel=(node.getAttribute('aria-labelledby')||'').split(/\s+/).slice(0,10).map(id=>document.getElementById(id)).filter((e):e is HTMLElement=>!!e&&!e.closest('[data-private],[hidden],[aria-hidden="true"],input,textarea,select')&&!e.querySelector(privateSelector)&&e.checkVisibility({opacityProperty:true,visibilityProperty:true})).map(e=>e.innerText).join(' ').slice(0,160);
-    const choices=node instanceof HTMLSelectElement?Array.from(node.options).filter(o=>!o.disabled&&!o.hidden).slice(0,40).map(o=>o.label.slice(0,80)).join(' / '):'';
-    const name = sensitive || !visible ? '[private]' : (node.getAttribute('aria-label') || accessibleLabel || (field ? node.getAttribute('placeholder') || '입력 필드' : node.innerText) || '').trim().slice(0, choices?80:160)+(choices?` [${choices}]`.slice(0,80):'');
-    const role = (node.tagName === 'A' ? 'link' : node.tagName === 'BUTTON' ? 'button' : node.tagName === 'SELECT' ? 'combobox' : field ? 'textbox' : node.getAttribute('role') || node.tagName.toLowerCase()).slice(0,100);
+    const form = field?(node as HTMLInputElement).form:node.closest('form');
+    const root=node.getRootNode() as Document|ShadowRoot;
+    const labelled=(node.getAttribute('aria-labelledby')||'').split(/\s+/).slice(0,10).map(id=>root.getElementById(id));
+    if(field)labelled.push(...Array.from((node as HTMLInputElement).labels||[]).slice(0,10));
+    const accessibleLabel=labelled.filter((e):e is HTMLElement=>e instanceof HTMLElement&&readable(e)&&!privateParents.has(e)).map(e=>visibleText(e,160)).join(' ').slice(0,160);
+    const choices=node instanceof HTMLSelectElement?Array.from(node.options).filter(o=>!o.disabled&&!o.hidden&&!o.parentElement?.matches('optgroup:disabled')).slice(0,40).map(o=>o.label.slice(0,80)).join(' / '):'';
+    const name = sensitive || !visible ? '[private]' : (node.getAttribute('aria-label') || accessibleLabel || (field ? node.getAttribute('placeholder') || '입력 필드' : visibleText(node,160)) || '').trim().slice(0, choices?80:160)+(choices?` [${choices}]`.slice(0,80):'');
+    const toggle=node instanceof HTMLInputElement&&['checkbox','radio'].includes(node.type);
+    const clickable=node.matches('a[href],button,[role="button"],[role="link"],[role="checkbox"],[role="switch"],[role="menuitem"]')||(node instanceof HTMLInputElement&&['checkbox','radio','button','submit','reset'].includes(node.type));
+    const role = (node.tagName === 'A' ? 'link' : node.tagName === 'BUTTON' ? 'button' : node.tagName === 'SELECT' ? 'combobox' : toggle ? (node as HTMLInputElement).type : node.getAttribute('role') || (field?'textbox':node.tagName.toLowerCase())).slice(0,100);
     // Fingerprint both visible description and destinations/containing form semantics.
     const fingerprint = JSON.stringify([node.tagName, name, node.getAttribute('href'), node.getAttribute('type'), node.getAttribute('formaction'), node.getAttribute('form'),
-      form?.getAttribute('action'), form?.getAttribute('method'), field ? (node as HTMLInputElement).value : '', node.getAttribute('autocomplete'), choices, visible, enabled, sensitive]);
-    const actions = sensitive ? [] : node instanceof HTMLSelectElement ? ['SELECT'] : field ? ['FILL'] : ['READ', 'EXTRACT', 'VERIFY', ...(node.matches('a[href],button,[role="button"]') ? ['CLICK'] : [])];
+      form?.getAttribute('action'), form?.getAttribute('method'), field ? (node as HTMLInputElement).value : '',node instanceof HTMLInputElement?node.checked:false, node.getAttribute('autocomplete'), choices, visible, enabled, sensitive]);
+    const actions = sensitive ? [] : node instanceof HTMLSelectElement ? ['SELECT'] : clickable ? ['READ','EXTRACT','VERIFY','CLICK'] : field ? ['FILL'] : ['READ', 'EXTRACT', 'VERIFY'];
     return { role, name, visible, enabled, sensitive, fingerprint, actions };
   }
   function readVisibleText(): string {
-    const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
-    const excluded = 'script,style,noscript,template,input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private],[hidden],[aria-hidden="true"],[inert]';
-    const parts: string[] = []; let length = 0, visited = 0;
-    while (walker.nextNode() && visited++ < 10000 && length < 12000) {
-      const parent = walker.currentNode.parentElement;
-      if (!parent || parent.closest(excluded) || !parent.checkVisibility({ opacityProperty: true, visibilityProperty: true, contentVisibilityAuto: true })) continue;
-      const text = (walker.currentNode.textContent || '').replace(/\s+/g, ' ').trim();
-      if (text) { const bounded = text.slice(0, 12000 - length); parts.push(bounded); length += bounded.length + 1; }
-    }
-    return parts.join('\n').slice(0, 12000);
+    return visibleText(document.body||document.documentElement);
   }
   function capture(includeText = false) {
-    flush();
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>('button,a[href],input,textarea,select,h1,h2,h3,main,nav,[role="button"],[role="region"]')).slice(0, 500);
+    const started=performance.now();flush();
+    const interactive:HTMLElement[]=[],content:HTMLElement[]=[];let visited=0,frames=0,eligible=0;shadowSkipped=false;
+    privateParents=new WeakSet();
+    for(const node of walk(document.body||document.documentElement)){
+      visited++;if(!(node instanceof HTMLElement))continue;
+      if(node.tagName==='IFRAME')frames++;
+      if(node.matches(privateSelector)){let parent=parentOf(node),depth=0;while(parent&&depth++<128){privateParents.add(parent);parent=parentOf(parent);}}
+      if(node.matches('button,a[href],input,textarea,select,[role="button"],[role="link"],[role="checkbox"],[role="switch"],[role="menuitem"]')){eligible++;if(interactive.length<500)interactive.push(node);}
+      else if(node.matches('h1,h2,h3,h4,h5,h6,p,li,article,section,main,nav,[role="region"]')){eligible++;if(content.length<500)content.push(node);}
+    }
+    const nodes=[...interactive,...content].slice(0,500);
     const selected = new Set<Element>(nodes);
     for (const node of nodes) if (!ids.has(node)) ids.set(node, `e${nextId++}`);
     const fresh = new Map<string, Entry>();
@@ -54,14 +96,17 @@ export function installToastRuntime(documentId: string): void {
       let id = ids.get(node); if (!id) { id = `e${nextId++}`; ids.set(node, id); }
       const data = describe(node); fresh.set(id, { node, fingerprint: data.fingerprint });
       const { fingerprint, ...publicData } = data;
-      let parent = node.parentElement;
-      while (parent && !selected.has(parent)) parent = parent.parentElement;
+      let parent = parentOf(node),depth=0;
+      while (parent && !selected.has(parent)&&depth++<128) parent = parentOf(parent);
+      if(depth>=128)parent=null;
       return { id, parent: parent ? ids.get(parent)! : null, ...publicData };
     });
     const signature = JSON.stringify([elements, [...fresh.values()].map(e => e.fingerprint)]);
     if (signature !== previous) { version++; previous = signature; }
     entries = fresh;
-    return { document: documentId, version, origin: location.origin, elements, text: includeText ? readVisibleText() : '' };
+    const text=includeText?readVisibleText():'';
+    stats={visited,elements:elements.length,textCharacters:text.length,shadowRoots:rootCount,framesSkipped:frames,truncated:visited>=10000||eligible>500||shadowSkipped||text.length>=12000,captureMs:performance.now()-started};
+    return { document: documentId, version, origin: location.origin, elements, text };
   }
   function perform(action: { document: string; version: number; target: string; op: string; value: string }) {
     flush();
@@ -77,7 +122,7 @@ export function installToastRuntime(documentId: string): void {
     const targetRect = entry.node.getBoundingClientRect();
     const point = { x: targetRect.x + targetRect.width / 2, y: targetRect.y + targetRect.height / 2, width: innerWidth, height: innerHeight };
     if (['READ', 'EXTRACT', 'VERIFY'].includes(action.op)) {
-      return { ok: true, text: data.name, ...(action.op === 'VERIFY' ? { matches: data.name === action.value } : {}) };
+      return { ok: true, text: action.op==='EXTRACT'?visibleText(entry.node,4096):data.name, ...(action.op === 'VERIFY' ? { matches: data.name === action.value } : {}) };
     }
     if (!data.actions.includes(action.op)) return { ok: false, reason: 'unsupported' };
     if (action.op === 'FILL') {
@@ -89,14 +134,17 @@ export function installToastRuntime(documentId: string): void {
     }
     if (action.op === 'SELECT') {
       if (!(entry.node instanceof HTMLSelectElement) || entry.node.multiple) return {ok:false,reason:'option'};
-      const matches=Array.from(entry.node.options).filter(o=>(o.value===action.value||o.label===action.value)&&!o.disabled&&!o.hidden);
+      const matches=Array.from(entry.node.options).filter(o=>(o.value===action.value||o.label===action.value)&&!o.disabled&&!o.hidden&&!o.parentElement?.matches('optgroup:disabled'));
       if(matches.length!==1)return {ok:false,reason:'ambiguous-option'};
       entry.node.value=matches[0].value; entry.node.dispatchEvent(new Event('change',{bubbles:true})); return {ok:true, point};
     }
     if (action.op !== 'CLICK') return { ok:false, reason:'unsupported' };
     const rect = entry.node.getBoundingClientRect();
-    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
-    if (!hit || !(hit === entry.node || entry.node.contains(hit))) return { ok: false, reason: 'covered' };
+    let hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2),depth=0;
+    while(hit?.shadowRoot&&depth++<128){const nested=hit.shadowRoot.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);if(!nested||nested===hit)break;hit=nested;}
+    let ancestor:Element|null=hit;depth=0;
+    while(ancestor&&ancestor!==entry.node&&depth++<128)ancestor=parentOf(ancestor);
+    if (!hit || ancestor!==entry.node) return { ok: false, reason: 'covered' };
     // Validation and dispatch share one synchronous JS turn. Page handler effects are untrusted.
     entry.node.click();
     return { ok: true, point };
@@ -109,10 +157,10 @@ export function installToastRuntime(documentId: string): void {
     // content must not be copied merely because the user selected nearby text.
     if(!selected||!node||node!==selected.focusNode||!textNode||!parent
       || document.activeElement?.matches('input,textarea,[contenteditable]:not([contenteditable="false"])')
-      ||parent.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[data-private],[hidden],[aria-hidden="true"],[inert],script,style')
+      ||within(parent,excluded)
       ||!parent.checkVisibility({opacityProperty:true,visibilityProperty:true}))return '';
     const text=textNode.textContent||'',factor=node===textNode?1:text.length;
     return text.slice(Math.min(selected.anchorOffset,selected.focusOffset)*factor,Math.max(selected.anchorOffset,selected.focusOffset)*factor).slice(0,4000);
   }
-  Object.defineProperty(world, '__toastIR', { value: Object.freeze({ capture, perform, selection }), configurable: false, writable: false });
+  Object.defineProperty(world, '__toastIR', { value: Object.freeze({ capture, perform, selection, statistics:()=>({...stats}) }), configurable: false, writable: false });
 }

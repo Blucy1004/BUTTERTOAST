@@ -5,7 +5,7 @@ const {AuthService}=require('../dist/auth/service');
 const {parseAuthCommand}=require('../dist/auth/protocol');
 test('bounded workflow shares only approved task origin, waits for execution approval, recaptures then completes',async()=>{
  let calls=0,acts=0,captures=0,completed=0;
- const adapter={models:async()=>['fixture'],chat:async()=>({text:'step',click:null,action:++calls===1?{op:'FILL',target:'e1',value:'query'}:null,usage:{input:1,output:1,cached:0}})};
+ const adapter={models:async()=>['fixture'],chat:async()=>({text:'step',click:null,completed:true,action:++calls===1?{op:'FILL',target:'e1',value:'query'}:null,usage:{input:1,output:1,cached:0}})};
  const host={capture:async()=>{captures++;return {data:{source:'task',origin:'https://example.test',text:'page',elements:[{id:'e1',name:'Search',role:'textbox',actions:['FILL']}]},valid:()=>true,check:async()=>true,dispose(){},click:async()=>false,act:async()=>{acts++;return true}}},confirmWorkflow:async()=>true,completed:()=>completed++,openTask:async()=>{},closeTask(){},hide(){}};
  const service=new AiService(adapter,{},host,()=>{});await service.command({type:'connect',provider:'compatible',endpoint:'http://127.0.0.1:1234/v1',key:'',remember:false});
  await service.command({type:'run-task',goal:'Search',steps:3});assert.equal(calls,1);assert.equal(acts,0);assert.equal(service.publicState().proposal.action.op,'FILL');
@@ -19,21 +19,18 @@ test('workflow refuses origin changes and malformed automation budgets',async()=
  assert.equal(calls,0);assert.equal(service.publicState().workflow.status,'paused');service.dispose();
  assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:100}),null);assert.equal(parseAiCommand({type:'run-task',goal:'x',steps:1,approved:true}),null);
 });
-test('an early cooldown timer neither bypasses the request interval nor abandons the next workflow step',{timeout:5000},async t=>{
+test('only provider Retry-After delays workflow continuation; early timers cannot bypass it',{timeout:5000},async t=>{
  t.mock.timers.enable({apis:['setTimeout']});
- let now=0,calls=0;
+ const {AiFailure}=require('../dist/ai/adapter');let now=0,calls=0;
  const settle=()=>new Promise(resolve=>setImmediate(resolve));
- const host={capture:async()=>({data:{source:'task',origin:'https://example.test',text:'page',elements:[{id:'e1',name:'Search',role:'textbox',actions:['FILL']}]},valid:()=>true,check:async()=>true,dispose(){},click:async()=>false,act:async()=>true}),confirmWorkflow:async()=>true,openTask:async()=>{},closeTask(){},hide(){}};
- const adapter={models:async()=>['fixture'],chat:async()=>({text:'step',action:++calls===1?{op:'FILL',target:'e1',value:'query'}:null,usage:{input:1,output:1,cached:0}})};
+ const host={capture:async()=>({data:{source:'task',origin:'https://example.test',text:'page',elements:[]},valid:()=>true,check:async()=>true,dispose(){},click:async()=>false}),confirmWorkflow:async()=>true,openTask:async()=>{},closeTask(){},hide(){}};
+ const adapter={models:async()=>['fixture'],chat:async()=>{if(++calls===1)throw new AiFailure('limit',1500);return {text:'done',action:null,completed:true,usage:{input:1,output:1,cached:0}}}};
  const service=new AiService(adapter,{},host,()=>{},()=>now);t.after(()=>service.dispose());
  await service.command({type:'connect',provider:'compatible',endpoint:'http://127.0.0.1:1234/v1',key:'',remember:false});
- const started=service.command({type:'run-task',goal:'Search',steps:3});await settle();t.mock.timers.tick(0);await started;
- const approved=service.command({type:'approve'});await settle();
- t.mock.timers.tick(1500);await settle();
- assert.equal(calls,1);assert.equal(service.publicState().busy,true);
- now=1499;t.mock.timers.tick(1500);await settle();assert.equal(calls,1);assert.equal(service.publicState().busy,true);
- now=1500;t.mock.timers.tick(1);await approved;
- assert.equal(calls,2);assert.equal(service.publicState().workflow.status,'completed');
+ await service.command({type:'run-task',goal:'Search',steps:3});assert.equal(service.publicState().workflow.status,'paused');
+ const continued=service.command({type:'continue-task'});await settle();t.mock.timers.tick(1500);await settle();assert.equal(calls,1);
+ now=1499;t.mock.timers.tick(1500);await settle();assert.equal(calls,1);
+ now=1500;t.mock.timers.tick(1);await continued;assert.equal(calls,2);assert.equal(service.publicState().workflow.status,'completed');
 });
 test('stopping during an awaited workflow page check cannot restore context or send the captured page',{timeout:5000},async t=>{
  let captures=0,calls=0,disposed=0,releaseCheck,checkStarted;

@@ -1,3 +1,4 @@
+const modelContext=require('./fixtures/model-context.cjs');
 const {app,BrowserWindow,webContents,session,dialog}=require('electron');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict');
 app.setPath('userData',fs.mkdtempSync(path.join(os.tmpdir(),'bt-workspace-')));
@@ -58,7 +59,7 @@ app.whenReady().then(async()=>{
  await ai.executeJavaScript('window.ai.command({type:"share-selection"})');await until(async()=>{const s=await state();return !s.busy&&s.message.includes('현재 페이지를 읽을 수 없습니다');},'private selection rejected');assert.equal((await state()).context,null);
  pass('explicit selected-text preview excludes form values and does not automatically send to a model');
  const network=session.fromPartition('toast-model-network');let calls=0;
- network.protocol.handle('https',async request=>{if(request.method==='GET')return Response.json({data:[{id:'gpt-fixture'}]});calls++;const body=await request.json(),context=JSON.parse(body.messages.at(-1).content).untrusted_page_context;return Response.json({choices:[{message:{content:JSON.stringify({reply:'Fixture action proposal',action:{op:'CLICK',target:context.elements.find(e=>e.actions.includes('CLICK')).id}})}}],usage:{prompt_tokens:20,completion_tokens:5}})});
+ network.protocol.handle('https',async request=>{if(request.method==='GET')return Response.json({data:[{id:'gpt-fixture'}]});calls++;const body=await request.json(),context=modelContext(body.messages);return Response.json({choices:[{message:{content:JSON.stringify({reply:'Fixture action proposal',action:{op:'CLICK',target:context.elements.find(e=>e.actions.includes('CLICK')).id}})}}],usage:{prompt_tokens:20,completion_tokens:5}})});
  await ai.executeJavaScript('window.ai.command({type:"connect",provider:"openai",endpoint:"https://api.openai.com/v1",key:"fixture-key-not-real",remember:false})');await until(async()=>(await state()).connected,'model fixture');
  await ai.executeJavaScript('window.ai.command({type:"share",source:"task"})');await until(async()=>!!(await state()).context,'task shared');
  await ai.executeJavaScript('window.ai.command({type:"send",text:"Click fixture"})');await until(async()=>!!(await state()).proposal,'proposal');assert.equal(await task.executeJavaScript('clicked'),0);

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, WebContents, ipcMain, session, protocol } from 'electron';
+import { app, BrowserWindow, WebContents, ipcMain, session, protocol, Menu } from 'electron';
 import path from 'node:path';
 import {readFileSync} from 'node:fs';
 import { parseCommand, RateGate, record } from './security/ipc';
@@ -9,16 +9,21 @@ import { BrowserTabs } from './browser/tabs';
 import { TabSessionStore } from './browser/session-store';
 import { installPrivacy } from './browser/privacy';
 import { resolveAddress } from './policy';
+import {AccountStorage} from './auth/storage';
 import { AccountWindow } from './auth/window';
 import { AiWorkspaces } from './ai/workspaces';
 import { BrowserLibrary } from './browser/library';
 import { BrowserManager } from './browser/manager';
+import {DownloadStore} from './browser/download-store';
 import { DownloadManager } from './browser/downloads';
 import { GoogleTheme } from './browser/theme';
 import { installSitePermissions } from './browser/permissions';
 import {BrowserUpdates} from './browser/updates';
 import { isWebUrl } from './policy';
 import { defaultWorkspace, workspaceGeometry } from './browser/workspace';
+import { addressSuggestions } from './browser/suggestions';
+import { PopupPolicy } from './browser/popups';
+import { BrowserWindows } from './browser/windows';
 import { TabMenu } from './browser/tab-menu';
 import { UiAppearance } from './profile/appearance';
 
@@ -28,6 +33,7 @@ app.enableSandbox();
 app.commandLine.appendSwitch('site-per-process');
 protocol.registerSchemesAsPrivileged([{ scheme: 'toast-ui', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 const commands = new RateGate();
+const suggestionCommands=new RateGate(10,15);
 const resizeCommands = new RateGate(8,30);
 let window: BrowserWindow;
 let tabs: BrowserTabs;
@@ -35,8 +41,11 @@ let store: TabSessionStore;
 let privacy: ReturnType<typeof installPrivacy>;
 let initialized = false;
 let account: AccountWindow;
+let accountStorage:AccountStorage;
 let ai: AiWorkspaces;
 let tabMenu:TabMenu;
+let extraWindows:BrowserWindows;
+let popups:PopupPolicy;
 let library: BrowserLibrary;
 let manager: BrowserManager;
 let appearance:UiAppearance;
@@ -72,6 +81,7 @@ app.on('second-instance', (_event, args) => {
 });
 app.on('open-url', (event, url) => { event.preventDefault(); if (isWebUrl(url)) { if (initialized) tabs.newTab(url); else pendingUrl = url; } });
 function settingsChanged(): void {
+  tabs.configureMemorySaver(library.settings().memorySaver);
   for (const wc of tabs.allContents()) void theme.apply(wc, library.settings().theme);
   if (!library.settings().restoreTabs) void store.save({ version: 1, active: 0, tabs: [''] });
   else void store.save(tabs.snapshot());
@@ -86,7 +96,7 @@ async function cycleTheme():Promise<void> {
     if(!await account.changeTheme(next))appearanceMessage='테마를 저장하지 못했어요. 프로필 설정에서 확인해 주세요.';
   }else{
     library.configureAppearance({...library.appearance(),theme:next});updateAppearance();
-    if(library.status!=='available')appearanceMessage='이번 실행에 적용했어요. 로그인하면 계정에 저장할 수 있어요.';
+    if(library.status!=='available')appearanceMessage='이번 실행에 적용했어요. 기기 보호 저장소를 사용할 수 없어 종료 후에는 유지되지 않아요.';
   }
   emitState();
 }
@@ -95,7 +105,7 @@ function emitState(): void {
   ai?.observe();
   const state = tabs.state();
   const profile=account?.profile();
-  window.webContents.send('browser:state', { ...state,version:appVersion, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false,accountProfile:profile?{name:profile.name,avatar:profile.avatar}:null,accountBusy:account?.busy()??false,appearanceMessage, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
+  window.webContents.send('browser:state', { ...state,popupBlocked:popups?.blocked(tabs.activeContents())??false,version:appVersion, layout:layoutWorkspace(),workspace, initialized, aiSlot:ai?.slot()??1,accountSignedIn: account?.signedIn() ?? false,accountProfile:profile?{name:profile.name,avatar:profile.avatar}:null,accountBusy:account?.busy()??false,appearanceMessage, sessionStatus: store?.status || 'unavailable', privacyEnabled: privacy.enabled(state.url) });
 }
 function focusAddress(): void {
   window.webContents.focus(); window.webContents.send('browser:focus-address');
@@ -107,11 +117,23 @@ function focusTools(tool:'find'|'tabs'):void {
 }
 /** Native input events work even while an untrusted page owns keyboard focus. */
 function keyboard(wc: WebContents): void {
+  if(wc!==window?.webContents){
+    popups?.attach(wc);
+    wc.on('context-menu',(_event,params)=>{
+      if(!isWebUrl(wc.getURL()))return;
+      const items:Electron.MenuItemConstructorOptions[]=[];
+      if(isWebUrl(params.linkURL)&&params.linkURL.length<=4096){const url=params.linkURL;items.push({label:'링크를 새 탭에서 열기',click:()=>tabs.newTab(url)},{label:'링크를 새 창에서 열기',click:()=>extraWindows.open(url)});}
+      if(params.isEditable)items.push({role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'});
+      else if(params.selectionText)items.push({role:'copy'});
+      if(items.length)Menu.buildFromTemplate(items).popup({window});
+    });
+  }
   wc.on('before-input-event', (event, input) => {
     if (!initialized || input.type !== 'keyDown' || input.alt) return;
     const key = input.key.toLowerCase(), modifier = process.platform === 'darwin' ? input.meta : input.control;
     let action: (() => void) | undefined;
     if (modifier) {
+      if (key === 'n'&&!input.shift) action=()=>extraWindows.open();
       if (key === 'l' && !input.shift) action = focusAddress;
       if (key === 'f' && !input.shift) action = () => focusTools('find');
       if (key === 'a' && input.shift) action = () => focusTools('tabs');
@@ -126,8 +148,9 @@ function keyboard(wc: WebContents): void {
       if (key === 'tab') action = () => tabs.cycle(input.shift ? -1 : 1);
       if (/^[1-9]$/.test(key) && !input.shift) action = () => tabs.selectNumber(Number(key));
       if (input.shift && ['pageup', 'pagedown'].includes(key)) action = () => tabs.move(tabs.state().active, key === 'pageup' ? -1 : 1);
-      if (key === 'r' && !input.shift) action = () => tabs.history('reload');
+      if (key === 'r') action = () => tabs.history(input.shift?'reload-hard':'reload');
     } else if (!input.shift && !input.meta && !input.control) {
+      if (key === 'f11') action = () => window.setFullScreen(!window.isFullScreen());
       if (key === 'f5') action = () => tabs.history('reload');
       if (key === 'escape') action = () => tabs.state().find.open?tabs.clearFind():tabs.history('stop');
       if (key === 'f3') action = () => tabs.find(tabs.state().find.query,true,true);
@@ -143,12 +166,17 @@ function trusted(event: Electron.IpcMainEvent): boolean {
 ipcMain.on('browser:command', (event, input: unknown) => {
   if (!trusted(event))return;
   if(record(input)&&input.type==='ai-stop-all'&&parseCommand(input)){if(initialized)ai.stopAll();return;}
+  if(record(input)&&input.type==='suggest'){
+    const cmd=parseCommand(input);if(initialized&&suggestionCommands.allow()&&cmd?.type==='suggest'){const data=library.snapshot();event.sender.send('browser:suggestions',{query:cmd.query,items:addressSuggestions(cmd.query,data.bookmarks,data.history)});}return;
+  }
   if (!(record(input)&&input.type==='workspace-resize'?resizeCommands:commands).allow()) return;
   const cmd = parseCommand(input);
   if (!cmd) return;
   if (cmd.type === 'ready') { emitState(); return; }
   if (!initialized) return;
   switch (cmd.type) {
+    case 'popup-open':void popups.open(tabs.activeContents());break;
+    case 'new-window':extraWindows.open();break;
     case 'theme-cycle':void cycleTheme();break;
     case 'tab-menu':tabMenu.open(cmd.id);break;
     case 'find-open':focusTools('find');break;
@@ -175,6 +203,8 @@ ipcMain.on('browser:command', (event, input: unknown) => {
     case 'select': tabs.select(cmd.id); break;
     case 'close': tabs.close(cmd.id); break;
     case 'move': tabs.move(cmd.id, cmd.delta); break;
+    case 'reorder':tabs.reorder(cmd.id,cmd.before);break;
+    case 'fullscreen':window.setFullScreen(!window.isFullScreen());break;
     case 'reopen': tabs.reopen(); break;
     case 'restart': tabs.restart(); break;
     case 'suspend': tabs.suspend(); break;
@@ -189,7 +219,7 @@ ipcMain.on('browser:command', (event, input: unknown) => {
       if (/^https?:/.test(url)) privacy.setException(url, privacy.enabled(url));
       emitState(); break;
     }
-    case 'back': case 'forward': case 'reload': case 'stop': tabs.history(cmd.type); break;
+    case 'back': case 'forward': case 'reload': case 'reload-hard': case 'stop': tabs.history(cmd.type); break;
   }
 });
 app.whenReady().then(async () => {
@@ -211,19 +241,26 @@ app.whenReady().then(async () => {
   await library.load();
   appearance=new UiAppearance();appearance.register(window.webContents,UI_URL);updateAppearance();
   workspace=library.workspace();
-  account = new AccountWindow(window, accountChanged,appearance);
+  accountStorage=new AccountStorage(path.join(app.getPath('userData'),'account'),osCipher);
+  await accountStorage.load().catch(()=>{});
+  account = new AccountWindow(window, accountChanged,appearance,accountStorage);
   store = new TabSessionStore(path.join(app.getPath('userData'), 'tabs.enc'), osCipher, emitState);
+  popups=new PopupPolicy(window,url=>tabs.newTab(url),emitState);
   tabs = new BrowserTabs(window, { changed: emitState, persist: snapshot => { if (library.settings().restoreTabs) void store.save(snapshot); }, input: keyboard,
+    canSuspend:wc=>!library.snapshot().permissions.some(rule=>rule.decision==='allow'&&wc.getURL().startsWith(rule.origin+'/'))&&!downloads?.snapshot().some(item=>['progressing','interrupted'].includes(item.state)&&wc.getURL().startsWith(item.origin+'/')),
     visited: (url, title) => library.visit(url, title), loaded: wc => { void theme.apply(wc, library.settings().theme); } });
-  downloads = new DownloadManager(window, () => tabs.activeContents(), () => manager?.emit());
+  tabs.configureMemorySaver(library.settings().memorySaver);
+  downloads = new DownloadManager(window, () => tabs.activeContents(), () => manager?.emit(),new DownloadStore(path.join(app.getPath('userData'),'downloads.enc'),osCipher),wc=>extraWindows?.activeContents(wc)??false);
+  await downloads.load();
   hardenSession(browsing, downloads.accept); installSitePermissions(browsing, window, library, () => tabs.activeContents());
   updates=new BrowserUpdates(window,()=>manager?.emit());
   manager = new BrowserManager(window, tabs, library, downloads, settingsChanged,updates,appearance);
   ai = new AiWorkspaces(window, tabs, (origin, operation, outcome) => library.audit(origin, operation, outcome), visible=>{workspace.rightCollapsed=!visible;if(visible)narrowToast=true;saveWorkspace();},appearance);
+  extraWindows=new BrowserWindows(window,library,appearance);
   tabMenu=new TabMenu(window,tabs,id=>{void ai.delegate(id);});
   window.on('resize', () => emitState());
   window.on('blur',endArrange);
-  window.on('closed', () => { initialized = false;updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose();appearance.dispose(); });
+  window.on('closed', () => { initialized = false;extraWindows.dispose();updates.dispose(); manager.dispose(); downloads.dispose(); account.dispose(); ai.dispose(); tabs.dispose();appearance.dispose(); });
   void window.loadURL(UI_URL);
   const saved = await store.load();
   if (window.isDestroyed()) return;
@@ -235,6 +272,6 @@ app.on('before-quit', event => {
   if (flushed || !store) return;
   event.preventDefault(); initialized = false;
   if(workspaceDirty){workspaceDirty=false;library?.configureWorkspace(workspace);}
-  void Promise.all([store.flush(), library?.flush(),ai?.flush()]).finally(() => { flushed = true; app.quit(); });
+  void Promise.all([store.flush(), library?.flush(),ai?.flush(),accountStorage?.flush(),downloads?.flush()]).finally(() => { flushed = true; app.quit(); });
 });
 app.on('window-all-closed', () => app.quit());
