@@ -1,5 +1,7 @@
 # Operation Toast Torture 재현
 
+0.5.0 신규 기능과 측정 결과는 [Golden Crust 보고서](GOLDEN-CRUST-REPORT.md)에 있다. `npm run test:crust`는 실제 앱의 커맨드바·분할·그룹·창 이동·초안·기록과 별도 프로세스 복원을 검사하며 `test:security`에도 포함된다. 아래 기존 Torture 검사도 계속 실행한다.
+
 현재 결과와 한계는 [보고서](TOAST-TORTURE-REPORT.md)를 참조한다. 실제 키나 계정 없이 로컬 fixture만 사용한다. 프로덕션 패키지는 `test/`, Mock 공급자, 테스트 cipher를 포함하지 않는다.
 
 ## 빠른 기능·보안 검증

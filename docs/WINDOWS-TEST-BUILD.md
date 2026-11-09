@@ -1,19 +1,20 @@
 # Windows 11 x64 개발 빌드
 
-최신 소스의 포터블 폴더와 NSIS 설치 프로그램을 만들 수 있다. **서명 없는 개발 빌드이며 Windows 직접 실행·설치·제거는 아직 검증하지 않았다.** Linux 패키징 검증을 Windows 실행 결과로 취급하지 않는다.
+최신 0.5.0 소스의 포터블 폴더와 NSIS 설치 프로그램을 만들 수 있다. **서명 없는 개발 빌드이며 0.5.0의 Windows 실기기 설치·업데이트·제거·DPAPI는 별도 검증 대상이다.** 자동 Windows CI와 Linux 패키징 검증을 실기기 결과로 취급하지 않는다. 오너가 확인한 실기기 실행·브라우징은 0.4.1의 결과다.
 
 ## 실행 파일
 
-- GitHub 다운로드: [v0.3.0-dev.1 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.3.0-dev.1)의 Assets. `Source code` 대신 `ButterToast-0.3.0-Setup-x64.exe` 또는 `ButterToast-0.3.0-Windows-x64.zip`을 선택한다. 이 링크는 이전 게시 빌드이며 아래 0.4 소스/로컬 산출물과 구분한다.
-- 새 로컬 0.4 설치 프로그램(미게시): `artifacts/ButterToast-0.4.0-Setup-x64.exe`
-- 새 로컬 포터블 ZIP(미게시): `artifacts/ButterToast-0.4.0-Windows-x64.zip`
+- 이전 공개 빌드: [v0.4.1-dev.1 릴리스](https://github.com/Blucy1004/BUTTERTOAST/releases/tag/v0.4.1-dev.1). 아래 0.5.0은 공개 릴리스하지 않은 개발 산출물이다.
+- 0.5.0 설치 프로그램: `artifacts/ButterToast-0.5.0-Setup-x64.exe`
+- 0.5.0 포터블 ZIP: `artifacts/ButterToast-0.5.0-Windows-x64.zip`. **전체 압축 해제 후 `ButterToast-0.5.0/ButterToast.exe`를 실행한다.**
+- 소스 ZIP: `artifacts/ButterToast-0.5.0-source.zip`. 빌드용 소스이며 실행파일은 포함하지 않는다.
 - 포터블 실행 파일: `artifacts/windows/ButterToast-win32-x64/ButterToast.exe`
 
 포터블은 전체 폴더를 함께 옮겨야 한다. exe 하나만 복사하면 DLL·resources가 없어 실행되지 않는다. 소스 ZIP의 src 폴더에는 실행 파일이 없다.
 
 설치 프로그램은 관리자 권한 없이 현재 사용자의 LocalAppData/Programs/ButterToast에 설치하고 시작 메뉴·프로그램 제거·기본 브라우저 후보 등록을 만든다. 기본 브라우저 선택은 앱의 관리 → 설정 → OS 기본 브라우저 설정에서 사용자가 결정한다. 설치/제거 전 앱을 닫아야 한다. 제거해도 AppData/Roaming/ButterToast 프로필은 자동 삭제하지 않는다.
 
-0.4.0 Setup은 같은 설치 경로를 사용한다. 이전 앱을 완전히 종료하고 새 파일을 실행한다. Pretendard 라이선스는 `OFL-Pretendard.txt`로 포함된다. 이전 라이브러리는 기본 테마로 읽지만 새 꾸미기 필드가 저장된 라이브러리를 이전 앱이 읽지 못할 수 있어 다운그레이드 호환성은 보장하지 않는다. 실제 Windows 덮어설치·제거는 별도 수동 검증 대상이다. [0.4 변경과 검증 범위](GOLDEN-TOAST-0.4.md)를 확인한다.
+0.5.0 Setup은 같은 설치 경로를 사용한다. 이전 앱을 완전히 종료하고 새 파일을 실행한다. Pretendard 라이선스는 `OFL-Pretendard.txt`로 포함된다. 기존 북마크·기록·설정을 읽으며 v1/v2 탭 세션도 읽는다. 그룹·분할을 담은 v3 세션을 이전 앱이 읽는 다운그레이드는 보장하지 않는다. 재실행 시 URL·그룹·분할 정보가 복구되지만 저장하지 않은 웹 폼 값은 복구되지 않는다. 실제 Windows 덮어설치·제거는 별도 수동 검증 대상이다. [0.5 기능](GOLDEN-CRUST-0.5.md)과 [검증 범위](QA/GOLDEN-CRUST-REPORT.md)를 확인한다.
 
 ## 빌드
 
